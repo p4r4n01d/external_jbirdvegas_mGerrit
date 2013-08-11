@@ -17,13 +17,21 @@ package com.jbirdvegas.mgerrit;
  *  limitations under the License.
  */
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.app.TabActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,15 +41,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TabHost;
+
 import com.jbirdvegas.mgerrit.helpers.GerritTeamsHelper;
-import com.jbirdvegas.mgerrit.objects.ChangeLogRange;
+import com.jbirdvegas.mgerrit.listeners.MyTabListener;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GooFileObject;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.objects.Project;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 import com.jbirdvegas.mgerrit.widgets.AddTeamView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,25 +62,40 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+public class GerritControllerActivity extends FragmentActivity {
 
-public class GerritControllerActivity extends TabActivity {
     private static final String TAG = GerritControllerActivity.class.getSimpleName();
-    private TabHost mTabHost;
+    private ViewPager mViewPager;
     private CommitterObject mCommitterObject;
     private String mProject;
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
+    private ActionBar mActionBar;
+
+    private ReviewTab mReviewTab;
+    private MergedTab mMergedTab;
+    private AbandonedTab mAbandonedTab;
+
+    /**
+     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * fragments for each of the sections. We use a
+     * {@link android.support.v4.app.FragmentPagerAdapter} derivative, which
+     * will keep every loaded fragment in memory. If this becomes too memory
+     * intensive, it may be best to switch to a
+     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     */
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        mTabHost = getTabHost();
-        if (!CardsActivity.mSkipStalking) {
+
+        if (!CardsFragment.mSkipStalking) {
             try {
                 mCommitterObject = getIntent()
                         .getExtras()
-                        .getParcelable(CardsActivity.KEY_DEVELOPER);
+                        .getParcelable(CardsFragment.KEY_DEVELOPER);
             } catch (NullPointerException npe) {
                 // non author specific view
                 // use default
@@ -95,57 +119,57 @@ public class GerritControllerActivity extends TabActivity {
             Log.d(TAG, "Changelog was null");
         }
         // Setup tabs //
-        addTabs();
+        setupTabs();
     }
 
-    private void addTabs() {
-        Intent base = new Intent();
-        base.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-            | Intent.FLAG_ACTIVITY_NO_HISTORY
-            | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (mChangeLogStart != null
-                && mChangeLogStop != null) {
-            Log.d(TAG, "Changelog in GerritControlerActivity: " + mChangeLogStart);
-            base.putExtra(AOKPChangelog.KEY_CHANGELOG,
-                    new ChangeLogRange(mChangeLogStart, mChangeLogStop));
-            base.setClass(this, MergedTab.class);
-            this.startActivity(base);
-            return;
-        }
-        // if we are stalking one user pass the user information
-        // along to all the tabs
-        if (mCommitterObject != null && !CardsActivity.mSkipStalking) {
-            base.putExtra(CardsActivity.KEY_DEVELOPER, mCommitterObject);
-        }
-        if (mProject != null) {
-            base.putExtra(JSONCommit.KEY_PROJECT, mProject);
-        }
-        // Review tab
-        Intent intentReview = new Intent(base)
-                .setClass(this, ReviewTab.class);
-        TabHost.TabSpec tabSpecReview = mTabHost
-                .newTabSpec(getString(R.string.reviewable))
-                .setContent(intentReview)
-                .setIndicator(getString(R.string.reviewable));
-        mTabHost.addTab(tabSpecReview);
+    private void createTabs()
+    {
+        mReviewTab = new ReviewTab();
+        mMergedTab = new MergedTab();
+        mAbandonedTab = new AbandonedTab();
+    }
 
-        // Merged tab
-        Intent intentMerged = new Intent(base)
-                .setClass(this, MergedTab.class);
-        TabHost.TabSpec tabSpecMerged = mTabHost
-                .newTabSpec(getString(R.string.merged))
-                .setContent(intentMerged)
-                .setIndicator(getString(R.string.merged));
-        mTabHost.addTab(tabSpecMerged);
+    /** MUST BE CALLED ON MAIN THREAD */
+    private void setupTabs()
+    {
+        createTabs();
 
-        // Abandon tab
-        Intent intentAbandon = new Intent(base)
-                .setClass(this, AbandonedTab.class);
-        TabHost.TabSpec tabSpecAbandon = mTabHost
-                .newTabSpec(getString(R.string.abandoned))
-                .setContent(intentAbandon)
-                .setIndicator(getString(R.string.abandoned));
-        mTabHost.addTab(tabSpecAbandon);
+        // setup action bar for tabs
+        mActionBar = getActionBar();
+        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        mActionBar.setDisplayShowTitleEnabled(true);
+
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the app.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        // Set up the ViewPager with the sections adapter.
+        /** The {@link ViewPager} that will host the section contents. */
+        ViewPager viewPager;
+        viewPager = (ViewPager) findViewById(R.id.tabs);
+        viewPager.setAdapter(mSectionsPagerAdapter);
+
+        // When swiping between different sections, select the corresponding
+        // tab. We can also use ActionBar.Tab#select() to do this if we have
+        // a reference to the Tab.
+        viewPager
+                .setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        mActionBar.setSelectedNavigationItem(position);
+                    }
+                });
+
+        // For each of the sections in the app, add a tab to the action bar.
+        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+            // Create a tab with text corresponding to the page title defined by
+            // the adapter. Also specify this Activity object, which implements
+            // the TabListener interface, as the callback (listener) for when
+            // this tab is selected.
+            mActionBar.addTab(mActionBar.newTab()
+                    .setText(mSectionsPagerAdapter.getPageTitle(i))
+                    .setTabListener(new MyTabListener(viewPager, this)));
+        }
     }
 
     @Override
@@ -175,7 +199,7 @@ public class GerritControllerActivity extends TabActivity {
                 builder.show();
                 return true;
             case R.id.menu_refresh:
-                refreshScreen(true);
+                refreshTab();
                 return true;
             case R.id.menu_team_instance:
                 showGerritDialog();
@@ -220,11 +244,11 @@ public class GerritControllerActivity extends TabActivity {
                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                             Project project = (Project) adapterView.getItemAtPosition(i);
                             mProject = project.getmPath();
-                            if (GerritControllerActivity.this.alertDialog != null) {
-                                GerritControllerActivity.this.alertDialog.dismiss();
-                                GerritControllerActivity.this.alertDialog = null;
+                            if (alertDialog != null) {
+                                alertDialog.dismiss();
+                                alertDialog = null;
                             }
-                            refreshScreen(true);
+                            refreshTab();
                         }
                     });
                     Builder projectsBuilder = new Builder(getThis());
@@ -236,7 +260,7 @@ public class GerritControllerActivity extends TabActivity {
                     });
                     projectsBuilder.setView(projectsList);
                     AlertDialog alertDialog1 = projectsBuilder.create();
-                    GerritControllerActivity.this.alertDialog = alertDialog1;
+                    alertDialog = alertDialog1;
                     alertDialog1.show();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -245,20 +269,24 @@ public class GerritControllerActivity extends TabActivity {
         }.execute(Prefs.getCurrentGerrit(this) + "projects/?d");
     }
 
+    // TODO: Refresh the tabs on a change
     private void showGerritDialog() {
         final Builder teamBuilder = new Builder(this);
-        teamBuilder.setTitle(R.string.menu_gerrit_instance);
         ListView instances = new ListView(this);
         Resources res = getResources();
+
         final ArrayList <String> teams = new ArrayList<String>(0);
-        final ArrayList<String> urls = new ArrayList<String>(0);
         String[] gerritNames = res.getStringArray(R.array.gerrit_names);
         Collections.addAll(teams, gerritNames);
+
+        final ArrayList<String> urls = new ArrayList<String>(0);
         String[] gerritWeb = res.getStringArray(R.array.gerrit_webaddresses);
         Collections.addAll(urls, gerritWeb);
+
         GerritTeamsHelper teamsHelper = new GerritTeamsHelper();
         teams.addAll(teamsHelper.getGerritNamesList());
         urls.addAll(teamsHelper.getGerritUrlsList());
+
         final ArrayAdapter <String> instanceAdapter = new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_1,
@@ -270,10 +298,10 @@ public class GerritControllerActivity extends TabActivity {
                 try {
                     Prefs.setCurrentGerrit(view.getContext(), urls.get(i));
                     // refresh the screen and go straight to default "Review tab"
-                    refreshScreen(true);
-                    if (GerritControllerActivity.this.alertDialog != null) {
-                        GerritControllerActivity.this.alertDialog.dismiss();
-                        GerritControllerActivity.this.alertDialog = null;
+                    refreshTab();
+                    if (alertDialog != null) {
+                        alertDialog.dismiss();
+                        alertDialog = null;
                     }
                 } catch (ArrayIndexOutOfBoundsException ignored) {
 
@@ -317,7 +345,7 @@ public class GerritControllerActivity extends TabActivity {
                         new AddTeamView.RefreshCallback() {
                     @Override
                     public void refreshScreenCallback() {
-                        refreshScreen(true);
+                        refreshTab();
                     }
                 };
                 AddTeamView addTeamView = new AddTeamView(
@@ -332,16 +360,69 @@ public class GerritControllerActivity extends TabActivity {
         this.alertDialog.show();
     }
 
-    private GerritControllerActivity getThis() {
+    private Activity getThis() {
         return this;
     }
 
-    public void refreshScreen(boolean keepTabPosition) {
-        int currentTab = getTabHost().getCurrentTab();
-        mTabHost.clearAllTabs();
-        addTabs();
-        if (keepTabPosition) {
-            mTabHost.setCurrentTab(currentTab);
+    private void refreshTab() {
+        mSectionsPagerAdapter.getCurrentFragment().refresh();
+    }
+
+    public CommitterObject getCommitterObject() { return mCommitterObject; }
+    public void clearCommitterObject() { mCommitterObject = null; }
+
+    public String getProject() { return mProject; }
+    public void clearProject() { mProject = ""; }
+
+    /**
+     * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding
+     * to one of the sections/tabs/pages.
+     *
+     * Class not used.
+     */
+    class SectionsPagerAdapter extends FragmentPagerAdapter
+    {
+        int mPosition;
+
+        SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        /** Called to instantiate the fragment for the given page. */
+        public Fragment getItem(int position) {
+
+            mPosition = position;
+
+            switch (position)
+            {
+                case 0: return mReviewTab;
+                case 1: return mMergedTab;
+                case 2: return mAbandonedTab;
+                default: return null;
+            }
+        }
+
+        @Override
+        /** Return the number of views available. */
+        public int getCount() { return 3; }
+
+        public int getPosition() { return mPosition; }
+
+        public CardsFragment getCurrentFragment() {
+            return (CardsFragment)getItem(mPosition);
+        }
+
+        @Override
+        /** Called by the ViewPager to obtain a title string to describe
+         *  the specified page. */
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0: return getString(R.string.reviewable);
+                case 1: return getString(R.string.merged);
+                case 2: return getString(R.string.abandoned);
+            }
+            return null;
         }
     }
 }
