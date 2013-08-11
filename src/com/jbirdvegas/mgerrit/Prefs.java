@@ -148,7 +148,7 @@ public class Prefs extends PreferenceActivity implements Preference.OnPreference
     public static Intent getStalkerIntent(Context activity, CommitterObject committerObject) {
         return new Intent()
                 .addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
-                .putExtra(CardsActivity.KEY_DEVELOPER, committerObject)
+                .putExtra(CardsFragment.KEY_DEVELOPER, committerObject)
                 .setClass(activity, GerritControllerActivity.class);
     }
 
