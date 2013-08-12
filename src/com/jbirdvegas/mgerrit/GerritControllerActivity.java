@@ -65,8 +65,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GerritControllerActivity extends FragmentActivity
-{
+public class GerritControllerActivity extends FragmentActivity {
+
     private static final String TAG = GerritControllerActivity.class.getSimpleName();
 
     private CommitterObject mCommitterObject;
@@ -274,6 +274,7 @@ public class GerritControllerActivity extends FragmentActivity
                             refreshTab();
                         }
                     });
+
                     Builder projectsBuilder = new Builder(getThis());
                     projectsBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         @Override
@@ -320,7 +321,6 @@ public class GerritControllerActivity extends FragmentActivity
                 try {
                     mGerritWebsite = urls.get(i);
                     Prefs.setCurrentGerrit(view.getContext(), mGerritWebsite);
-
                     if (alertDialog != null) {
                         alertDialog.dismiss();
                         alertDialog = null;

@@ -108,6 +108,7 @@ public abstract class CardsFragment extends Fragment {
         mParent = (GerritControllerActivity) this.getActivity();
         mCurrentFragment = this.getView();
 
+        mTimerStart = System.currentTimeMillis();
         mCards = (CardUI) mCurrentFragment.findViewById(R.id.commit_cards);
         mCards.setSwipeable(true);
         mRequestQueue = Volley.newRequestQueue(mParent);

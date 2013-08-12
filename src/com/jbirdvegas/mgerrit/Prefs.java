@@ -39,7 +39,7 @@ public class Prefs extends PreferenceActivity implements Preference.OnPreference
     private static final CharSequence NINE_OLD_ANDROIDS_KEY = "open_source_lib_nine_old_androids";
     private static final CharSequence AOSP_VOLLEY = "open_source_aosp_volley";
     private static final CharSequence APACHE_COMMONS_KEY = "open_source_apache_commons";
-    private static final String GERRIT_KEY = "gerrit_instances_key";
+    public static final String GERRIT_KEY = "gerrit_instances_key";
     private static final String ANIMATION_KEY = "animation_key";
     private static final String SAVED_GERRIT_INSTANCES_KEY = "saved_gerrit_instances";
     private static final String SERVER_TIMEZONE_KEY = "server_timezone";
