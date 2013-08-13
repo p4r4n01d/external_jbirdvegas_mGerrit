@@ -66,7 +66,7 @@ public abstract class CardsFragment extends Fragment {
     private long mTimerStart;
 
     private RequestQueue mRequestQueue;
-    public boolean inProject;
+    public static boolean inProject;
     private ChangeLogRange mChangelogRange;
     private GerritControllerActivity mParent;
     private View mCurrentFragment;
@@ -192,7 +192,7 @@ public abstract class CardsFragment extends Fragment {
                 .append("status:")
                 .append(getQuery());
 
-        if (project != null && !project.trim().isEmpty()) {
+        if (inProject) {
             try {
                 builder.append('+')
                         .append("project:")
@@ -222,7 +222,7 @@ public abstract class CardsFragment extends Fragment {
             public void onCardSwiped(Card card, View layout) {
                 mParent.clearCommitterObject();
                 mSkipStalking = true;
-                refresh();
+                mParent.refreshTab();
             }
         });
         return userImageCard;
@@ -230,12 +230,11 @@ public abstract class CardsFragment extends Fragment {
 
     private void setup()
     {
-        // track if we are in project
-        String project = mParent.getProject();
         boolean followingUser = false;
+        // track if we are in project
+        String project = Prefs.getCurrentProject(mParent);
 
-        inProject = false;
-        if (project != null && !project.trim().isEmpty()) inProject = true;
+        inProject = (!"".equals(project));
 
         CommitterObject user = mParent.getCommitterObject();
         if (!mSkipStalking) {
@@ -353,8 +352,8 @@ public abstract class CardsFragment extends Fragment {
         card.setOnCardSwipedListener(new Card.OnCardSwiped() {
             @Override
             public void onCardSwiped(Card card, View layout) {
-                mParent.clearProject();
-                onCreate(null);
+                Prefs.setCurrentProject(mParent, "");
+                mParent.refreshTab();
             }
         });
         card.setSwipableCard(true);
@@ -377,12 +376,6 @@ public abstract class CardsFragment extends Fragment {
             drawCardsFromList(generateCardsList(getStoredCards()), mCards);
     }
 
-    public void refresh()
-    {
-        mCards.clearCards();
-        setup();
-    }
-
     /**
      * Each tab provides its own query for ?p=status:[open:merged:abandoned]
      *
@@ -400,9 +393,5 @@ public abstract class CardsFragment extends Fragment {
     private String getStoredCards() {
         return PreferenceManager.getDefaultSharedPreferences(mParent)
                 .getString(KEY_STORED_CARDS, "");
-    }
-
-    public void setInProject(boolean inProject) {
-        this.inProject = inProject;
     }
 }

@@ -70,7 +70,6 @@ public class GerritControllerActivity extends FragmentActivity {
     private static final String TAG = GerritControllerActivity.class.getSimpleName();
 
     private CommitterObject mCommitterObject;
-    private String mProject;
     private String mGerritWebsite;
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
@@ -110,10 +109,9 @@ public class GerritControllerActivity extends FragmentActivity {
             }
         }
 
-        try {
-            mProject = getIntent().getStringExtra(JSONCommit.KEY_PROJECT);
-        } catch (NullPointerException npe) {
-            // not following one project
+        // ensure we are not tracking a project unintentionally
+        if (CardsFragment.inProject) {
+            Prefs.setCurrentProject(this, null);
         }
 
         try {
@@ -266,7 +264,7 @@ public class GerritControllerActivity extends FragmentActivity {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                             Project project = (Project) adapterView.getItemAtPosition(i);
-                            mProject = project.getmPath();
+                            Prefs.setCurrentProject(GerritControllerActivity.this, project.getmPath());
                             if (alertDialog != null) {
                                 alertDialog.dismiss();
                                 alertDialog = null;
@@ -399,16 +397,18 @@ public class GerritControllerActivity extends FragmentActivity {
         refreshTab();
     }
 
-    private void refreshTab() {
+    /* This is a bit of a hack, resetting the ViewPager's adapter forces
+        a refresh of all the tabs, and a re-drawing of each of their contents.
+        Resetting the cards stack and calling setup to create it again in one tab
+        (the current one) does not trigger a redraw.
+     */
+    public void refreshTab() {
         //mSectionsPagerAdapter.getCurrentFragment().refresh();
         mViewPager.setAdapter(mSectionsPagerAdapter);
     }
 
     public CommitterObject getCommitterObject() { return mCommitterObject; }
     public void clearCommitterObject() { mCommitterObject = null; }
-
-    public String getProject() { return mProject; }
-    public void clearProject() { mProject = ""; }
 
     public String getGerritWebsite() {
         return mGerritWebsite;
