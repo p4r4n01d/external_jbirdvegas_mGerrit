@@ -25,15 +25,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,9 +60,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class GerritControllerActivity extends FragmentActivity {
 
@@ -73,6 +74,12 @@ public class GerritControllerActivity extends FragmentActivity {
     private String mGerritWebsite;
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
+
+    /*
+     * Keep track of all the GerritTask instances so the dialog can be dismissed
+     *  when this activity is paused.
+     */
+    private Set<GerritTask> mGerritTasks;
 
     private ReviewTab mReviewTab;
     private MergedTab mMergedTab;
@@ -126,6 +133,7 @@ public class GerritControllerActivity extends FragmentActivity {
         }
 
         mGerritWebsite = Prefs.getCurrentGerrit(this);
+        mGerritTasks = new HashSet<GerritTask>();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mListener = new SharedPreferences.OnSharedPreferenceChangeListener()
@@ -136,7 +144,7 @@ public class GerritControllerActivity extends FragmentActivity {
                     onGerritChanged(Prefs.getCurrentGerrit(GerritControllerActivity.this));
             }
         };
-        mPrefs.registerOnSharedPreferenceChangeListener(mListener);
+        // Don't register listener here. It is registered in onResume instead.
 
         // Setup tabs //
         setupTabs();
@@ -205,7 +213,7 @@ public class GerritControllerActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_save:
-                Intent intent = new Intent(this, Prefs.class);
+                Intent intent = new Intent(this, PrefsActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
@@ -240,9 +248,11 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     private void getProjectsList() {
-        new GerritTask(this) {
+        GerritTask gerritTask = new GerritTask(this)
+        {
             @Override
-            public void onJSONResult(String jsonString) {
+            public void onJSONResult(String jsonString)
+            {
                 try {
                     JSONObject projectsJson = new JSONObject(jsonString);
                     Iterator stringIterator = projectsJson.keys();
@@ -260,9 +270,11 @@ public class GerritControllerActivity extends FragmentActivity {
                     projectsList.setAdapter(new ArrayAdapter<Object>(getThis(),
                             android.R.layout.simple_list_item_single_choice,
                             projectLinkedList.toArray()));
-                    projectsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    projectsList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+                    {
                         @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+                        {
                             Project project = (Project) adapterView.getItemAtPosition(i);
                             Prefs.setCurrentProject(GerritControllerActivity.this, project.getmPath());
                             if (alertDialog != null) {
@@ -288,7 +300,9 @@ public class GerritControllerActivity extends FragmentActivity {
                     e.printStackTrace();
                 }
             }
-        }.execute(Prefs.getCurrentGerrit(this) + "projects/?d");
+        };
+        mGerritTasks.add(gerritTask);
+        gerritTask.execute(Prefs.getCurrentGerrit(this) + "projects/?d");
     }
 
     private void showGerritDialog() {
@@ -415,15 +429,41 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onPause()
+    {
+        super.onPause();
+        mPrefs.unregisterOnSharedPreferenceChangeListener(mListener);
+
+        Iterator<GerritTask> it = mGerritTasks.iterator();
+        while (it.hasNext())
+        {
+            GerritTask gerritTask = it.next();
+            if (gerritTask.getStatus() == AsyncTask.Status.FINISHED)
+                it.remove();
+            else gerritTask.dismissDialog();
+        }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        mPrefs.registerOnSharedPreferenceChangeListener(mListener);
+    }
+
+    @Override
     protected void onDestroy()
     {
-        mPrefs.unregisterOnSharedPreferenceChangeListener(mListener);
         super.onDestroy();
+
+        for (GerritTask gerritTask : mGerritTasks) gerritTask.cancel(true);
+        mGerritTasks.clear();
+        mGerritTasks = null;
     }
 
     /**
-     * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding
-     * to one of the sections/tabs/pages.
+     * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment
+     * corresponding to one of the sections/tabs/pages.
      *
      * Class not used.
      */

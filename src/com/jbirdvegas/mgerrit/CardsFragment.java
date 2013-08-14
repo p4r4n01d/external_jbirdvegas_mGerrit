@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit;
  */
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.fima.cardsui.objects.Card;
@@ -38,6 +40,7 @@ import com.jbirdvegas.mgerrit.objects.ChangeLogRange;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,8 +50,11 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public abstract class CardsFragment extends Fragment {
     private static final String KEY_STORED_CARDS = "storedCards";
@@ -70,6 +76,12 @@ public abstract class CardsFragment extends Fragment {
     private ChangeLogRange mChangelogRange;
     private GerritControllerActivity mParent;
     private View mCurrentFragment;
+
+    /*
+     * Keep track of all the GerritTask instances so the dialog can be dismissed
+     *  when this activity is paused.
+     */
+    private Set<GerritTask> mGerritTasks;
 
     // draws a stack of cards
     // Currently not used as the number of cards tends
@@ -119,6 +131,9 @@ public abstract class CardsFragment extends Fragment {
                 .append(JSONCommit.DETAILED_ACCOUNTS_ARG).toString();
 
         if (savedInstanceState == null) saveCards("");
+
+        mGerritTasks = new HashSet<GerritTask>();
+
         setup();
     }
 
@@ -275,16 +290,20 @@ public abstract class CardsFragment extends Fragment {
 
     private void loadChangeLog(final ChangeLogRange logRange) {
         String url = mParent.getGerritWebsite() + mUrlParams;
-        new GerritTask(mParent) {
+        GerritTask gerritTask = new GerritTask(mParent)
+        {
             @Override
-            public void onJSONResult(String s) {
+            public void onJSONResult(String s)
+            {
                 saveCards(s);
                 drawCardsFromList(
                         generateChangeLog(
                                 logRange, s),
                         mCards);
             }
-        }.execute(url);
+        };
+        mGerritTasks.add(gerritTask);
+        gerritTask.execute(url);
     }
 
     private List<CommitCard> generateChangeLog(ChangeLogRange logRange,
@@ -365,13 +384,17 @@ public abstract class CardsFragment extends Fragment {
         String url = mParent.getGerritWebsite() + mUrlParams;
         Log.d(TAG, "Calling mgerrit: " + url);
         if (getStoredCards().equals(""))
-            new GerritTask(mParent) {
+        {
+            GerritTask gerritTask = new GerritTask(mParent) {
                 @Override
                 public void onJSONResult(String s) {
                     saveCards(s);
                     drawCardsFromList(generateCardsList(s), mCards);
                 }
-            }.execute(url);
+            };
+            mGerritTasks.add(gerritTask);
+            gerritTask.execute(url);
+        }
         else
             drawCardsFromList(generateCardsList(getStoredCards()), mCards);
     }
@@ -393,5 +416,20 @@ public abstract class CardsFragment extends Fragment {
     private String getStoredCards() {
         return PreferenceManager.getDefaultSharedPreferences(mParent)
                 .getString(KEY_STORED_CARDS, "");
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+
+        Iterator<GerritTask> it = mGerritTasks.iterator();
+        while (it.hasNext())
+        {
+            GerritTask gerritTask = it.next();
+            if (gerritTask.getStatus() == AsyncTask.Status.FINISHED)
+                it.remove();
+            else gerritTask.dismissDialog();
+        }
     }
 }

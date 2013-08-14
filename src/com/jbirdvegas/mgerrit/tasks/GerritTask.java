@@ -246,4 +246,6 @@ public abstract class GerritTask extends AsyncTask<String, String, String> {
         }
         return (int) l;
     }
+
+    public void dismissDialog() { mProgressDialog.dismiss(); }
 }
