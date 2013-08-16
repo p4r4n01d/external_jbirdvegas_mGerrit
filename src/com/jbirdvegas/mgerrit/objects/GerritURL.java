@@ -12,32 +12,38 @@ import java.net.URLEncoder;
  */
 public class GerritURL
 {
-    private static String mGerritBase;
-    private String mProject;
-    private String mStatus;
-    private String mEmail;
-    private String mCommitterState;
+    private static String sGerritBase;
+    private static String sProject = "";
+    private String mStatus = "";
+    private String mEmail = "";
+    private String mCommitterState = "";
     private boolean mRequestDetailedAccounts = false;
 
-    public void setProject(String project) {
-        mProject = project;
+    public static void setGerrit(String mGerritBase) {
+        GerritURL.sGerritBase = mGerritBase;
+    }
+
+    public static void setProject(String project) {
+        if (project == null) project = "";
+        sProject = project;
     }
 
     public void setStatus(String status) {
+        if (status == null) status = "";
         mStatus = status;
     }
 
     public void setEmail(String email) {
+        if (email == null) email = "";
         mEmail = email;
     }
 
     public void setCommitterState(String committerState) {
+        if (committerState == null) committerState = "";
         mCommitterState = committerState;
     }
 
-    public static void setGerrit(String mGerritBase) {
-        GerritURL.mGerritBase = mGerritBase;
-    }
+
 
     public void setRequestDetailedAccounts(boolean requestDetailedAccounts) {
         mRequestDetailedAccounts = requestDetailedAccounts;
@@ -46,33 +52,43 @@ public class GerritURL
     @Override
     public String toString()
     {
-        StringBuilder builder = new StringBuilder(0)
-            .append(mGerritBase)
-            .append(StaticWebAddress.getStatusQuery())
-            .append("(");
+        boolean addPlus = false;
 
-        if (!"".equals(mCommitterState) && !"".equals(mEmail))
-        {
-            builder.append(mCommitterState)
-                .append(':')
-                .append(mEmail);
+        // Sanity checking, this value REALLY should be set.
+        if (sGerritBase == null) {
+            throw new NullPointerException("Base Gerrit URL is null, did you forget to set one?");
         }
+
+        StringBuilder builder = new StringBuilder(0)
+            .append(sGerritBase)
+            .append(StaticWebAddress.getQuery())
+            .append("(");
 
         if (!"".equals(mStatus))
         {
-            builder.append('+')
-                .append(JSONCommit.KEY_STATUS)
-                .append(":")
-                .append(mStatus);
+            builder.append(JSONCommit.KEY_STATUS)
+                    .append(":")
+                    .append(mStatus);
+            addPlus = true;
+        }
+
+        if (!"".equals(mCommitterState) && !"".equals(mEmail))
+        {
+            if (addPlus) builder.append('+');
+            builder.append(mCommitterState)
+                .append(':')
+                .append(mEmail);
+            addPlus = true;
         }
 
         try {
-            if (!"".equals(mProject))
+            if (!"".equals(sProject))
             {
-                    builder.append('+')
-                        .append(JSONCommit.KEY_PROJECT)
-                        .append(":")
-                        .append(URLEncoder.encode(mProject, "UTF-8"));
+                if (addPlus) builder.append('+');
+                builder.append(JSONCommit.KEY_PROJECT)
+                    .append(":")
+                    .append(URLEncoder.encode(sProject, "UTF-8"));
+                addPlus = true;
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

@@ -18,7 +18,6 @@ package com.jbirdvegas.mgerrit;
  */
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -38,6 +37,7 @@ import com.jbirdvegas.mgerrit.cards.CommitCard;
 import com.jbirdvegas.mgerrit.cards.ImageCard;
 import com.jbirdvegas.mgerrit.objects.ChangeLogRange;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
+import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 
@@ -45,16 +45,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public abstract class CardsFragment extends Fragment {
     private static final String KEY_STORED_CARDS = "storedCards";
@@ -67,21 +62,24 @@ public abstract class CardsFragment extends Fragment {
     public static boolean mSkipStalking;
     private static final boolean DEBUG = true;
     private static final boolean CHATTY = false;
-    protected String TAG = getClass().getSimpleName();
-    private String mUrlParams;
+    protected String TAG = "CardsFragment";
+
+    private GerritURL mUrl;
+
     private long mTimerStart;
 
     private RequestQueue mRequestQueue;
+
     public static boolean inProject;
     private ChangeLogRange mChangelogRange;
     private GerritControllerActivity mParent;
     private View mCurrentFragment;
 
-    /*
-     * Keep track of all the GerritTask instances so the dialog can be dismissed
-     *  when this activity is paused.
-     */
-    private Set<GerritTask> mGerritTasks;
+    CardUI mCards;
+
+    // Indicates that this fragment will need to be refreshed
+    private boolean mIsDirty = false;
+
 
     // draws a stack of cards
     // Currently not used as the number of cards tends
@@ -104,11 +102,15 @@ public abstract class CardsFragment extends Fragment {
             count++;
         }
 
-        Toast.makeText(mParent,
-                String.format(getString(R.string.found_cards_toast,
-                        count,
-                        (System.currentTimeMillis() - mTimerStart) / 1000)),
-                Toast.LENGTH_LONG).show();
+        // Check if the fragment is attached to an activity
+        if (this.isAdded())
+        {
+            Toast.makeText(mParent,
+                    String.format(getString(R.string.found_cards_toast,
+                            count,
+                            (System.currentTimeMillis() - mTimerStart) / 1000)),
+                    Toast.LENGTH_LONG).show();
+        }
         cardUI.refresh();
     }
 
@@ -117,23 +119,7 @@ public abstract class CardsFragment extends Fragment {
     {
         super.onActivityCreated(savedInstanceState);
 
-        mParent = (GerritControllerActivity) this.getActivity();
-        mCurrentFragment = this.getView();
-
-        mTimerStart = System.currentTimeMillis();
-        mCards = (CardUI) mCurrentFragment.findViewById(R.id.commit_cards);
-        mCards.setSwipeable(true);
-        mRequestQueue = Volley.newRequestQueue(mParent);
-        // default to non author specific view
-        mUrlParams = new StringBuilder(0)
-                .append(StaticWebAddress.getStatusQuery())
-                .append(getQuery())
-                .append(JSONCommit.DETAILED_ACCOUNTS_ARG).toString();
-
-        if (savedInstanceState == null) saveCards("");
-
-        mGerritTasks = new HashSet<GerritTask>();
-
+        init(savedInstanceState);
         setup();
     }
 
@@ -147,7 +133,7 @@ public abstract class CardsFragment extends Fragment {
                         mParent.getApplicationContext()));
             }
         } catch (JSONException e) {
-            String url = mParent.getGerritWebsite() + mUrlParams;
+            String url = mUrl.toString();
             Log.d(TAG, new StringBuilder(0)
                     .append(getString(R.string.failed_to_parse_json_response))
                     .append(' ')
@@ -161,13 +147,10 @@ public abstract class CardsFragment extends Fragment {
     private CommitCard getCommitCard(JSONObject jsonObject, Context context) {
         return new CommitCard(
                 new JSONCommit(jsonObject, context),
-                mParent,
                 mParent.getCommitterObject(),
                 mRequestQueue,
                 this);
     }
-
-    CardUI mCards;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -175,52 +158,11 @@ public abstract class CardsFragment extends Fragment {
         return inflater.inflate(R.layout.commit_list, container, false);
     }
 
-    private void setProject(String project, boolean followingUser, CommitterObject committer)
+    private ImageCard stalkUser(final CommitterObject committerObject)
     {
-        StringBuilder builder = new StringBuilder(0)
-                .append("changes/?q=(")
-                .append("status:")
-                .append(getQuery())
-                .append('+')
-                .append("project:")
-                .append(URLEncoder.encode(project));
+        mUrl.setCommitterState(committerObject.getState());
+        mUrl.setEmail(committerObject.getEmail());
 
-        if (followingUser && !mSkipStalking) {
-            builder.append("+owner:").append(committer.getEmail());
-        }
-        builder.append(')')
-                .append(JSONCommit.DETAILED_ACCOUNTS_ARG);
-        mUrlParams = builder.toString();
-    }
-
-    private ImageCard stalkUser(String project, final CommitterObject committerObject)
-    {
-        String userEmail = committerObject.getEmail();
-
-        // http://gerrit.aokp.co/changes/?q=(owner:android@championswimmer.tk+status:open)&o=DETAILED_ACCOUNTS
-        StringBuilder builder = new StringBuilder(0)
-                .append("changes/?q=(")
-                .append(committerObject.getState())
-                .append(':')
-                .append(userEmail)
-                .append('+')
-                .append("status:")
-                .append(getQuery());
-
-        if (inProject) {
-            try {
-                builder.append('+')
-                        .append("project:")
-                        .append(URLEncoder.encode(project, "UTF-8"));
-            } catch (UnsupportedEncodingException uee) {
-                // Should not occur
-            }
-            inProject = true;
-        }
-
-        mUrlParams = builder.append(')')
-                .append(JSONCommit.DETAILED_ACCOUNTS_ARG)
-                .toString();
         Toast.makeText(mParent.getApplicationContext(),
                 // format string with a space
                 String.format("%s %s",
@@ -237,10 +179,32 @@ public abstract class CardsFragment extends Fragment {
             public void onCardSwiped(Card card, View layout) {
                 mParent.clearCommitterObject();
                 mSkipStalking = true;
-                mParent.refreshTab();
+
+                mUrl.setCommitterState("");
+                mUrl.setEmail("");
+
+                mParent.refreshTabs();
             }
         });
         return userImageCard;
+    }
+
+    private void init(Bundle savedInstanceState)
+    {
+        mParent = (GerritControllerActivity) this.getActivity();
+        mCurrentFragment = this.getView();
+
+        mTimerStart = System.currentTimeMillis();
+        mCards = (CardUI) mCurrentFragment.findViewById(R.id.commit_cards);
+        mCards.setSwipeable(true);
+        mRequestQueue = Volley.newRequestQueue(mParent);
+        // default to non author specific view
+
+        mUrl = new GerritURL();
+        mUrl.setRequestDetailedAccounts(true);
+        mUrl.setStatus(getQuery());
+
+        if (savedInstanceState == null) saveCards("");
     }
 
     private void setup()
@@ -248,7 +212,6 @@ public abstract class CardsFragment extends Fragment {
         boolean followingUser = false;
         // track if we are in project
         String project = Prefs.getCurrentProject(mParent);
-
         inProject = (!"".equals(project));
 
         CommitterObject user = mParent.getCommitterObject();
@@ -261,16 +224,11 @@ public abstract class CardsFragment extends Fragment {
                     && !userEmail.trim().isEmpty()
                     && userEmail.contains(AT_SYMBOL)) {
 
-                mCards.addCard(stalkUser(project, user));
+                mCards.addCard(stalkUser(user));
             }
         }
 
-        // handle if project was clicked
-        if (inProject)
-        {
-            setProject(project, followingUser, user);
-            mCards.addCard(getProjectCard(project), true);
-        }
+        if (inProject) mCards.addCard(getProjectCard());
 
         try {
             mChangelogRange = mParent.getIntent()
@@ -289,8 +247,7 @@ public abstract class CardsFragment extends Fragment {
     }
 
     private void loadChangeLog(final ChangeLogRange logRange) {
-        String url = mParent.getGerritWebsite() + mUrlParams;
-        GerritTask gerritTask = new GerritTask(mParent)
+        new GerritTask(mParent)
         {
             @Override
             public void onJSONResult(String s)
@@ -301,9 +258,7 @@ public abstract class CardsFragment extends Fragment {
                                 logRange, s),
                         mCards);
             }
-        };
-        mGerritTasks.add(gerritTask);
-        gerritTask.execute(url);
+        }.execute(mUrl.toString());
     }
 
     private List<CommitCard> generateChangeLog(ChangeLogRange logRange,
@@ -346,7 +301,7 @@ public abstract class CardsFragment extends Fragment {
                 }
             }
         } catch (JSONException e) {
-            String url = mParent.getGerritWebsite() + mUrlParams;
+            String url = mUrl.toString();
             Log.d(TAG, new StringBuilder(0)
                     .append(getString(R.string.failed_to_parse_json_response))
                     .append(' ')
@@ -357,7 +312,8 @@ public abstract class CardsFragment extends Fragment {
         return commitCardList;
     }
 
-    private Card getProjectCard(final String project) {
+    private Card getProjectCard() {
+        final String project = Prefs.getCurrentProject(mParent);
         Card card = new Card(project) {
             @Override
             public View getCardContent(Context context) {
@@ -371,8 +327,7 @@ public abstract class CardsFragment extends Fragment {
         card.setOnCardSwipedListener(new Card.OnCardSwiped() {
             @Override
             public void onCardSwiped(Card card, View layout) {
-                Prefs.setCurrentProject(mParent, "");
-                mParent.refreshTab();
+                Prefs.setCurrentProject(mParent, null);
             }
         });
         card.setSwipableCard(true);
@@ -381,19 +336,17 @@ public abstract class CardsFragment extends Fragment {
 
     private void loadScreen() {
         mTimerStart = System.currentTimeMillis();
-        String url = mParent.getGerritWebsite() + mUrlParams;
+        String url = mUrl.toString();
         Log.d(TAG, "Calling mgerrit: " + url);
         if (getStoredCards().equals(""))
         {
-            GerritTask gerritTask = new GerritTask(mParent) {
+            new GerritTask(mParent) {
                 @Override
                 public void onJSONResult(String s) {
                     saveCards(s);
                     drawCardsFromList(generateCardsList(s), mCards);
                 }
-            };
-            mGerritTasks.add(gerritTask);
-            gerritTask.execute(url);
+            }.execute(url);
         }
         else
             drawCardsFromList(generateCardsList(getStoredCards()), mCards);
@@ -418,18 +371,26 @@ public abstract class CardsFragment extends Fragment {
                 .getString(KEY_STORED_CARDS, "");
     }
 
-    @Override
-    public void onPause()
+    protected void refresh()
     {
-        super.onPause();
+        // Clear the cards and empty the card cache
+        mCards.clearCards();
+        saveCards("");
 
-        Iterator<GerritTask> it = mGerritTasks.iterator();
-        while (it.hasNext())
-        {
-            GerritTask gerritTask = it.next();
-            if (gerritTask.getStatus() == AsyncTask.Status.FINISHED)
-                it.remove();
-            else gerritTask.dismissDialog();
-        }
+        if (inProject) mCards.addCard(getProjectCard());
+        mIsDirty = false;
+        loadScreen();
     }
+
+    // Refresh this fragment
+    public void resume() { if (mIsDirty) refresh(); }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        resume();
+    }
+
+    public void markDirty() { mIsDirty = true; }
 }

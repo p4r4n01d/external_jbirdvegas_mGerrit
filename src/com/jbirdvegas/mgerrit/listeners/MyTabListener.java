@@ -2,10 +2,9 @@ package com.jbirdvegas.mgerrit.listeners;
 
 
 import android.app.ActionBar;
-import android.content.Context;
-
-import android.support.v4.view.ViewPager;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.support.v4.view.ViewPager;
 
 public class MyTabListener implements ActionBar.TabListener
 {
