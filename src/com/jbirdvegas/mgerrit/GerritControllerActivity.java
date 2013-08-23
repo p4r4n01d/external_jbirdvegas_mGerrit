@@ -413,6 +413,7 @@ public class GerritControllerActivity extends FragmentActivity {
                         .toString(),
                 Toast.LENGTH_LONG).show();
         GerritURL.setGerrit(newGerrit);
+        // Call changeGerrit from DatabaseFactory here
         refreshTabs();
     }
 
