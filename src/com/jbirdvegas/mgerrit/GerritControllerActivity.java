@@ -249,6 +249,7 @@ public class GerritControllerActivity extends FragmentActivity {
         }
     }
 
+    // To depricate
     private void getProjectsList() {
         GerritTask gerritTask = new GerritTask(this)
         {

@@ -3,6 +3,8 @@ package com.jbirdvegas.mgerrit.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.jbirdvegas.mgerrit.Prefs;
+
 /** This class aims to manage and abstract which database is being accessed.
  *  This is a singleton class, we can have only one DBHelper (it is also a
  *   singleton) and we only need one instance of a wdb as we should only
@@ -12,14 +14,17 @@ public class DatabaseFactory
     private static DBHelper dbHelper;
     private static SQLiteDatabase wdb;
 
-    // TODO: Save all the cursors here so they can be re-queried when the
-    // gerrit source (database file) changes
+    private static DatabaseFactory mInstance = null;
 
     private DatabaseFactory() {
         super();
     }
 
-    public static void getDatabase(Context context, String gerrit)
+    public static DatabaseFactory getDatabase(Context context) {
+        return getDatabase(context, Prefs.getCurrentGerrit(context));
+    }
+
+    public static DatabaseFactory getDatabase(Context context, String gerrit)
     {
         String dbName = DBHelper.getDatabaseName(gerrit);
         DatabaseFactory.dbHelper = DBHelper.getInstance(context, gerrit);
@@ -27,6 +32,9 @@ public class DatabaseFactory
         // Ensure the database is open and we have a reference to it before
         //  trying to perform any queries using it.
         DatabaseFactory.wdb = dbHelper.getWritableDatabase();
+
+        mInstance = new DatabaseFactory();
+        return mInstance;
     }
 
     public void closeDatabase() {
@@ -49,7 +57,5 @@ public class DatabaseFactory
 
         // Reopen the new database
         getDatabase(context, newGerrit);
-
-        // TODO: Re-query data for open cursors?
     }
 }
