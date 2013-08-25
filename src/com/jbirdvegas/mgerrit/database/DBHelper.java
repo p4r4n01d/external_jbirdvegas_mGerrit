@@ -55,7 +55,7 @@ class DBHelper extends SQLiteOpenHelper
 
     // Sanitise the names of the Gerrit instances so we do not create odd file names
     public static String getDatabaseName(String gerritURL) {
-        String[] parts = gerritURL.split(".", 1);
+        String[] parts = gerritURL.split("\\.");
         String name;
         if (parts.length < 2)  name = parts[parts.length - 1];
         else name = parts[parts.length - 2];

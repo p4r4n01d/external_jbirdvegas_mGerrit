@@ -27,7 +27,7 @@ public class DatabaseFactory
     public static DatabaseFactory getDatabase(Context context, String gerrit)
     {
         String dbName = DBHelper.getDatabaseName(gerrit);
-        DatabaseFactory.dbHelper = DBHelper.getInstance(context, gerrit);
+        DatabaseFactory.dbHelper = DBHelper.getInstance(context, dbName);
 
         // Ensure the database is open and we have a reference to it before
         //  trying to perform any queries using it.

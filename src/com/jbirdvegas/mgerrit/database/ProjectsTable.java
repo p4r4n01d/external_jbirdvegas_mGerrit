@@ -43,6 +43,10 @@ public class ProjectsTable
                 + " PRIMARY KEY (" + C_ROOT + ", " + C_SUBPROJECT + "))");
     }
 
+    /* Note: We may have to implement our own method of monitoring and reporting changes
+     *  if Cursor.registerContentObserver only works with ContentProviders
+     */
+
     /** Insert the list of projects into the database **/
     public boolean insertProjects(List<Project> projects) {
 
@@ -86,8 +90,7 @@ public class ProjectsTable
     // Split a project's path (name) into its root and subproject
     private Pair<String, String> splitPath(String projectPath)
     {
-        // TODO: We want 2 parts, check limit parameter and confirm value
-        String p[] = projectPath.split("/", 1);
+        String p[] = projectPath.split("/", 2);
         return new Pair<String, String>(p[0], p[1]);
     }
 }
