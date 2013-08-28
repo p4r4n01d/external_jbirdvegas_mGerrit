@@ -1,0 +1,71 @@
+mGerrit TODO List
+
+Outstanding
+===========
+- Reset project if current project not listed in current Gerrit
+- New Projects view using ExpandableListView
+- Non-blocking JSON fetching operations
+	- Could include fetching JSON details in navigation bar (with ability to cancel using expandable notifications)
+- Smarter refresh - ideal: deprecate manual refresh and refresh automatically
+	- Compare change updated timestamps and change ids to determine when the rest of the data is old and does not need to be changed
+	- Only load the new stuff and don't reset all the cards views if not necesscary.
+- Do not default to one specific gerrit - open up the list of Gerrits to choose from. This applies only when there is no app data (e.g. mgerrit has just been installed)
+- Master-detail view
+	- Convert PatchSetViewerActivity into a Fragment
+- When selecting a committer, use the currently selected tab to determine which changes of theirs to view
+- More feedback on which Gerrit is selected
+	- Change gerrit selector icon to match the current Gerrit
+		- If custom Gerrit either:
+			a) Use generic icon (even the application icon will do)
+			b) Let user upload a custom identifying icon
+- Only show 'AOKP Changelog' option when the AOKP Gerrit is selected
+- Migrate Help dialog information into long-press hints. Could show hint when long pressing on a tab or on the card stripe. This needs more thought...
+- If downloading dialog is to be left, don't include details about the type of data
+- Combine 'org.apache.commons.codec' into library (jar) and import it. Probably don't need to be working on the source for this.
+
+- Seperate debug/release versioning (not sure if gradle fully supports this)
+- Layout optimisations using Android Hierarchy Viewer (debug version)
+
+Database
+--------
+	- Change List table
+	- Change set (details) table
+	- Include CWAC-LoaderEx library for Database operations
+	- Fetch all data from database and when new data, insert into database and query it
+		- Ensures the database is up to date with the data being displayed
+		- Would need to manage multiple loaders and adapters if binding JSON data directly as well as database cursors
+
+Searching (Requires database), action bar
+-----------------------------
+	- Project list searching: Type in the name of a project and it shows the matching subprojects under their corresponding root. i.e filters out unmatching subprojects.
+	- General searching:
+		- mimic Gerrit web interface queries
+		- Support searching for a specific commit heading (default). e.g. searching for "commit:[translation]" will show a heading for Commits and list all the commits with "[translation]" in the title.
+		- Where it is ambigious (e.g. search results from commits and committers) show results under section headings. These section headings should be collapsable.
+
+CardsUI Library
+----------------
+	- Remove top gradient
+	- Decrease padding between cards
+	- Investigate card swiping
+	- Include card stripe colouring support/update library to Androguide
+
+CM Gerrit (Requires Server side changes)
+----------------------------------------
+	- Get change diffs
+	- Get change messages
+
+Future Direction
+----------------
+- Authentication/Authorisation
+	- Not sure if Gerrit API(s) supports this
+	- Show system prompt such as "mgerrit is requesting access to...", such as when an Oauth2 token is requested (something similar to what happens when you use the Google Play Services APIs anyway).
+	- This will make way for mGerrit to become a full-blown Gerrit client/portal.
+
+Optional/Lower priority
+-----------------------
+	- Add support for API 7+
+		- Switch to ActionBarComapt/ActionbarScherlock
+	- Colour cards stripe instead of including 'new'/'merged'/'abandoned'. Suggest: open/review => black or transparent, merged => green, abandoned => red
+	- Colour each project in a sperate colour
+
