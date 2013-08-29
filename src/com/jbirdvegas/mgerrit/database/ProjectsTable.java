@@ -1,11 +1,13 @@
 package com.jbirdvegas.mgerrit.database;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
 
 import com.jbirdvegas.mgerrit.objects.Project;
+import com.jbirdvegas.mgerrit.tasks.ProjectsListLoader;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,9 +31,13 @@ public class ProjectsTable
     public static final String SORT_BY = C_ROOT + " ASC, " + C_SUBPROJECT + " ASC";
 
     public SQLiteDatabase mDb;
+    DatabaseFactory mFactory;
+    Context mContext;
 
-    protected ProjectsTable(SQLiteDatabase db) {
+    protected ProjectsTable(SQLiteDatabase db, DatabaseFactory factory, Context context) {
         this.mDb = db;
+        this.mFactory = factory;
+        this.mContext = context;
     }
 
     // We could make the sql text static and execute it from DBHelper
@@ -67,9 +73,12 @@ public class ProjectsTable
         return true;
     }
 
-    public Cursor getProjects() {
-        return mDb.query(TABLE, new String[] { C_ROOT, C_SUBPROJECT},
-                null, null, null, null, SORT_BY);
+    public ProjectsListLoader getProjects() {
+
+        String search = "SELECT " + C_ROOT + ", " + C_SUBPROJECT + " FROM " + TABLE
+                + " ORDER BY " + SORT_BY;
+
+        return new ProjectsListLoader(mContext, this, search, null);
     }
 
     // Return a cursor containing all of the root (base) projects
@@ -92,5 +101,9 @@ public class ProjectsTable
     {
         String p[] = projectPath.split("/", 2);
         return new Pair<String, String>(p[0], p[1]);
+    }
+
+    public DatabaseFactory getFactory() {
+        return mFactory;
     }
 }

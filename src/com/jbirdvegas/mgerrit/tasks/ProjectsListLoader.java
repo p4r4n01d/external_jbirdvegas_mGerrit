@@ -1,13 +1,11 @@
 package com.jbirdvegas.mgerrit.tasks;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.AsyncTask;
-import android.os.Bundle;
+
+import com.commonsware.cwac.loaderex.SQLiteCursorLoader;
 
 import com.jbirdvegas.mgerrit.Prefs;
-import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.database.ProjectsTable;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.objects.Project;
@@ -20,47 +18,44 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class ProjectsListLoader extends AsyncTaskLoader<Cursor>
+public class ProjectsListLoader extends SQLiteCursorLoader
 {
-
     GerritTask mProjectListFetcher;
     Context mContext;
     ProjectsTable mProjTbl;
-    Cursor mCursor;
 
-    /* TODO: The Loader will monitor for changes to the data, and report them through
-     *  new calls to ProjectsList.onLoadFinished. */
-    /* TODO: The Loader will release the data once it knows the application is no longer
-     *  using it. */
+    String mRawQuery = null;
+    String[] mArgs = null;
 
-    public ProjectsListLoader(Context context, Bundle args) {
-        super(context);
+    /* This will monitor for changes to the data, and report them through new calls to the
+     *  onLoadFinished callback */
+    /* The Loader will release the data once it knows the application is no longer
+     *  using it (should be managed by the superclass SQLiteCursorLoader) */
+
+    public ProjectsListLoader(Context context, ProjectsTable projectsTable, String rawQuery, String[] args) {
+        super(context,
+                projectsTable.getFactory().getDatabaseHelper(), rawQuery, args);
+        mContext = context;
+        mRawQuery = rawQuery;
+        mArgs = args;
+        mProjTbl = projectsTable;
     }
 
     @Override
-    public Cursor loadInBackground() {
-        /* Try querying the database, and if there are no results, fetch the
-         *  list from the server and re-query the database. */
-
-        // Avoid referencing the parent activity directly to avoid context leaks.
-        mProjTbl = DatabaseFactory.getDatabase(mContext).getProjectsTable();
-        Cursor mCursor = mProjTbl.getProjects();
-
-        /* This needs to block as this will query database, find there are
-         *  no results, fetch some and re-query the database before the results
-         *  are inserted. */
-        if (mCursor.isAfterLast())
-        {
+    protected Cursor buildCursor() {
+        Cursor c = mProjTbl.getFactory().getWritableDatabase().rawQuery(mRawQuery, mArgs);
+        if (c.isAfterLast()) {
             fetchProjects();
 
-            // Hope the Status is PENDING initially.
-            while (mProjectListFetcher.getStatus() != AsyncTask.Status.FINISHED) {
-                try { Thread.sleep(100); }
-                catch (InterruptedException e) { e.printStackTrace(); }
+            // Hopefully mProjectListFetcher has been started at this point
+            try {
+                mProjectListFetcher.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        else mCursor = mProjTbl.getProjects();
-        return mCursor;
+        // Go around and query again.
+        return buildCursor();
     }
 
     private void fetchProjects() {
@@ -86,8 +81,8 @@ public class ProjectsListLoader extends AsyncTaskLoader<Cursor>
                     // Insert projects into database
                     mProjTbl.insertProjects(projects);
 
-                    /* TODO: Wake up the main thread of this AsyncTaskLoader as the
-                     *  results are in */
+                    /* Wake up the main thread of this Loader as the results are in */
+                    this.notify();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -95,9 +90,5 @@ public class ProjectsListLoader extends AsyncTaskLoader<Cursor>
             }
         };
         mProjectListFetcher.execute(Prefs.getCurrentGerrit(mContext) + "projects/?d");
-    }
-
-    private void releaseResources() {
-        mCursor.close();
     }
 }

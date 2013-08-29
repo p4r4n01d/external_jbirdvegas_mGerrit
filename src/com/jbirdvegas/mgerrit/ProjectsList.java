@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.jbirdvegas.mgerrit.adapters.ProjectsListAdapter;
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.database.ProjectsTable;
-import com.jbirdvegas.mgerrit.tasks.ProjectsListLoader;
 
 public class ProjectsList extends Activity
     implements LoaderManager.LoaderCallbacks<Cursor>
@@ -83,7 +82,7 @@ public class ProjectsList extends Activity
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        return new ProjectsListLoader(this, null);
+        return mProjectsTable.getProjects();
     }
 
     @Override

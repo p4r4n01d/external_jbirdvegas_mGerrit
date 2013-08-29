@@ -10,28 +10,31 @@ class DBHelper extends SQLiteOpenHelper
     static final String TAG = "DbHelper";
     static final int DB_VERSION = 1;
     private static DBHelper mInstance;
-    private static Context context;
+    private static Context sContext;
     private static String sDbName;
+    private static DatabaseFactory sFactory;
 
     /**
      * Constructor should be private to prevent direct instantiation.
      * make call to static factory method "getInstance()" instead.
      */
-    DBHelper(Context context, String dbName) {
+    private DBHelper(DatabaseFactory databaseFactory, Context context, String dbName) {
         super(context, dbName, null, DB_VERSION);
-        this.context = context;
+        sContext = context;
         sDbName = dbName;
+        sFactory = databaseFactory;
     }
 
-    public static DBHelper getInstance(Context ctx, String dbName) {
+    // This method prevents the existing static values from being overwritten when unnecessary
+    public static DBHelper getInstance(DatabaseFactory databaseFactory, Context ctx, String dbName) {
         // Use the application context, which will ensure that you
         // don't accidentally leak an Activity's context.
         // See this article for more information: http://bit.ly/6LRzfx
         if (mInstance == null) {
-            mInstance = new DBHelper(ctx, dbName);
+            mInstance = new DBHelper(databaseFactory, ctx, dbName);
         } else if (sDbName.equals(dbName)) {
             //this.close();
-            mInstance = new DBHelper(ctx, dbName);
+            mInstance = new DBHelper(databaseFactory, ctx, dbName);
         }
         return mInstance;
     }
@@ -39,7 +42,7 @@ class DBHelper extends SQLiteOpenHelper
     // Called only once, first time the DB is created. Create all the tables here
     @Override
     public void onCreate(SQLiteDatabase db) {
-        new ProjectsTable(db).create();
+        new ProjectsTable(db, sFactory, sContext).create();
     }
 
     // Called whenever newVersion > oldVersion. Can do some version number checking
@@ -68,7 +71,8 @@ class DBHelper extends SQLiteOpenHelper
     {
         this.close();
         mInstance = null;
-        context = null;
+        sContext = null;
         sDbName = null;
+        sFactory = null;
     }
 }

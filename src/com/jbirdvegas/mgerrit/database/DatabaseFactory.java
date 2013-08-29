@@ -2,6 +2,7 @@ package com.jbirdvegas.mgerrit.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import com.jbirdvegas.mgerrit.Prefs;
 
@@ -15,6 +16,8 @@ public class DatabaseFactory
     private static SQLiteDatabase wdb;
 
     private static DatabaseFactory mInstance = null;
+    private Context mContext;
+    private static String mCurrentGerrit = null;
 
     private DatabaseFactory() {
         super();
@@ -29,12 +32,24 @@ public class DatabaseFactory
         String dbName = DBHelper.getDatabaseName(gerrit);
         DatabaseFactory.dbHelper = DBHelper.getInstance(context, dbName);
 
+        if (mInstance != null && dbName.equals(mCurrentGerrit)) return mInstance;
+
         // Ensure the database is open and we have a reference to it before
         //  trying to perform any queries using it.
         DatabaseFactory.wdb = dbHelper.getWritableDatabase();
 
         mInstance = new DatabaseFactory();
+        mInstance.mContext = context;
         return mInstance;
+    }
+
+    // Not static as this ensures getDatabase was called
+    public SQLiteOpenHelper getDatabaseHelper() {
+        return dbHelper;
+    }
+
+    public SQLiteDatabase getWritableDatabase() {
+        return wdb;
     }
 
     public void closeDatabase() {
@@ -45,7 +60,7 @@ public class DatabaseFactory
 
     /* -- Get table methods -- */
     public ProjectsTable getProjectsTable() {
-        return new ProjectsTable(wdb);
+        return new ProjectsTable(wdb, this, mContext);
     }
 
     // This should be called when the Gerrit source changes to modify all database references to
