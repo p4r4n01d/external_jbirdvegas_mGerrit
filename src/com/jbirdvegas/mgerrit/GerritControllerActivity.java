@@ -21,8 +21,12 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -32,6 +36,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,17 +50,16 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.jbirdvegas.mgerrit.helpers.GerritTeamsHelper;
+import com.jbirdvegas.mgerrit.helpers.Tools;
+import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
 import com.jbirdvegas.mgerrit.listeners.MyTabListener;
+import com.jbirdvegas.mgerrit.message.*;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
+import com.jbirdvegas.mgerrit.objects.GerritMessage;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.GooFileObject;
-import com.jbirdvegas.mgerrit.objects.JSONCommit;
-import com.jbirdvegas.mgerrit.objects.Project;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 import com.jbirdvegas.mgerrit.widgets.AddTeamView;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -63,8 +67,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 public class GerritControllerActivity extends FragmentActivity {
@@ -76,7 +78,7 @@ public class GerritControllerActivity extends FragmentActivity {
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
 
-    /*
+    /**
      * Keep track of all the GerritTask instances so the dialog can be dismissed
      *  when this activity is paused.
      */
@@ -87,17 +89,14 @@ public class GerritControllerActivity extends FragmentActivity {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link android.support.v4.app.FragmentPagerAdapter} derivative, which
-     * will keep every loaded fragment in memory. If this becomes too memory
-     * intensive, it may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     * fragments for each of the sections.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private ActionBar mActionBar;
 
     ArrayList<CharSequence> mTitles;
+    private DefaultGerritReceivers receivers;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -147,10 +146,12 @@ public class GerritControllerActivity extends FragmentActivity {
         };
         // Don't register listener here. It is registered in onResume instead.
 
-        /* Initially set the current Gerrit globasl here.
+        /* Initially set the current Gerrit globals here.
          *  We can rely on callbacks to know when they change */
         GerritURL.setGerrit(Prefs.getCurrentGerrit(this));
         GerritURL.setProject(Prefs.getCurrentProject(this));
+
+        receivers = new DefaultGerritReceivers(this);
 
         // Setup tabs //
         setupTabs();
@@ -158,6 +159,25 @@ public class GerritControllerActivity extends FragmentActivity {
         mTitles = new ArrayList<CharSequence>();
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++)
             mTitles.add(mSectionsPagerAdapter.getPageTitle(i));
+    }
+
+    // Register to receive messages.
+    private void registerReceivers() {
+        receivers.registerReceivers(EstablishingConnection.TYPE,
+                ConnectionEstablished.TYPE,
+                InitializingDataTransfer.TYPE,
+                ProgressUpdate.TYPE,
+                Finished.TYPE,
+                HandshakeError.TYPE,
+                ErrorDuringConnection.TYPE);
+
+    }
+
+    // Unregister all the receivers that were registerd in registerReceivers
+    private void unregisterReceivers() {
+
+        receivers.unregisterReceivers();
+        receivers.dismissProgressDialog();
     }
 
     /** MUST BE CALLED ON MAIN THREAD */
@@ -389,6 +409,7 @@ public class GerritControllerActivity extends FragmentActivity {
     {
         super.onPause();
         mPrefs.unregisterOnSharedPreferenceChangeListener(mListener);
+        unregisterReceivers();
 
         Iterator<GerritTask> it = mGerritTasks.iterator();
         while (it.hasNext())
@@ -396,7 +417,6 @@ public class GerritControllerActivity extends FragmentActivity {
             GerritTask gerritTask = it.next();
             if (gerritTask.getStatus() == AsyncTask.Status.FINISHED)
                 it.remove();
-            else gerritTask.dismissDialog();
         }
     }
 
@@ -405,6 +425,7 @@ public class GerritControllerActivity extends FragmentActivity {
     {
         super.onResume();
         mPrefs.registerOnSharedPreferenceChangeListener(mListener);
+        registerReceivers();
     }
 
     @Override

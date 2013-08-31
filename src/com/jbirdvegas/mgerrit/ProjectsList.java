@@ -1,5 +1,22 @@
 package com.jbirdvegas.mgerrit;
 
+/*
+ * Copyright (C) 2013 Android Open Kang Project (AOKP)
+ *  Author: Evan Conway (P4R4N01D), 2013
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Loader;
@@ -14,6 +31,14 @@ import android.widget.TextView;
 import com.jbirdvegas.mgerrit.adapters.ProjectsListAdapter;
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.database.ProjectsTable;
+import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
+import com.jbirdvegas.mgerrit.message.ConnectionEstablished;
+import com.jbirdvegas.mgerrit.message.ErrorDuringConnection;
+import com.jbirdvegas.mgerrit.message.EstablishingConnection;
+import com.jbirdvegas.mgerrit.message.Finished;
+import com.jbirdvegas.mgerrit.message.HandshakeError;
+import com.jbirdvegas.mgerrit.message.InitializingDataTransfer;
+import com.jbirdvegas.mgerrit.message.ProgressUpdate;
 
 public class ProjectsList extends Activity
     implements LoaderManager.LoaderCallbacks<Cursor>
@@ -21,6 +46,7 @@ public class ProjectsList extends Activity
     ExpandableListView mProjectsListView;
     ProjectsTable mProjectsTable;
     ProjectsListAdapter mListAdapter;
+    private DefaultGerritReceivers receivers;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,6 +99,38 @@ public class ProjectsList extends Activity
         }
         return super.onOptionsItemSelected(item);
     }
+
+    // Register to receive messages.
+    private void registerReceivers() {
+        receivers.registerReceivers(EstablishingConnection.TYPE,
+                ConnectionEstablished.TYPE,
+                InitializingDataTransfer.TYPE,
+                ProgressUpdate.TYPE,
+                Finished.TYPE,
+                HandshakeError.TYPE,
+                ErrorDuringConnection.TYPE);
+
+    }
+
+    // Unregister all the receivers that were registerd in registerReceivers
+    private void unregisterReceivers() {
+
+        receivers.unregisterReceivers();
+        receivers.dismissProgressDialog();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceivers();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceivers();
+    }
+
 
     /* We load the data on a seperate thread (AsyncTaskLoader) but what to do
      *  on the main thread. Probably best to block (with a alert dialog) like
