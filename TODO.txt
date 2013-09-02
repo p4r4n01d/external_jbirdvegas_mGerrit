@@ -10,6 +10,7 @@ Outstanding
 	- Compare change updated timestamps and change ids to determine when the rest of the data is old and does not need to be changed
 	- Only load the new stuff and don't reset all the cards views if not necesscary.
 - Do not default to one specific gerrit - open up the list of Gerrits to choose from. This applies only when there is no app data (e.g. mgerrit has just been installed)
+- Give a visual aid to which Gerrit source is currently selected in Gerrit selection dialog
 - Master-detail view
 	- Convert PatchSetViewerActivity into a Fragment
 - When selecting a committer, use the currently selected tab to determine which changes of theirs to view
@@ -26,6 +27,7 @@ Outstanding
     - Change preferences (either temporarily or permently) to the gerrit from the URL
     - When given a change link open that specific change
     - When given a Gerrit link just change the current Gerrit
+- When there are no comments on a change, don't display comments card
 
 - Seperate debug/release versioning (not sure if gradle fully supports this)
 - Layout optimisations using Android Hierarchy Viewer (debug version)
@@ -36,6 +38,7 @@ Database
 --------
 	- Change List table
 	- Change set (details) table
+	- Include CWAC-LoaderEx library for Database operations
 	- Fetch all data from database and when new data, insert into database and query it
 		- Ensures the database is up to date with the data being displayed
 		- Would need to manage multiple loaders and adapters if binding JSON data directly as well as database cursors
@@ -60,7 +63,6 @@ CardsUI Library
 CM Gerrit (Requires Server side changes)
 ----------------------------------------
 	- Get change diffs
-	- Get change messages
 
 Future Direction
 ----------------
