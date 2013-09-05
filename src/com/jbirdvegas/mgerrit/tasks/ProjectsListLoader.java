@@ -17,97 +17,79 @@ package com.jbirdvegas.mgerrit.tasks;
  *  limitations under the License.
  */
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.os.Looper;
 
 import com.commonsware.cwac.loaderex.SQLiteCursorLoader;
 
 import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.database.ProjectsTable;
-import com.jbirdvegas.mgerrit.objects.JSONCommit;
-import com.jbirdvegas.mgerrit.objects.Project;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import com.jbirdvegas.mgerrit.objects.GerritMessage;
+import com.jbirdvegas.mgerrit.objects.GerritURL;
 
 public class ProjectsListLoader extends SQLiteCursorLoader
 {
-    GerritTask mProjectListFetcher;
-    Context mContext;
     ProjectsTable mProjTbl;
 
     String mRawQuery = null;
     String[] mArgs = null;
+    GerritURL mUrl;
+
+    private final BroadcastReceiver finishedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Check if this message corresponds to the current URL
+            String url = intent.getStringExtra(GerritMessage.URL);
+            if (mUrl.equals(url)) {
+                ProjectsListLoader.this.notify();
+            }
+        }
+    };
 
     /* This will monitor for changes to the data, and report them through new calls to the
      *  onLoadFinished callback */
     /* The Loader will release the data once it knows the application is no longer
      *  using it (should be managed by the superclass SQLiteCursorLoader) */
 
-    public ProjectsListLoader(Context context, ProjectsTable projectsTable, String rawQuery, String[] args) {
+    public ProjectsListLoader(Context context,
+                              ProjectsTable projectsTable,
+                              String rawQuery,
+                              String[] args) {
         super(context,
                 projectsTable.getFactory().getDatabaseHelper(), rawQuery, args);
-        mContext = context;
         mRawQuery = rawQuery;
         mArgs = args;
         mProjTbl = projectsTable;
+        mUrl = new GerritURL();
+
+        // This is just a precaution in case it has not been set yet
+        GerritURL.setGerrit(Prefs.getCurrentGerrit(getContext()));
+    }
+
+    private Cursor query() {
+        return mProjTbl.getFactory().getWritableDatabase().rawQuery(mRawQuery, mArgs);
     }
 
     @Override
     protected Cursor buildCursor() {
-        Cursor c = mProjTbl.getFactory().getWritableDatabase().rawQuery(mRawQuery, mArgs);
+        Cursor c = query();
         if (c.isAfterLast()) {
-            fetchProjects();
+            // Send request to service to start fetching projects
+            Intent it = new Intent(getContext(), GerritService.class);
+            mUrl.listProjects();
+            it.putExtra(GerritService.URL_KEY, mUrl.toString());
+            getContext().startService(it);
 
-            // Hopefully mProjectListFetcher has been started at this point
+            // Wait for service to finish (no data, we cannot really do anything)
             try {
-                mProjectListFetcher.wait();
+                this.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        // Go around and query again.
-        return buildCursor();
-    }
-
-    private void fetchProjects() {
-        mProjectListFetcher = new GerritTask(mContext)
-        {
-            @Override
-            public void onJSONResult(String jsonString)
-            {
-                try {
-                    JSONObject projectsJson = new JSONObject(jsonString);
-                    Iterator stringIterator = projectsJson.keys();
-
-                    List<Project> projects = new ArrayList<Project>();
-                    while (stringIterator.hasNext()) {
-                        String path = (String) stringIterator.next();
-                        JSONObject projJson = projectsJson.getJSONObject(path);
-                        String kind = projJson.getString(JSONCommit.KEY_KIND);
-                        String id = projJson.getString(JSONCommit.KEY_ID);
-                        projects.add(Project.getInstance(path, kind, id));
-                    }
-                    Collections.sort(projects);
-
-                    // Insert projects into database
-                    mProjTbl.insertProjects(projects);
-
-                    /* Wake up the main thread of this Loader as the results are in */
-                    this.notify();
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Looper.prepare();
-        mProjectListFetcher.execute(Prefs.getCurrentGerrit(mContext) + "projects/?d");
+        else return c; // Ensure that the DB is not queried again unnecessarily
+        return query();
     }
 }
