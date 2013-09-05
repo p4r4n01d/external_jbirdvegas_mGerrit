@@ -18,6 +18,7 @@ public class GerritURL
     private String mEmail = "";
     private String mCommitterState = "";
     private boolean mRequestDetailedAccounts = false;
+    private boolean mListProjects = false;
 
     public static void setGerrit(String mGerritBase) {
         GerritURL.sGerritBase = mGerritBase;
@@ -43,10 +44,13 @@ public class GerritURL
         mCommitterState = committerState;
     }
 
-
-
     public void setRequestDetailedAccounts(boolean requestDetailedAccounts) {
         mRequestDetailedAccounts = requestDetailedAccounts;
+    }
+
+    // Setting this will ignore all change related parts of the query URL
+    public void listProjects() {
+        mListProjects = true;
     }
 
     @Override
@@ -57,6 +61,13 @@ public class GerritURL
         // Sanity checking, this value REALLY should be set.
         if (sGerritBase == null) {
             throw new NullPointerException("Base Gerrit URL is null, did you forget to set one?");
+        }
+
+        if (mListProjects) {
+            return new StringBuilder(0)
+                    .append(sGerritBase)
+                    .append("projects/?d")
+                    .toString();
         }
 
         StringBuilder builder = new StringBuilder(0)
@@ -101,5 +112,9 @@ public class GerritURL
         }
 
         return builder.toString();
+    }
+
+    public boolean equals(String str) {
+        return this.toString().equals(str);
     }
 }

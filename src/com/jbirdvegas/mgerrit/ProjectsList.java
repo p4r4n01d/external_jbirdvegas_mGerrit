@@ -112,13 +112,6 @@ public class ProjectsList extends Activity
 
     }
 
-    // Unregister all the receivers that were registerd in registerReceivers
-    private void unregisterReceivers() {
-
-        receivers.unregisterReceivers();
-        receivers.dismissProgressDialog();
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -128,9 +121,8 @@ public class ProjectsList extends Activity
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceivers();
+        receivers.unregisterReceivers();
     }
-
 
     /* We load the data on a seperate thread (AsyncTaskLoader) but what to do
      *  on the main thread. Probably best to block (with a alert dialog) like

@@ -52,5 +52,6 @@
                   android:label="@string/app_name"
                   android:parentActivityName=".GerritControllerActivity"
                   android:icon="@drawable/ic_launcher" />
+        <service android:name=".tasks.GerritService" />
     </application>
 </manifest>
