@@ -17,16 +17,12 @@ package com.jbirdvegas.mgerrit.tasks;
  *  limitations under the License.
  */
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 
 import com.commonsware.cwac.loaderex.SQLiteCursorLoader;
-
 import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.database.ProjectsTable;
-import com.jbirdvegas.mgerrit.objects.GerritMessage;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 
 public class ProjectsListLoader extends SQLiteCursorLoader
@@ -36,17 +32,6 @@ public class ProjectsListLoader extends SQLiteCursorLoader
     String mRawQuery = null;
     String[] mArgs = null;
     GerritURL mUrl;
-
-    private final BroadcastReceiver finishedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Check if this message corresponds to the current URL
-            String url = intent.getStringExtra(GerritMessage.URL);
-            if (mUrl.equals(url)) {
-                ProjectsListLoader.this.notify();
-            }
-        }
-    };
 
     /* This will monitor for changes to the data, and report them through new calls to the
      *  onLoadFinished callback */
@@ -74,22 +59,6 @@ public class ProjectsListLoader extends SQLiteCursorLoader
 
     @Override
     protected Cursor buildCursor() {
-        Cursor c = query();
-        if (c.isAfterLast()) {
-            // Send request to service to start fetching projects
-            Intent it = new Intent(getContext(), GerritService.class);
-            mUrl.listProjects();
-            it.putExtra(GerritService.URL_KEY, mUrl.toString());
-            getContext().startService(it);
-
-            // Wait for service to finish (no data, we cannot really do anything)
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        else return c; // Ensure that the DB is not queried again unnecessarily
         return query();
     }
 }

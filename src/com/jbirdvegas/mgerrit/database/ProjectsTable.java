@@ -26,16 +26,12 @@ import android.util.Pair;
 import com.jbirdvegas.mgerrit.objects.Project;
 import com.jbirdvegas.mgerrit.tasks.ProjectsListLoader;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ProjectsTable
 {
     // Table name
-    public static final String TABLE = "Symbols";
+    public static final String TABLE = "Projects";
 
     // Columns
     public static final String C_ROOT = "base";
@@ -80,19 +76,22 @@ public class ProjectsTable
             projectValues.clear();
             Pair<String, String> proj = splitPath(project.getmPath());
             projectValues.put(C_ROOT, proj.first);
-            projectValues.put(C_ROOT, proj.second);
+            projectValues.put(C_SUBPROJECT, proj.second);
 
             // We are only inserting PK columns so we should use the IGNORE resolution algorithm.
             mDb.insertWithOnConflict(TABLE, null, projectValues, SQLiteDatabase.CONFLICT_IGNORE);
         }
 
+        mDb.setTransactionSuccessful();
         mDb.endTransaction();
         return true;
     }
 
     public ProjectsListLoader getProjects() {
 
-        String search = "SELECT " + C_ROOT + ", " + C_SUBPROJECT + " FROM " + TABLE
+        String search = "SELECT rowid as _id, " + C_ROOT + " FROM " + TABLE
+                + " WHERE " + C_ROOT + " <> ''"
+                + " GROUP BY " + C_ROOT
                 + " ORDER BY " + SORT_BY;
 
         return new ProjectsListLoader(mContext, this, search, null);
@@ -100,16 +99,17 @@ public class ProjectsTable
 
     // Return a cursor containing all of the root (base) projects
     public Cursor getRootProjects(String rootProject) {
-        String[] projection = new String[] { "_id", C_ROOT};
+        String[] projection = new String[] { "rowid as _id", C_ROOT};
         return mDb.query(TABLE, projection,
-                null, null, null, null, SORT_BY);
+                null, null, C_ROOT, null, SORT_BY);
     }
 
     // Return a cursor containing all of the subprojects under one root project
     public Cursor getSubprojects(String rootProject) {
-        String[] projection = new String[] { "_id", C_SUBPROJECT};
+        String[] projection = new String[] { "rowid as _id", C_SUBPROJECT};
         return mDb.query(TABLE, projection,
-                C_ROOT + " = ?", new String[] {rootProject},
+                C_ROOT + " = ? AND " + C_SUBPROJECT + " <> ''",
+                new String[] {rootProject},
                 null, null, SORT_BY);
     }
 
@@ -117,7 +117,8 @@ public class ProjectsTable
     private Pair<String, String> splitPath(String projectPath)
     {
         String p[] = projectPath.split("/", 2);
-        return new Pair<String, String>(p[0], p[1]);
+        if (p.length < 2) return new Pair<String, String>(p[0], "");
+        else return new Pair<String, String>(p[0], p[1]);
     }
 
     public DatabaseFactory getFactory() {

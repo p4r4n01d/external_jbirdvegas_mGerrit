@@ -81,7 +81,7 @@ class DBHelper extends SQLiteOpenHelper
         else name = parts[parts.length - 2];
 
         // Conservative naming scheme - allow only letters. digits and underscores.
-        return name.toLowerCase().replaceAll("[^a-z0-9_]+", "");
+        return name.toLowerCase().replaceAll("[^a-z0-9_]+", "") + ".db";
     }
 
     protected void shutdown()
