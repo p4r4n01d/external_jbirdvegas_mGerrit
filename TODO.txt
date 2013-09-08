@@ -3,7 +3,6 @@ mGerrit TODO List
 Outstanding
 ===========
 - Reset project if current project not listed in current Gerrit
-- New Projects view using ExpandableListView
 - Non-blocking JSON fetching operations
 	- Could include fetching JSON details in navigation bar (with ability to cancel using expandable notifications)
 - Smarter refresh - ideal: deprecate manual refresh and refresh automatically
@@ -39,17 +38,13 @@ Outstanding
 
 Database
 --------
-	- Change List table
-	- Change set (details) table
-	- Fetch all data from database and when new data, insert into database and query it
-		- Ensures the database is up to date with the data being displayed
-		- Would need to manage multiple loaders and adapters if binding JSON data directly as well as database cursors
+    - Change List table
+    - Change set (details) table
     - Change GerritTask so query operations can be performed by a loader with feedback provided directly through to the Activity by using a publish-subscribe model
     - Hide database query strings and internals in the respective database table class 
 
 Searching (Requires database), action bar
 -----------------------------
-	- Project list searching: Type in the name of a project and it shows the matching subprojects under their corresponding root. i.e filters out unmatching subprojects.
 	- General searching:
 		- mimic Gerrit web interface queries
 		- Support searching for a specific commit heading (default). e.g. searching for "commit:[translation]" will show a heading for Commits and list all the commits with "[translation]" in the title.

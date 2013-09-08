@@ -47,6 +47,8 @@ public class ProjectsTable
     DatabaseFactory mFactory;
     Context mContext;
 
+    public static final String SEPERATOR = "/";
+
     protected ProjectsTable(SQLiteDatabase db, DatabaseFactory factory, Context context) {
         this.mDb = db;
         this.mFactory = factory;
@@ -87,28 +89,37 @@ public class ProjectsTable
         return true;
     }
 
-    public ProjectsListLoader getProjects() {
+    public ProjectsListLoader getProjects(String baseproject, String subproject) {
 
-        String search = "SELECT rowid as _id, " + C_ROOT + " FROM " + TABLE
-                + " WHERE " + C_ROOT + " <> ''"
-                + " GROUP BY " + C_ROOT
-                + " ORDER BY " + SORT_BY;
+        StringBuilder where = new StringBuilder(0);
 
-        return new ProjectsListLoader(mContext, this, search, null);
-    }
+        where.append("SELECT rowid as _id, ").append(C_ROOT)
+                .append(" FROM ").append(TABLE)
+                .append(" WHERE ").append(C_ROOT).append(" <> ''");
 
-    // Return a cursor containing all of the root (base) projects
-    public Cursor getRootProjects(String rootProject) {
-        String[] projection = new String[] { "rowid as _id", C_ROOT};
-        return mDb.query(TABLE, projection,
-                null, null, C_ROOT, null, SORT_BY);
+        String s = appendLikeQueries(new String[] { C_ROOT, C_SUBPROJECT},
+                new String[] { baseproject, subproject});
+        if (!s.equals("()")) where.append(" AND ").append(s);
+
+        where.append(" GROUP BY ").append(C_ROOT)
+                .append(" ORDER BY ").append(SORT_BY);
+
+        return new ProjectsListLoader(mContext, this, where.toString(), null);
     }
 
     // Return a cursor containing all of the subprojects under one root project
-    public Cursor getSubprojects(String rootProject) {
+    public Cursor getSubprojects(String rootProject, String subproject) {
+
+        StringBuilder where = new StringBuilder(0);
+        where.append(C_ROOT).append(" = ? AND ").append(C_SUBPROJECT).append(" <> ''");
+
+        String s = appendLikeQueries(new String[] { C_SUBPROJECT},
+                new String[] { subproject});
+        if (!s.equals("()")) where.append(" AND ").append(s);
+
         String[] projection = new String[] { "rowid as _id", C_SUBPROJECT};
         return mDb.query(TABLE, projection,
-                C_ROOT + " = ? AND " + C_SUBPROJECT + " <> ''",
+                where.toString(),
                 new String[] {rootProject},
                 null, null, SORT_BY);
     }
@@ -116,9 +127,24 @@ public class ProjectsTable
     // Split a project's path (name) into its root and subproject
     private Pair<String, String> splitPath(String projectPath)
     {
-        String p[] = projectPath.split("/", 2);
+        String p[] = projectPath.split(SEPERATOR, 2);
         if (p.length < 2) return new Pair<String, String>(p[0], "");
         else return new Pair<String, String>(p[0], p[1]);
+    }
+
+    private String appendLikeQueries(String[] fields, String[] queries) {
+        boolean lastSucessful = false;
+        StringBuilder builder = new StringBuilder(0).append("(");
+
+        for (int i = 0; i < fields.length; i++) {
+            String query = queries[i];
+            if (query != null && query.length() > 0) {
+                if (lastSucessful) builder.append(" OR ");
+                builder.append(fields[i]).append(" LIKE '%").append(query).append("%'");
+                lastSucessful = true;
+            }
+        }
+        return builder.append(")").toString();
     }
 
     public DatabaseFactory getFactory() {

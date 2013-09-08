@@ -19,26 +19,32 @@ package com.jbirdvegas.mgerrit;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ExpandableListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.jbirdvegas.mgerrit.adapters.ProjectsListAdapter;
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.database.ProjectsTable;
 import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
-import com.jbirdvegas.mgerrit.message.ConnectionEstablished;
 import com.jbirdvegas.mgerrit.message.ErrorDuringConnection;
-import com.jbirdvegas.mgerrit.message.EstablishingConnection;
 import com.jbirdvegas.mgerrit.message.Finished;
-import com.jbirdvegas.mgerrit.message.HandshakeError;
-import com.jbirdvegas.mgerrit.message.InitializingDataTransfer;
-import com.jbirdvegas.mgerrit.message.ProgressUpdate;
+import com.jbirdvegas.mgerrit.message.StartingRequest;
+import com.jbirdvegas.mgerrit.objects.GerritURL;
+import com.jbirdvegas.mgerrit.tasks.GerritService;
 
 public class ProjectsList extends Activity
     implements LoaderManager.LoaderCallbacks<Cursor>
@@ -47,10 +53,15 @@ public class ProjectsList extends Activity
     ProjectsTable mProjectsTable;
     ProjectsListAdapter mListAdapter;
     private DefaultGerritReceivers receivers;
+    private String mBase, mSubproject;
+
+    private static final String SEPERATOR = ProjectsTable.SEPERATOR;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.projects_list);
 
         // Action bar Up affordance
@@ -63,13 +74,12 @@ public class ProjectsList extends Activity
                 android.R.layout.simple_expandable_list_item_1,
                 new String[] { ProjectsTable.C_ROOT }, // Name for group layouts
                 new int[] { android.R.id.text1 },
-                android.R.layout.simple_expandable_list_item_1,
+                R.layout.projects_subproject_row,
                 new String[] { ProjectsTable.C_SUBPROJECT }, // Name for child layouts
                 new int[] { android.R.id.text1 });
         mProjectsListView.setAdapter(mListAdapter);
 
-        mProjectsListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener()
-        {
+        mProjectsListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
                                         int childPosition, long id)
@@ -77,16 +87,62 @@ public class ProjectsList extends Activity
                 TextView tv = (TextView) v;
                 String subgroup = tv.getText().toString();
                 String root = mListAdapter.getGroupName(groupPosition);
-                String project = root + "/" + subgroup;
-                Prefs.setCurrentProject(ProjectsList.this, project);
-                ProjectsList.this.finish();
+                setProject(root, subgroup);
                 return true;
             }
         });
 
-        mProjectsTable = DatabaseFactory.getDatabase(this).getProjectsTable();
+        mProjectsListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
 
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                TextView tv = (TextView) v;
+                String group = tv.getText().toString();
+                if (mListAdapter.getChildrenCount(groupPosition) < 1) {
+                    setProject(group, "");
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        mProjectsTable = DatabaseFactory.getDatabase(this).getProjectsTable();
         getLoaderManager().initLoader(0, null, this);
+        receivers = new DefaultGerritReceivers(this);
+
+        // Todo: We don't always need to query the server here
+        startService();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            Pair<String, String> pair = splitQuery(query);
+
+            mBase = pair.first;
+            mSubproject = pair.second;
+
+            getLoaderManager().restartLoader(0, null, this);
+        }
+    }
+
+    // Source: http://developer.android.com/guide/topics/search/search-dialog.html
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the options menu from XML
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.projects_menu, menu);
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(true);
+
+        return true;
     }
 
     @Override
@@ -102,14 +158,9 @@ public class ProjectsList extends Activity
 
     // Register to receive messages.
     private void registerReceivers() {
-        receivers.registerReceivers(EstablishingConnection.TYPE,
-                ConnectionEstablished.TYPE,
-                InitializingDataTransfer.TYPE,
-                ProgressUpdate.TYPE,
+        receivers.registerReceivers(StartingRequest.TYPE,
                 Finished.TYPE,
-                HandshakeError.TYPE,
                 ErrorDuringConnection.TYPE);
-
     }
 
     @Override
@@ -124,19 +175,42 @@ public class ProjectsList extends Activity
         receivers.unregisterReceivers();
     }
 
+    private void setProject(String root, String subproject) {
+        String project;
+        if (subproject.equals("")) project = root;
+        else project = root + SEPERATOR + subproject;
+        Prefs.setCurrentProject(getApplicationContext(), project);
+        ProjectsList.this.finish();
+    }
+
+    private void startService() {
+
+        GerritURL url = new GerritURL();
+
+        // This is just a precaution in case it has not been set yet
+        GerritURL.setGerrit(Prefs.getCurrentGerrit(this));
+        url.listProjects();
+
+        Intent it = new Intent(this, GerritService.class);
+        it.putExtra(GerritService.URL_KEY, url.toString());
+        startService(it);
+    }
+
     /* We load the data on a seperate thread (AsyncTaskLoader) but what to do
-     *  on the main thread. Probably best to block (with a alert dialog) like
+     *  on the main thread? Probably best to block (with a alert dialog) like
      *  the old implementation did, then unblock once all the data has been
      *  downloaded and we can start binding data to views.
      */
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        return mProjectsTable.getProjects();
+        String base = null, subproject = null;
+        return mProjectsTable.getProjects(mBase, mSubproject);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mListAdapter.setSubprojectQuery(mSubproject);
         mListAdapter.changeCursor(cursor);
         // TODO: Find the current project in the list and scroll to it.
     }
@@ -144,5 +218,19 @@ public class ProjectsList extends Activity
     @Override
     public void onLoaderReset(Loader loader) {
         mListAdapter.changeCursor(null);
+    }
+
+    /**
+     * Split the query as if it was the name (or part) of a base project,
+     *  a sub project or base project/sub project. Note that providing the
+     *  seperator in the query will change the results that are provided.
+     * @param query The (partial) name of a base project, sub project or both.
+     * @return A pair comprised of a base project and sub project matching the query
+     *  to search for
+     */
+    private Pair<String, String> splitQuery(String query) {
+        String p[] = query.split(SEPERATOR, 2);
+        if (p.length < 2) return new Pair<String, String>(p[0], p[0]);
+        else return new Pair<String, String>(p[0], p[1]);
     }
 }
