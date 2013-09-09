@@ -27,6 +27,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
+import com.jbirdvegas.mgerrit.database.ProjectsTable;
 import com.jbirdvegas.mgerrit.message.ErrorDuringConnection;
 import com.jbirdvegas.mgerrit.message.EstablishingConnection;
 import com.jbirdvegas.mgerrit.message.Finished;
@@ -145,7 +146,7 @@ public class GerritService extends IntentService {
                 e.printStackTrace(); // TODO: Send ParseError Message
             }
             Collections.sort(projectList);
-            DatabaseFactory.getDatabase(mContext).getProjectsTable().insertProjects(projectList);
+            ProjectsTable.insertProjects(GerritService.this, projectList);
         }
     }
 }

@@ -22,44 +22,38 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.lang.reflect.Method;
+
 class DBHelper extends SQLiteOpenHelper
 {
     static final String TAG = "DbHelper";
     static final int DB_VERSION = 1;
-    private static DBHelper mInstance;
-    private static Context sContext;
     private static String sDbName;
-    private static DatabaseFactory sFactory;
 
     /**
      * Constructor should be private to prevent direct instantiation.
      * make call to static factory method "getInstance()" instead.
      */
-    private DBHelper(DatabaseFactory databaseFactory, Context context, String dbName) {
+    protected DBHelper(Context context, String dbName) {
         super(context, dbName, null, DB_VERSION);
-        sContext = context;
         sDbName = dbName;
-        sFactory = databaseFactory;
-    }
-
-    // This method prevents the existing static values from being overwritten when unnecessary
-    public static DBHelper getInstance(DatabaseFactory databaseFactory, Context ctx, String dbName) {
-        // Use the application context, which will ensure that you
-        // don't accidentally leak an Activity's context.
-        // See this article for more information: http://bit.ly/6LRzfx
-        if (mInstance == null) {
-            mInstance = new DBHelper(databaseFactory, ctx, dbName);
-        } else if (sDbName.equals(dbName)) {
-            //this.close();
-            mInstance = new DBHelper(databaseFactory, ctx, dbName);
-        }
-        return mInstance;
     }
 
     // Called only once, first time the DB is created. Create all the tables here
     @Override
     public void onCreate(SQLiteDatabase db) {
-        new ProjectsTable(db, sFactory, sContext).create();
+        for (Class<? extends DatabaseTable> table : DatabaseTable.tables)
+        {
+            try {
+                Method getTableInst = table.getDeclaredMethod("getInstance");
+                DatabaseTable tableInst = (DatabaseTable) getTableInst.invoke(null);
+
+                Method createTable = table.getDeclaredMethod("create", String.class, SQLiteDatabase.class);
+                createTable.invoke(tableInst, TAG, db);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to create table for " + table.getSimpleName(), e);
+            }
+        }
     }
 
     // Called whenever newVersion > oldVersion. Can do some version number checking
@@ -87,9 +81,6 @@ class DBHelper extends SQLiteOpenHelper
     protected void shutdown()
     {
         this.close();
-        mInstance = null;
-        sContext = null;
         sDbName = null;
-        sFactory = null;
     }
 }

@@ -58,7 +58,7 @@ public class ProjectsListAdapter extends SimpleCursorTreeAdapter
 
         // TODO: The column index will always be constant here
         String root = groupCursor.getString(groupCursor.getColumnIndex(ProjectsTable.C_ROOT));
-        return DatabaseFactory.getDatabase(mContext).getProjectsTable().getSubprojects(root, mSubproject);
+        return ProjectsTable.getSubprojects(mContext, root, mSubproject);
     }
 
     @Override

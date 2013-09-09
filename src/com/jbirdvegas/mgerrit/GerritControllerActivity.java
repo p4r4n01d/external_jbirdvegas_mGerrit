@@ -50,6 +50,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.helpers.GerritTeamsHelper;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
@@ -136,7 +137,7 @@ public class GerritControllerActivity extends FragmentActivity {
         mGerritWebsite = Prefs.getCurrentGerrit(this);
         mGerritTasks = new HashSet<GerritTask>();
 
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         mListener = new SharedPreferences.OnSharedPreferenceChangeListener()
         {
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
@@ -255,7 +256,6 @@ public class GerritControllerActivity extends FragmentActivity {
                 return true;
             case R.id.menu_projects:
                 intent = new Intent(this, ProjectsList.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
                 return true;
@@ -374,7 +374,8 @@ public class GerritControllerActivity extends FragmentActivity {
                         .toString(),
                 Toast.LENGTH_LONG).show();
         GerritURL.setGerrit(newGerrit);
-        // Call changeGerrit from DatabaseFactory here
+
+        DatabaseFactory.changeGerrit(this, newGerrit);
         refreshTabs();
     }
 

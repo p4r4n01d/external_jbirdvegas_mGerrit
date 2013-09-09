@@ -106,7 +106,6 @@ public class ProjectsList extends Activity
             }
         });
 
-        mProjectsTable = DatabaseFactory.getDatabase(this).getProjectsTable();
         getLoaderManager().initLoader(0, null, this);
         receivers = new DefaultGerritReceivers(this);
 
@@ -203,9 +202,8 @@ public class ProjectsList extends Activity
      */
 
     @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        String base = null, subproject = null;
-        return mProjectsTable.getProjects(mBase, mSubproject);
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return ProjectsTable.getProjects(this, mBase, mSubproject);
     }
 
     @Override
@@ -216,7 +214,7 @@ public class ProjectsList extends Activity
     }
 
     @Override
-    public void onLoaderReset(Loader loader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
         mListAdapter.changeCursor(null);
     }
 

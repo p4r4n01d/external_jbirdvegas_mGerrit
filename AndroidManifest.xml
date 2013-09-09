@@ -56,5 +56,10 @@
                       android:resource="@xml/searchable"/>
         </activity>
         <service android:name=".tasks.GerritService" />
+        <provider
+            android:name=".database.DatabaseFactory"
+            android:authorities="com.jbirdvegas.provider.mgerrit"
+            android:exported="false">
+        </provider>
     </application>
 </manifest>
