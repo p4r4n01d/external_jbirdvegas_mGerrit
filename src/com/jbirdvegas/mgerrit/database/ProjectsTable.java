@@ -32,8 +32,7 @@ import com.jbirdvegas.mgerrit.objects.Project;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectsTable extends DatabaseTable
-{
+public class ProjectsTable extends DatabaseTable {
     // Table name
     public static final String TABLE = "Projects";
 
@@ -71,11 +70,10 @@ public class ProjectsTable extends DatabaseTable
                 + C_ROOT + " text NOT NULL, "
                 + C_SUBPROJECT + " text NOT NULL, "
                 + C_DESCRIPTION + " text, " // This will probably be null
-                + " PRIMARY KEY (" + C_ROOT + ", " + C_SUBPROJECT + "))");
+                + "PRIMARY KEY (" + C_ROOT + ", " + C_SUBPROJECT + "))");
     }
 
-    public static void addURIMatches(UriMatcher _urim)
-    {
+    public static void addURIMatches(UriMatcher _urim) {
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE, ITEM_LIST);
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE + "/#", ITEM_ID);
     }
@@ -144,8 +142,7 @@ public class ProjectsTable extends DatabaseTable
     }
 
     // Split a project's path (name) into its root and subproject
-    private static Pair<String, String> splitPath(String projectPath)
-    {
+    private static Pair<String, String> splitPath(String projectPath) {
         String p[] = projectPath.split(SEPERATOR, 2);
         if (p.length < 2) return new Pair<String, String>(p[0], "");
         else return new Pair<String, String>(p[0], p[1]);

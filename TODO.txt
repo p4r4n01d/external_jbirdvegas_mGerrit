@@ -35,6 +35,12 @@ Outstanding
 - Layout optimisations using Android Hierarchy Viewer (debug version)
 - Lint optimisations:
     - Use --html switch: Very pretty output.
+- Check in DefaultGerritReceivers whether the broadcast response matches the query
+	- When initializing the DefaultGerritReceivers specify the query being performed (GerritURL)
+	- Check query before incrementing/decrementing the number of running queries
+- Check BroadcastReceivers across activities
+	- E.g. If a broadcast response is broadcast delivered while the ProjectsList activity is open for a change query, the broadcast should be
+		(re-)delivered to the activity that was listening to broadcasts matching the actual query
 
 Database
 --------

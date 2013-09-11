@@ -29,72 +29,70 @@ import android.util.Log;
  */
 public class DBParams {
 
-	private DBParams() { } // Empty private constructor
+    private DBParams() { } // Empty private constructor
 
-	public static final String TAG_LIMIT = "limit";
-	public static final String TAG_CONFLICT = "conflict";
+    public static final String TAG_LIMIT = "limit";
+    public static final String TAG_CONFLICT = "conflict";
     public static final String TAG_GROUP_BY = "group_by";
 
-	public static Uri appendLimitParameter(Uri uri, int numRows) {
-		return uri.buildUpon().appendQueryParameter(TAG_LIMIT, Integer.toString(numRows)).build();
-	}
+    public static Uri appendLimitParameter(Uri uri, int numRows) {
+        return uri.buildUpon().appendQueryParameter(TAG_LIMIT, Integer.toString(numRows)).build();
+    }
 
-	/** Convenience method that is short-hand for appending a limit parameter of 1 **/ 
-	public static Uri fetchOneRow(Uri uri) {
-		return appendLimitParameter(uri, 1);
-	}
+    /** Convenience method that is short-hand for appending a limit parameter of 1 **/
+    public static Uri fetchOneRow(Uri uri) {
+        return appendLimitParameter(uri, 1);
+    }
 
-	public static Uri insertWithReplace(Uri uri) {
-		return uri.buildUpon().appendQueryParameter(TAG_CONFLICT, "REPLACE").build();
-	}
+    public static Uri insertWithReplace(Uri uri) {
+        return uri.buildUpon().appendQueryParameter(TAG_CONFLICT, "REPLACE").build();
+    }
 
-	public static Uri insertWithIgnore(Uri uri) {
-		return uri.buildUpon().appendQueryParameter(TAG_CONFLICT, "IGNORE").build();
-	}
+    public static Uri insertWithIgnore(Uri uri) {
+        return uri.buildUpon().appendQueryParameter(TAG_CONFLICT, "IGNORE").build();
+    }
 
-	public static Uri insertOrUpdate(Uri uri) {
-		return uri.buildUpon().appendQueryParameter("duplicate", "UPDATE")
-				.appendQueryParameter(TAG_CONFLICT, "IGNORE")
-				.build();
-	}
+    public static Uri insertOrUpdate(Uri uri) {
+        return uri.buildUpon().appendQueryParameter("duplicate", "UPDATE")
+                .appendQueryParameter(TAG_CONFLICT, "IGNORE")
+                .build();
+    }
 
-	private static Integer getConflictParameter(Uri uri) {
-		String conflictAlgorithm = uri.getQueryParameter(TAG_CONFLICT);
-		if (conflictAlgorithm == null)
-			return null;
-		else if (conflictAlgorithm.equals("REPLACE"))
-			return SQLiteDatabase.CONFLICT_REPLACE;
-		else if (conflictAlgorithm.equals("IGNORE"))
-			return SQLiteDatabase.CONFLICT_IGNORE;
-		else 
-		{
-			Log.w(DBParams.class.getSimpleName(),
-					"The conflict algorithm '" + conflictAlgorithm + "' is not supported");
-			return null;
-		}
-	}
+    private static Integer getConflictParameter(Uri uri) {
+        String conflictAlgorithm = uri.getQueryParameter(TAG_CONFLICT);
+        if (conflictAlgorithm == null) return null;
+        else if (conflictAlgorithm.equals("REPLACE")) {
+            return SQLiteDatabase.CONFLICT_REPLACE;
+        } else if (conflictAlgorithm.equals("IGNORE")) {
+            return SQLiteDatabase.CONFLICT_IGNORE;
+        } else {
+            Log.w(DBParams.class.getSimpleName(),
+                    "The conflict algorithm '" + conflictAlgorithm + "' is not supported");
+            return null;
+        }
+    }
 
-	private static Integer getLimitParameter(Uri uri) {
-		String limit = uri.getQueryParameter(TAG_LIMIT);
-		if (limit == null || limit.isEmpty()) return null;
-		return Integer.valueOf(limit);
-	}
+    private static Integer getLimitParameter(Uri uri) {
+        String limit = uri.getQueryParameter(TAG_LIMIT);
+        if (limit == null || limit.isEmpty()) return null;
+        return Integer.valueOf(limit);
+    }
 
-	public static Map<String, Integer> getParameters(Uri uri) {
-		Map<String, Integer> params = new HashMap<String, Integer>();
-		Integer conflict = getConflictParameter(uri);
-		if (conflict != null) params.put(TAG_CONFLICT, conflict);
+    public static Map<String, Integer> getParameters(Uri uri) {
+        Map<String, Integer> params = new HashMap<String, Integer>();
+        Integer conflict = getConflictParameter(uri);
+        if (conflict != null) params.put(TAG_CONFLICT, conflict);
 
-		Integer limit = getLimitParameter(uri);
-		if (limit != null) params.put(TAG_LIMIT, limit);
+        Integer limit = getLimitParameter(uri);
+        if (limit != null) params.put(TAG_LIMIT, limit);
 
-		return params;
-	}
+        return params;
+    }
 
-	public static boolean updateOnDuplicateInsertion(Uri uri) {
-		String dup = uri.getQueryParameter("duplicate");
-		return dup != null && dup.equals("UPDATE");
-	}
+    public static boolean updateOnDuplicateInsertion(Uri uri) {
+        String dup = uri.getQueryParameter("duplicate");
+        return dup != null && dup.equals("UPDATE");
+    }
 
     public static Uri groupBy(Uri uri, String condition) {
         return uri.buildUpon().appendQueryParameter(TAG_GROUP_BY, condition).build();

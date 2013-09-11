@@ -26,9 +26,6 @@ import com.jbirdvegas.mgerrit.objects.GerritMessage;
 import java.util.Iterator;
 import java.util.Map;
 
-/**
-* Created by Evan on 30/08/13.
-*/
 public class StartingRequest extends GerritMessage {
 
     /* Note: Must have the type declared static and public so receivers can subscribe
