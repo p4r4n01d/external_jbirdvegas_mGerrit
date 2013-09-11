@@ -41,10 +41,7 @@ public abstract class DatabaseTable {
     // Add an element for the List and ID MIME types for each table
     enum UriType {
         ProjectsList, ProjectsID,
-        UsersList, UsersID,
-        ChangesList, ChangesID,
-        FileInfoList, FileInfoID,
-        MessageInfoList, MessageInfoID
+        SyncTimeList, SyncTimeID
     };
 
     // Add each DatabaseTable class here
@@ -52,11 +49,11 @@ public abstract class DatabaseTable {
     static {
         tables = new ArrayList<Class<? extends DatabaseTable>>();
         tables.add(ProjectsTable.class);
-        //tables.add(Users.class);
-        //tables.add(Changes.class);
-        //tables.add(FileInfo.class);
-        //tables.add(MessageInfo.class);
+        tables.add(SyncTime.class);
     };
+
+    // Each subclass MUST declare the following constant in order to facilitate table creation:
+    // public static final String TABLE;
 
     /* Gathers information from the DatabaseTable classes
      *  to help implement the ContentProvider's getType method, which handles requests for the
