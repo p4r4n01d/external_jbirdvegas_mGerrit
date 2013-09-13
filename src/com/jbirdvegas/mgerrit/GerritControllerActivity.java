@@ -154,7 +154,7 @@ public class GerritControllerActivity extends FragmentActivity {
         };
         // Don't register listener here. It is registered in onResume instead.
 
-        /* Initially set the current Gerrit globals here.
+        /* Initially set the current Gerrit globally here.
          *  We can rely on callbacks to know when they change */
         GerritURL.setGerrit(Prefs.getCurrentGerrit(this));
         GerritURL.setProject(Prefs.getCurrentProject(this));
@@ -444,8 +444,8 @@ public class GerritControllerActivity extends FragmentActivity {
 
 
     /**
-     * A {@link android.support.v4.app.FragmentStatePagerAdapter} that returns a fragment
-     * corresponding to one of the sections/tabs/pages.
+     * A {@link android.support.v4.app.FragmentStatePagerAdapter} that returns a
+     * fragment corresponding to one of the sections/tabs/pages.
      */
     class SectionsPagerAdapter extends FragmentStatePagerAdapter
     {
@@ -464,7 +464,6 @@ public class GerritControllerActivity extends FragmentActivity {
          * IMPORTANT: Do not use this to monitor the currently selected page as it is used
          *  to load neighbouring tabs that may not be selected. */
         public Fragment getItem(int position) {
-
             CardsFragment fragment;
 
             switch (position)
