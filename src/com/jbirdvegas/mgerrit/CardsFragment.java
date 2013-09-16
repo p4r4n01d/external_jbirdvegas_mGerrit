@@ -18,8 +18,12 @@ package com.jbirdvegas.mgerrit;
  */
 
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +37,12 @@ import com.fima.cardsui.views.CardUI;
 import com.jbirdvegas.mgerrit.cards.CommitCard;
 import com.jbirdvegas.mgerrit.cards.ImageCard;
 import com.jbirdvegas.mgerrit.cards.ProjectCard;
+import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.objects.ChangeLogRange;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
+import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,7 +54,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class CardsFragment extends Fragment {
+public abstract class CardsFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String KEY_STORED_CARDS = "storedCards";
     public static final String KEY_DEVELOPER = "committer_object";
     public static final String AT_SYMBOL = "@";
@@ -102,11 +109,11 @@ public abstract class CardsFragment extends Fragment {
         // Check if the fragment is attached to an activity
         if (this.isAdded())
         {
-            Toast.makeText(mParent,
+            /*Toast.makeText(mParent,
                     String.format(getString(R.string.found_cards_toast,
                             count,
                             (System.currentTimeMillis() - mTimerStart) / 1000)),
-                    Toast.LENGTH_LONG).show();
+                    Toast.LENGTH_LONG).show();*/
         }
         cardUI.refresh();
     }
@@ -138,6 +145,48 @@ public abstract class CardsFragment extends Fragment {
                     .append('\n')
                     .append(result).toString(), e);
         }
+        return commitCardList;
+    }
+
+    protected List<CommitCard> generateCardsList(Cursor changes) {
+        List<CommitCard> commitCardList = new LinkedList<CommitCard>();
+
+        /*
+         * TODO: Put this into JSONCommit:
+         *     - takes a map (Cursor column name -> annotated field name
+         *     - uses reflection to map the columns provided in the cursor to JSONCommit values
+         */
+
+        int changeid_index = changes.getColumnIndex(UserChanges.C_CHANGE_ID);
+        int subject_index = changes.getColumnIndex(UserChanges.C_SUBJECT);
+        int project_index = changes.getColumnIndex(UserChanges.C_PROJECT);
+        int updated_index = changes.getColumnIndex(UserChanges.C_UPDATED);
+        int status_index = changes.getColumnIndex(UserChanges.C_STATUS);
+
+        // Committer object
+        int username_index = changes.getColumnIndex(UserChanges.C_NAME);
+        int useremail_index = changes.getColumnIndex(UserChanges.C_EMAIL);
+        // TODO: This column is not present in the Users table yet
+        int userid_index = changes.getColumnIndex(UserChanges.C_USER_ID);
+
+        while (changes.moveToNext()) {
+            CommitterObject committer = new CommitterObject(changes.getString(username_index),
+                    changes.getString(useremail_index),
+                    changes.getInt(userid_index));
+
+            JSONCommit commit = new JSONCommit(mParent, changes.getString(changeid_index),
+                    changes.getString(project_index),
+                    changes.getString(subject_index),
+                    committer,
+                    changes.getString(updated_index),
+                    changes.getString(status_index));
+
+            CommitCard card = new CommitCard(commit, mParent.getCommitterObject(),
+                    mRequestQueue, this);
+
+            commitCardList.add(card);
+        }
+        // Don't close the cursor, the loader manager does that
         return commitCardList;
     }
 
@@ -201,6 +250,8 @@ public abstract class CardsFragment extends Fragment {
         // default to non author specific view
 
         mUrl = new GerritURL();
+
+        // Need the account id of the owner here to maintain FK db constraint
         mUrl.setRequestDetailedAccounts(true);
         mUrl.setStatus(getQuery());
 
@@ -243,7 +294,8 @@ public abstract class CardsFragment extends Fragment {
             if (DEBUG) Log.w(TAG, "Not making changelog");
         }
 
-        loadScreen();
+        sendRequest();
+        getLoaderManager().initLoader(0, null, this);
     }
 
     private void loadChangeLog(final ChangeLogRange logRange) {
@@ -316,30 +368,19 @@ public abstract class CardsFragment extends Fragment {
         return new ProjectCard(mParent, Prefs.getCurrentProject(mParent));
     }
 
-    private void loadScreen() {
-        mTimerStart = System.currentTimeMillis();
-        String url = mUrl.toString();
-        Log.d(TAG, "Calling mgerrit: " + url);
-        if (getStoredCards().equals(""))
-        {
-            new GerritTask(mParent) {
-                @Override
-                public void onJSONResult(String s) {
-                    saveCards(s);
-                    drawCardsFromList(generateCardsList(s), mCards);
-                }
-            }.execute(url);
-        }
-        else
-            drawCardsFromList(generateCardsList(getStoredCards()), mCards);
-    }
-
     /**
      * Each tab provides its own query for ?p=status:[open:merged:abandoned]
      *
      * @return current tab name used for query { open, merged, abandoned }
      */
     abstract String getQuery();
+
+    private void sendRequest() {
+        Intent it = new Intent(mParent, GerritService.class);
+        it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
+        it.putExtra(GerritService.URL_KEY, mUrl.toString());
+        mParent.startService(it);
+    }
 
     private void saveCards(String jsonCards) {
         /**
@@ -373,8 +414,30 @@ public abstract class CardsFragment extends Fragment {
 
         if (inProject) mCards.addCard(getProjectCard());
         mIsDirty = false;
-        loadScreen();
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     public void markDirty() { mIsDirty = true; }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String project = Prefs.getCurrentProject(mParent);
+        if ("".equals(project)) project = null;
+
+        CommitterObject user = mParent.getCommitterObject();
+
+        return UserChanges.listCommits(mParent, getQuery(), user, project);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // Naive implementation
+        mCards.clearCards();
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        drawCardsFromList(generateCardsList(cursor), mCards);
+
+    }
 }

@@ -65,8 +65,6 @@
     <string name="owner_gravatar">Owner\'s Gravatar profile image</string>
     <string name="author_gravatar">Author\'s Gravatar profile image</string>
     <string name="committer_gravatar">Committer\'s Gravatar profile image</string>
-    <string name="koush_url_imageview_helper_title">Koushik Dutta\'s UrlImageViewHelper</string>
-    <string name="koush_url_imageview_helper_website" translatable="false">https://github.com/koush/UrlImageViewHelper</string>
     <string name="menu_refresh">Refresh</string>
     <string name="current_revision_is_draft_message">Current revision is a draft.
         Some information will be unavailable
