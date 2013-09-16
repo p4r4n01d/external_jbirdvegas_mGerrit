@@ -220,7 +220,6 @@ public class ProjectsList extends Activity
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mListAdapter.setSubprojectQuery(mQuery);
         mListAdapter.changeCursor(cursor);
-        // TODO: Find the current project in the list and scroll to it.
     }
 
     @Override
@@ -246,13 +245,19 @@ public class ProjectsList extends Activity
     public boolean onQueryTextChange(String query) {
         mQuery = query;
         getLoaderManager().restartLoader(0, null, this);
+        int sizeOfGroups = mListAdapter.getGroupCount();
+        for (int i = 0; sizeOfGroups > i; i++) {
+            mProjectsListView.expandGroup(i);
+        }
         return true; // Don't have support for suggestions yet.
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-		/* Although the submit request is handled when the query changes,
-		 *  return false here to hide the soft keyboard.  */
+        /*
+         Although the submit request is handled when the query changes,
+         *  return false here to hide the soft keyboard.
+         */
         return false;
     }
 }
