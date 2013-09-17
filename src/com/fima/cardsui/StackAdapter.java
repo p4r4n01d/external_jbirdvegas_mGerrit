@@ -1,10 +1,12 @@
 package com.fima.cardsui;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import com.fima.cardsui.objects.AbstractCard;
+import com.fima.cardsui.objects.Card;
 import com.fima.cardsui.objects.CardStack;
 
 import java.util.ArrayList;
@@ -46,19 +48,19 @@ public class StackAdapter extends BaseAdapter {
 
         // TODO: caching is not working well
 
-        // if (convertView != null) {
-        // CardStack tagStack = (CardStack) convertView.getTag();
-        // ArrayList<Card> tagCards = tagStack.getCards();
-        // ArrayList<Card> cards = stack.getCards();
-        // Card lastTagCard = tagCards.get(tagCards.size()-1);
-        // if (!lastTagCard.equals(cards.get(cards.size()-1))) {
-        // convertView = stack.getView(mContext);
-        // convertView.setTag(stack);
-        // }
-        // } else if (convertView == null) {
-        convertView = stack.getView(mContext, mSwipeable);
-        // convertView.setTag(stack);
-        // }
+        if (convertView != null) {
+            CardStack tagStack = (CardStack) convertView.getTag();
+            ArrayList<Card> tagCards = tagStack.getCards();
+            ArrayList<Card> cards = stack.getCards();
+            Card lastTagCard = tagCards.get(tagCards.size()-1);
+            if (!lastTagCard.equals(cards.get(cards.size()-1))) {
+                convertView = stack.getView(mContext);
+                convertView.setTag(stack);
+            }
+        } else {
+            convertView = stack.getView(mContext, mSwipeable);
+            convertView.setTag(stack);
+        }
 
         return convertView;
     }
