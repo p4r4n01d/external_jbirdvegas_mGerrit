@@ -254,8 +254,6 @@ public abstract class CardsFragment extends Fragment
         // Need the account id of the owner here to maintain FK db constraint
         mUrl.setRequestDetailedAccounts(true);
         mUrl.setStatus(getQuery());
-
-        if (savedInstanceState == null) saveCards("");
     }
 
     private void setup()
@@ -304,7 +302,6 @@ public abstract class CardsFragment extends Fragment
             @Override
             public void onJSONResult(String s)
             {
-                saveCards(s);
                 drawCardsFromList(
                         generateChangeLog(
                                 logRange, s),
@@ -380,31 +377,6 @@ public abstract class CardsFragment extends Fragment
         it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
         it.putExtra(GerritService.URL_KEY, mUrl.toString());
         mParent.startService(it);
-    }
-
-    private void saveCards(String jsonCards) {
-        /**
-         * This method needs some work as this saves the results for the current tab.
-         *  When either a new query is made (changing projects, (un)stalking a user, changing
-         *  Gerrit, switching tabs) these results can either expire or should not be used.
-         *
-         *  What needs to happen if caching is to be done like this is that the result of EVERY
-         *   different query performed needs to be saved and restored only if the current query matches
-         *   EXACTLY. Since there will likely be changes to the results, this option is not a
-         *   viable solution.
-         *
-         *   In the meantime, disable caching completely.
-         */
-        /*PreferenceManager.getDefaultSharedPreferences(mParent)
-                .edit()
-                .putString(KEY_STORED_CARDS, jsonCards)
-                .commit();*/
-    }
-
-    private String getStoredCards() {
-        return "";
-        /* return PreferenceManager.getDefaultSharedPreferences(mParent)
-                .getString(KEY_STORED_CARDS, ""); */
     }
 
     protected void refresh()

@@ -585,6 +585,10 @@ public class JSONCommit implements Parcelable {
         return mPatchSetNumber;
     }
 
+    public String getTopic() {
+        return mTopic;
+    }
+
     public void setStatus(String status) {
         mStatus = Status.valueOf(status);
     }
@@ -674,6 +678,7 @@ public class JSONCommit implements Parcelable {
         sb.append(", mCodeReviewers=").append(mCodeReviewers);
         sb.append(", mPatchSetNumber=").append(mPatchSetNumber);
         sb.append(", mMessagesList=").append(mMessagesList);
+        sb.append(", Topic='").append(mTopic).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -129,7 +129,7 @@ public class UserChanges extends DatabaseTable {
                                            String project) {
 
         String[] projection = new String[] { C_CHANGE_ID, C_SUBJECT, C_PROJECT, C_UPDATED,
-                C_STATUS, C_USER_ID, C_EMAIL, C_NAME };
+                C_STATUS, C_TOPIC, C_USER_ID, C_EMAIL, C_NAME };
         StringBuilder where = new StringBuilder().append(C_STATUS).append(" = ?").append(" AND ")
                 .append(Changes.TABLE).append(".").append(C_OWNER)
                 .append(" = ").append(Users.TABLE).append(".").append(C_USER_ID);
@@ -181,7 +181,7 @@ public class UserChanges extends DatabaseTable {
             row.put(C_OWNER, commit.getOwnerObject().getAccountId());
             row.put(C_PROJECT, commit.getProject());
             row.put(C_STATUS, commit.getStatus().toString());
-            //row.put(C_TOPIC, commit.getTopic());
+            row.put(C_TOPIC, commit.getTopic());
             values.add(row);
 
             committers.add(commit.getOwnerObject());

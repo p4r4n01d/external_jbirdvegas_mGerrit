@@ -157,6 +157,8 @@ public class ProjectsTable extends DatabaseTable {
     public static boolean anyProjects(Context context) {
         Cursor cursor = context.getContentResolver().query(CONTENT_URI, new String[] { "count(*)" },
                 null, null, null);
+        if (cursor == null) return false;
+        cursor.moveToFirst(); // IMPORTANT
         boolean areProjects = (cursor.getInt(0) > 0);
         cursor.close();
         return areProjects;
