@@ -11,9 +11,9 @@ public abstract class AbstractCard {
 
     protected Boolean hasOverflow, isClickable;
 
-    public abstract View getView(Context context);
+    public abstract View getView(Context context, View convertView);
 
-    public abstract View getView(Context context, boolean swipable);
+    public abstract View getView(Context context, View convertView, boolean swipable);
 
     public String getTitle() {
         return title;

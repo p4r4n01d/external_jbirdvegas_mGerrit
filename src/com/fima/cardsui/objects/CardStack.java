@@ -33,11 +33,9 @@ public class CardStack extends AbstractCard {
     private StackAdapter mAdapter;
     private int mPosition;
     private Context mContext;
-    private CardStack mStack;
 
     public CardStack() {
         cards = new ArrayList<Card>();
-        mStack = this;
     }
 
     public ArrayList<Card> getCards() {
@@ -46,46 +44,42 @@ public class CardStack extends AbstractCard {
 
     public void add(Card newCard) {
         cards.add(newCard);
-
     }
 
     @Override
-    public View getView(Context context) {
-        return getView(context, false);
+    public View getView(Context context, View convertView) {
+        return getView(context, convertView, false);
     }
 
     @Override
-    public View getView(Context context, boolean swipable) {
+    public View getView(Context context, View convertView, boolean swipable) {
 
         mContext = context;
 
-        final View view = LayoutInflater.from(context).inflate(
+        convertView = LayoutInflater.from(context).inflate(
                 R.layout.item_stack, null);
 
-        final RelativeLayout container = (RelativeLayout) view
+        final RelativeLayout container = (RelativeLayout) convertView
                 .findViewById(R.id.stackContainer);
-        final TextView title = (TextView) view.findViewById(R.id.stackTitle);
 
-        if (!TextUtils.isEmpty(this.title)) {
-            title.setTextColor(Color.parseColor(stackTitleColor));
-            title.setText(this.title);
-            title.setVisibility(View.VISIBLE);
-        }
+        setTitle(convertView);
 
         final int cardsArraySize = cards.size();
         final int lastCardPosition = cardsArraySize - 1;
+
+        Animation anim = AnimationUtils.loadAnimation(context, R.anim.cards_incoming_anim);
+        boolean animationsEnabled = Prefs.getAnimationPreference(context);
 
         Card card;
         View cardView;
         for (int i = 0; i < cardsArraySize; i++) {
             card = cards.get(i);
-            cardView = null;
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.WRAP_CONTENT);
 
             int topPx = 0;
-            Animation anim = AnimationUtils.loadAnimation(context, R.anim.cards_incoming_anim);
+
             if (lastCardPosition == i) {
                 // last card
                 cardView = card.getViewLast(context);
@@ -97,14 +91,14 @@ public class CardStack extends AbstractCard {
 
                 } else {
                     // any other card
-                    cardView = card.getView(context);
+                    cardView = card.getView(context, null);
 
                 }
                 cardView.setOnClickListener(getClickListener(this, container, i));
             }
 
             // if user wants animations
-            if (Prefs.getAnimationPreference(context)) {
+            if (animationsEnabled) {
                 // add Google Now style animation
                 cardView.startAnimation(anim);
             }
@@ -129,7 +123,7 @@ public class CardStack extends AbstractCard {
                         c.OnSwipeCard();
                         cards.remove(c);
 
-                        mAdapter.setItems(mStack, getPosition());
+                        mAdapter.setItems(CardStack.this, getPosition());
 
                         // refresh();
                         mAdapter.notifyDataSetChanged();
@@ -141,7 +135,17 @@ public class CardStack extends AbstractCard {
             container.addView(cardView);
         }
 
-        return view;
+        return convertView;
+    }
+
+    private void setTitle(View view) {
+        final TextView title = (TextView) view.findViewById(R.id.stackTitle);
+
+        if (!TextUtils.isEmpty(this.title)) {
+            title.setTextColor(Color.parseColor(stackTitleColor));
+            title.setText(this.title);
+            title.setVisibility(View.VISIBLE);
+        }
     }
 
     public Card remove(int index) {

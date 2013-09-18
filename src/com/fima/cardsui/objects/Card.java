@@ -67,7 +67,7 @@ public abstract class Card extends AbstractCard {
     }
 
     @Override
-    public View getView(Context context, boolean swipable) {
+    public View getView(Context context, View convertView, boolean swipable) {
         View view = LayoutInflater.from(context).inflate(getCardLayout(), null);
         mCardLayout = view;
         try {
@@ -77,31 +77,20 @@ public abstract class Card extends AbstractCard {
             e.printStackTrace();
         }
 
-        // ((TextView) view.findViewById(R.id.title)).setText(this.title);
-
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        int bottom = Utils.convertDpToPixelInt(context, 12);
-        lp.setMargins(0, 0, 0, bottom);
-
-        view.setLayoutParams(lp);
-
+        setLayoutParams(context, view);
         return view;
     }
 
     @Override
-    public View getView(Context context) {
-        return getView(context, false);
+    public View getView(Context context, View convertView) {
+        return getView(context, convertView, false);
     }
 
     public View getViewLast(Context context) {
 
         View view = LayoutInflater.from(context).inflate(getLastCardLayout(),
                 null);
-
         mCardLayout = view;
-
         try {
             ((FrameLayout) view.findViewById(R.id.cardContent))
                     .addView(getCardContent(context));
@@ -109,16 +98,7 @@ public abstract class Card extends AbstractCard {
             e.printStackTrace();
         }
 
-        // ((TextView) view.findViewById(R.id.title)).setText(this.title);
-
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        int bottom = Utils.convertDpToPixelInt(context, 12);
-        lp.setMargins(0, 0, 0, bottom);
-
-        view.setLayoutParams(lp);
-
+        setLayoutParams(context, view);
         return view;
     }
 
@@ -126,9 +106,7 @@ public abstract class Card extends AbstractCard {
 
         View view = LayoutInflater.from(context).inflate(getFirstCardLayout(),
                 null);
-
         mCardLayout = view;
-
         try {
             ((FrameLayout) view.findViewById(R.id.cardContent))
                     .addView(getCardContent(context));
@@ -136,8 +114,11 @@ public abstract class Card extends AbstractCard {
             e.printStackTrace();
         }
 
-        // ((TextView) view.findViewById(R.id.title)).setText(this.title);
+        setLayoutParams(context, view);
+        return view;
+    }
 
+    private void setLayoutParams(Context context, View view) {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -145,8 +126,6 @@ public abstract class Card extends AbstractCard {
         lp.setMargins(0, 0, 0, bottom);
 
         view.setLayoutParams(lp);
-
-        return view;
     }
 
     public abstract View getCardContent(Context context);

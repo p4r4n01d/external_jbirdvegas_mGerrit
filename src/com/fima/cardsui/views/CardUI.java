@@ -317,7 +317,7 @@ public class CardUI extends FrameLayout {
             mAdapter.setSwipeable(mSwipeable); // in case swipeable changed;
             mAdapter.setItems(mStacks);
         }
-        ((FrameLayout) this.findViewById(R.id.layoutCardsView)).invalidate();
+        this.findViewById(R.id.layoutCardsView).invalidate();
     }
 
     public void clearCards() {

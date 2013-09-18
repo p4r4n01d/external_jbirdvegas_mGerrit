@@ -48,7 +48,9 @@ public class StackAdapter extends BaseAdapter {
 
         // TODO: caching is not working well
 
-        if (convertView != null) {
+        convertView = stack.getView(mContext, convertView, mSwipeable);
+
+        /*if (convertView != null) {
             CardStack tagStack = (CardStack) convertView.getTag();
             ArrayList<Card> tagCards = tagStack.getCards();
             ArrayList<Card> cards = stack.getCards();
@@ -60,7 +62,7 @@ public class StackAdapter extends BaseAdapter {
         } else {
             convertView = stack.getView(mContext, mSwipeable);
             convertView.setTag(stack);
-        }
+        }*/
 
         return convertView;
     }
