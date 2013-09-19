@@ -42,7 +42,7 @@ abstract class SyncProcessor<T> {
         @Override
         public void onResponse(T data) {
             insert(data);
-            new Finished(mContext, null, mCurrentUrl);
+            new Finished(mContext, null, mCurrentUrl).sendUpdateMessage();
             doPostProcess(data);
         }
     };
