@@ -20,7 +20,6 @@ Outstanding
 			b) Let user upload a custom identifying icon
 - Only show 'AOKP Changelog' option when the AOKP Gerrit is selected
 - Migrate Help dialog information into long-press hints. Could show hint when long pressing on a tab or on the card stripe. This needs more thought...
-- If downloading dialog is to be left, don't include details about the type of data
 - Combine 'org.apache.commons.codec' into library (jar) and import it. Probably don't need to be working on the source for this.
 - Add hook (intent filter?) that allows mgerrit to open from a Gerrit url
     - Change preferences (either temporarily or permently) to the gerrit from the URL
@@ -44,10 +43,7 @@ Outstanding
 
 Database
 --------
-    - Change List table
     - Change set (details) table
-    - Change GerritTask so query operations can be performed by a loader with feedback provided directly through to the Activity by using a publish-subscribe model
-    - Hide database query strings and internals in the respective database table class 
 
 Searching (Requires database), action bar
 -----------------------------
@@ -58,7 +54,6 @@ Searching (Requires database), action bar
 
 CardsUI Library
 ----------------
-	- Remove top gradient
 	- Decrease padding between cards
 	- Investigate card swiping
 	- Include card stripe colouring support/update library to Androguide
