@@ -1,8 +1,10 @@
 package com.jbirdvegas.mgerrit;
 
 import android.app.Application;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
@@ -27,6 +29,9 @@ public class TheApplication extends Application
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private SharedPreferences mPrefs;
+
+    public static final String PREF_CHANGE_TYPE = "Preference Changed";
+    public static final String PREF_CHANGE_KEY = "Preference Key";
 
     @Override
     public void onCreate() {
@@ -55,5 +60,12 @@ public class TheApplication extends Application
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(Prefs.GERRIT_KEY)) onGerritChanged(Prefs.getCurrentGerrit(this));
+        sendPreferenceChangedMessage(key);
+    }
+
+    private void sendPreferenceChangedMessage(String key) {
+        Intent intent = new Intent(PREF_CHANGE_TYPE);
+        intent.putExtra(PREF_CHANGE_KEY, key);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }
