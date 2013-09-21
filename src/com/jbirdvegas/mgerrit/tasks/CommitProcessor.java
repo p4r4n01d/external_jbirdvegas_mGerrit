@@ -44,7 +44,7 @@ class CommitProcessor extends SyncProcessor<JSONCommit[]> {
     boolean isSyncRequired() {
         Context context = getContext();
         long syncInterval = context.getResources().getInteger(R.integer.changes_sync_interval);
-        long lastSync = SyncTime.getValueForQuery(context, SyncTime.PROJECTS_LIST_SYNC_TIME, getUrl());
+        long lastSync = SyncTime.getValueForQuery(context, SyncTime.PROJECTS_LIST_SYNC_TIME, getQuery());
         boolean sync = isInSyncInterval(syncInterval, lastSync);
         if (sync) return true;
 
@@ -60,6 +60,12 @@ class CommitProcessor extends SyncProcessor<JSONCommit[]> {
     @Override
     void doPostProcess(JSONCommit[] data) {
         SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
-                System.currentTimeMillis(), getUrl());
+                System.currentTimeMillis(), getQuery());
+    }
+
+    // Helper method to extract the relevant query portion of the URL
+    private String getQuery() {
+        String url = GerritURL.getQuery(getUrl());
+        return (url == null) ? getUrl() : url;
     }
 }
