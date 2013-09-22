@@ -21,6 +21,7 @@ import android.content.Context;
 
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.database.Changes;
+import com.jbirdvegas.mgerrit.database.CommitMarker;
 import com.jbirdvegas.mgerrit.database.DatabaseTable;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
@@ -31,8 +32,9 @@ import java.util.Arrays;
 
 class CommitProcessor extends SyncProcessor<JSONCommit[]> {
 
-    CommitProcessor(Context context, String url) {
+    CommitProcessor(Context context, GerritURL url) {
         super(context, url);
+        setResumableUrl();
     }
 
     @Override
@@ -61,11 +63,35 @@ class CommitProcessor extends SyncProcessor<JSONCommit[]> {
     void doPostProcess(JSONCommit[] data) {
         SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
                 System.currentTimeMillis(), getQuery());
+
+        // Save our spot using the sortkey of the most recent change
+        String changeID = Changes.getMostRecentChange(mContext, getUrl().getStatus());
+        if (changeID != null) {
+            JSONCommit commit = findCommit(data, changeID);
+            if (commit != null) {
+                CommitMarker.markCommit(mContext, commit);
+            }
+        }
     }
 
-    // Helper method to extract the relevant query portion of the URL
-    private String getQuery() {
-        String url = GerritURL.getQuery(getUrl());
-        return (url == null) ? getUrl() : url;
+    /**
+     * Check if we have a sortkey already stored for the current query, if so
+     *  we can modify the url given to include that sortkey.
+     */
+    protected void setResumableUrl() {
+        GerritURL originalURL = getUrl();
+        String sortKey = CommitMarker.getSortKeyForQuery(mContext, getUrl().getStatus());
+        if (sortKey != null) {
+            originalURL.setSortKey(sortKey);
+            super.setUrl(originalURL);
+        }
+    }
+
+    private JSONCommit findCommit(JSONCommit[] commits, String changeID) {
+        for (JSONCommit commit : commits) {
+            if (changeID.equals(commit.getChangeId()))
+                return commit;
+        }
+        return null;
     }
 }

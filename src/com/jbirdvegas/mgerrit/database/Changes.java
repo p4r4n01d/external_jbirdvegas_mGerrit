@@ -101,13 +101,21 @@ public class Changes extends DatabaseTable {
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE + "/#", ITEM_ID);
     }
 
-    protected static Cursor getMostRecentChange(Context context, String status) {
+    public static String getMostRecentChange(Context context, String status) {
         Uri uri = DBParams.fetchOneRow(CONTENT_URI);
+        String changeID = null;
+
+        status = JSONCommit.Status.getStatusString(status);
+
         Cursor c = context.getContentResolver().query(uri,
-                new String[] { C_CHANGE_ID, C_UPDATED },
+                new String[] { C_CHANGE_ID },
                 C_STATUS + " = ?",
                 new String[] { status },
                 C_UPDATED + " DESC");
-        return c;
+        if (c.moveToFirst()) {
+            changeID = c.getString(0);
+        }
+        c.close();
+        return changeID;
     }
 }
