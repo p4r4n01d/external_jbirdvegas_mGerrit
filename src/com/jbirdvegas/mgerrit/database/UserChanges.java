@@ -193,7 +193,13 @@ public class UserChanges extends DatabaseTable {
         // Now insert the commits
         Uri uri = DBParams.insertWithReplace(Changes.CONTENT_URI);
         ContentValues valuesArray[] = new ContentValues[values.size()];
-        return context.getContentResolver().bulkInsert(uri, values.toArray(valuesArray));
+        int numRows = context.getContentResolver().bulkInsert(uri, values.toArray(valuesArray));
+
+        if (numRows > 0) {
+            // This table changed as it comprises of the Changes table
+            context.getContentResolver().notifyChange(UserChanges.CONTENT_URI, null);
+        }
+        return numRows;
     }
 
     // Removes the extraneous 0s off the milliseconds in server timestamps
