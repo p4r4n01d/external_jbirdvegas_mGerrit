@@ -94,13 +94,7 @@ public class Users extends DatabaseTable {
         Uri uri = DBParams.insertWithReplace(CONTENT_URI);
 
         ContentValues valuesArray[] = new ContentValues[values.size()];
-        int numRows = context.getContentResolver().bulkInsert(uri, values.toArray(valuesArray));
-
-        if (numRows > 0) {
-            // This also changes the UserChanges table.
-            context.getContentResolver().notifyChange(UserChanges.CONTENT_URI, null);
-        }
-        return numRows;
+        return context.getContentResolver().bulkInsert(uri, values.toArray(valuesArray));
     }
 
     public static Uri insertUser(Context context, String name, String email) {
