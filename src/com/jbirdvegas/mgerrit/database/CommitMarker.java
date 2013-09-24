@@ -65,10 +65,10 @@ public class CommitMarker extends DatabaseTable {
     @Override
     public void create(String TAG, SQLiteDatabase db) {
         db.execSQL("create table " + TABLE + " ("
-                + C_CHANGE_ID + " text PRIMARY KEY, "
+                + C_CHANGE_ID + " text NOT NULL, "
                 + C_UPDATED + " text NOT NULL, "
                 + C_SORTKEY + " text NOT NULL, "
-                + C_STATUS + " text NOT NULL, "
+                + C_STATUS + " text PRIMARY KEY, "
                 + "FOREIGN KEY (" + C_CHANGE_ID + ") REFERENCES "
                     + Users.TABLE + "(" + Changes.C_CHANGE_ID + "), "
                 + "FOREIGN KEY (" + C_UPDATED + ") REFERENCES "
@@ -107,7 +107,8 @@ public class CommitMarker extends DatabaseTable {
         contentValues.put(C_UPDATED, trimDate(commit.getLastUpdatedDate()));
         contentValues.put(C_SORTKEY, commit.getSortKey());
         contentValues.put(C_STATUS, commit.getStatus().toString());
-        context.getContentResolver().insert(CONTENT_URI, contentValues);
+        Uri uri = DBParams.insertWithReplace(CONTENT_URI);
+        context.getContentResolver().insert(uri, contentValues);
     }
 
     // Removes the extraneous 0s off the milliseconds in server timestamps
