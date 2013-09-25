@@ -18,7 +18,6 @@ Outstanding
 		- If custom Gerrit either:
 			a) Use generic icon (even the application icon will do)
 			b) Let user upload a custom identifying icon
-- Only show 'AOKP Changelog' option when the AOKP Gerrit is selected
 - Migrate Help dialog information into long-press hints. Could show hint when long pressing on a tab or on the card stripe. This needs more thought...
 - Combine 'org.apache.commons.codec' into library (jar) and import it. Probably don't need to be working on the source for this.
 - Add hook (intent filter?) that allows mgerrit to open from a Gerrit url
