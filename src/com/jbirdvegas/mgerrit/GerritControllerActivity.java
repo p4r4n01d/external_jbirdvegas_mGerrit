@@ -183,8 +183,7 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     /** MUST BE CALLED ON MAIN THREAD */
-    private void setupTabs()
-    {
+    private void setupTabs() {
         // setup action bar for tabs
         mActionBar = getActionBar();
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -408,8 +407,7 @@ public class GerritControllerActivity extends FragmentActivity {
     public void clearCommitterObject() { mCommitterObject = null; }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
         receivers.unregisterReceivers();
 
@@ -425,8 +423,7 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
         registerReceivers();
 
@@ -483,8 +480,7 @@ public class GerritControllerActivity extends FragmentActivity {
         public Fragment getItem(int position) {
             CardsFragment fragment;
 
-            switch (position)
-            {
+            switch (position) {
                 case 0:
                     fragment = new ReviewTab();
                     mReviewTab = (ReviewTab) fragment;
@@ -506,16 +502,13 @@ public class GerritControllerActivity extends FragmentActivity {
         // The ViewPager monitors the current tab position so we can get the
         //  ViewPager from the enclosing class and use the fragment recording
         //  to get the current fragment
-        public CardsFragment getCurrentFragment()
-        {
+        public CardsFragment getCurrentFragment() {
             int pos = GerritControllerActivity.this.mViewPager.getCurrentItem();
             return getFragment(pos);
         }
 
-        public CardsFragment getFragment(int pos)
-        {
-            switch (pos)
-            {
+        public CardsFragment getFragment(int pos) {
+            switch (pos) {
                 case 0: return mReviewTab;
                 case 1: return mMergedTab;
                 case 2: return mAbandonedTab;

@@ -20,8 +20,6 @@ package com.jbirdvegas.mgerrit.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
-import android.database.ContentObserver;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Handler;
@@ -100,6 +98,10 @@ public class UserChanges extends DatabaseTable {
     // Sort by condition for querying results.
     public static final String SORT_BY = C_UPDATED + " DESC";
 
+    private static final String[] CHANGE_LIST_PROJECTION = new String[] {
+            C_CHANGE_ID, C_SUBJECT, C_PROJECT, C_UPDATED,
+            C_STATUS, C_TOPIC, C_USER_ID, C_EMAIL, C_NAME };
+
     private static UserChanges mInstance = null;
     private MyObserver mObserver;
 
@@ -124,46 +126,33 @@ public class UserChanges extends DatabaseTable {
      * List the commits for a given change status
      * @param context Context for database access
      * @param status The change status to search for
-     * @param committer The email of the committer
+     * @param committerID The email of the committer
      * @param project The full path of the project to search for
      * @return A CursorLoader
      */
-    public static CursorLoader listCommits(Context context, String status, Integer committer,
+    public static CursorLoader listCommits(Context context, String status, Integer committerID,
                                            String project) {
-
-        String[] projection = new String[] { C_CHANGE_ID, C_SUBJECT, C_PROJECT, C_UPDATED,
-                C_STATUS, C_TOPIC, C_USER_ID, C_EMAIL, C_NAME };
-        StringBuilder where = new StringBuilder().append(C_STATUS).append(" = ?").append(" AND ")
-                .append(Changes.TABLE).append(".").append(C_OWNER)
-                .append(" = ").append(Users.TABLE).append(".").append(C_USER_ID);
-
+        StringBuilder builder = new StringBuilder();
         List<String> bindArgs = new ArrayList<String>();
 
-        status = JSONCommit.Status.getStatusString(status);
-        bindArgs.add(status);
-
-        if (committer != null) {
-            where.append(" AND ").append(C_USER_ID).append(" = ?");
-            bindArgs.add(committer.toString());
+        if (committerID != null) {
+            builder.append(" AND ").append(C_USER_ID).append(" = ?");
+            bindArgs.add(committerID.toString());
         }
 
         if (project != null) {
-            where.append(" AND ").append(C_PROJECT).append(" = ?");
+            builder.append(" AND ").append(C_PROJECT).append(" = ?");
             bindArgs.add(project);
         }
 
-        String valuesArray[] = new String[1];
-
-        return new CursorLoader(context, CONTENT_URI,
-                projection, where.toString(), bindArgs.toArray(valuesArray),
-                SORT_BY);
+        return findCommits(context, status, builder, bindArgs);
     }
 
     public static CursorLoader listCommits(Context context, String status, CommitterObject committer,
                                            String project) {
-        Integer email = null;
-        if (committer != null)  email = committer.getAccountId();
-        return listCommits(context, status, email, project);
+        Integer accountID = null;
+        if (committer != null)  accountID = committer.getAccountId();
+        return listCommits(context, status, accountID, project);
     }
 
     /** Insert the list of commits into the database **/
@@ -199,14 +188,76 @@ public class UserChanges extends DatabaseTable {
         return context.getContentResolver().bulkInsert(uri, values.toArray(valuesArray));
     }
 
+    /**
+     * List the commits for a given change status and subject
+     * @param context Context for database access
+     * @param status The change status to search for
+     * @param subject A full or partial commit message string to search for
+     * @return A CursorLoader
+     */
+    public static CursorLoader findCommitsWithSubject(Context context, String status,
+                                                      String subject) {
+        StringBuilder builder = new StringBuilder();
+        List<String> bindArgs = new ArrayList<String>();
+
+        if (subject != null) {
+            builder.append(" AND ").append(C_PROJECT).append(" LIKE ?");
+            bindArgs.add("%" + subject + "%");
+        }
+        return findCommits(context, status, builder, bindArgs);
+    }
+
+    /**
+     * List the commits that start with the given change id
+     * @param context Context for database access
+     * @param changeID
+     * @return
+     */
+    public static CursorLoader findCommitWithChangeID(Context context, String changeID) {
+
+        if (changeID == null) return null;
+
+        StringBuilder where = new StringBuilder().append(Changes.TABLE).append(".").append(C_OWNER)
+                .append(" = ").append(Users.TABLE).append(".").append(C_USER_ID)
+                .append(" AND ").append(C_CHANGE_ID).append(" LIKE ?");
+
+        return new CursorLoader(context, CONTENT_URI, CHANGE_LIST_PROJECTION,
+                where.toString(), new String[] { changeID + "%" }, SORT_BY);
+    }
+
     // Removes the extraneous 0s off the milliseconds in server timestamps
     private static String trimDate(String date) {
         return date.substring(0, date.length() - 6);
     }
 
+    /**
+     * Helper method for change list search queries
+     * @param context Context for database access
+     * @param status The change status to search for
+     * @param builder A string builder to help form the where query
+     * @param bindArgs Any bind arguments to be bound to the SQL query
+     * @return A CursorLoader
+     */
+    private static CursorLoader findCommits(Context context, String status,
+                                           StringBuilder builder, List<String> bindArgs) {
+        if (builder.length() > 0) builder.append(" AND ");
+
+        StringBuilder where = builder.append(C_STATUS).append(" = ?").append(" AND ")
+                .append(Changes.TABLE).append(".").append(C_OWNER)
+                .append(" = ").append(Users.TABLE).append(".").append(C_USER_ID);
+
+        status = JSONCommit.Status.getStatusString(status);
+        bindArgs.add(status);
+
+        String valuesArray[] = new String[bindArgs.size()];
+
+        return new CursorLoader(context, CONTENT_URI, CHANGE_LIST_PROJECTION,
+                where.toString(), bindArgs.toArray(valuesArray), SORT_BY);
+    }
+
     @Override
     protected void registerContentObserver(Context context) {
-        mObserver = new MyObserver(new Handler(), context);
+        mObserver = new MyObserver(new Handler(), context, CONTENT_URI);
         context.getContentResolver().registerContentObserver(Users.CONTENT_URI, true,
                 mObserver);
         context.getContentResolver().registerContentObserver(Changes.CONTENT_URI, true,
@@ -216,25 +267,5 @@ public class UserChanges extends DatabaseTable {
     @Override
     protected void unRegisterContentObserver(Context context) {
         context.getContentResolver().unregisterContentObserver(mObserver);
-    }
-
-    class MyObserver extends ContentObserver {
-
-        Context mContext;
-
-        public MyObserver(Handler handler, Context context) {
-            super(handler);
-            mContext = context;
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            this.onChange(selfChange, null);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            mContext.getContentResolver().notifyChange(UserChanges.CONTENT_URI, this);
-        }
     }
 }
