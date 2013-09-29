@@ -122,15 +122,22 @@ public class CommitCard extends Card {
         ImageView moarInfo = (ImageView) commitCardView.findViewById(
                 R.id.commit_card_moar_info);
 
-        moarInfo.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener cardListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, PatchSetViewerFragment.class);
                 // example website
                 // http://gerrit.aokp.co/changes/?q=7615&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=CURRENT_FILES&o=DETAILED_LABELS
-                mActivity.onChangeSelected(mCommit.getChangeId());
+                mActivity.onChangeSelected(mCommit.getChangeId(), true);
             }
-        });
+        };
+
+        if (moarInfo != null) {
+            moarInfo.setOnClickListener(cardListener);
+        } else {
+            setOnClickListener(cardListener);
+        }
+
         shareView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -71,28 +71,32 @@ public class PatchSetViewerFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         init();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSelectedChange = getArguments().getString(CHANGE_ID);
+        mParent = this.getActivity();
+
+        if (getArguments() != null) {
+            mSelectedChange = getArguments().getString(CHANGE_ID);
+            Prefs.setSelectedChange(mParent.getApplicationContext(), mSelectedChange);
+        } else {
+            mSelectedChange = Prefs.getSelectedChange(mParent.getApplicationContext());
+        }
     }
 
     private void init()
     {
-        mParent = this.getActivity();
         mCurrentFragment = this.getView();
 
         mCardsUI = (CardUI) mCurrentFragment.findViewById(R.id.commit_cards);
         mRequestQueue = Volley.newRequestQueue(mParent);
 
         mUrl = new GerritURL();
-
-        mUrl.setChangeID(mSelectedChange);
-        mUrl.requestChangeDetail(true);
-        executeGerritTask(mUrl.toString());
+        setSelectedChange(mSelectedChange);
     }
 
     private void executeGerritTask(final String query) {
@@ -159,6 +163,15 @@ public class PatchSetViewerFragment extends Fragment {
         }
     }
 
+    public void setSelectedChange(String changeID) {
+        this.mSelectedChange = changeID;
+        if (mSelectedChange != null && mSelectedChange.length() > 0) {
+            mUrl.setChangeID(mSelectedChange);
+            mUrl.requestChangeDetail(true);
+            executeGerritTask(mUrl.toString());
+        }
+    }
+
     /*
     Possible cards
 
@@ -180,19 +193,11 @@ public class PatchSetViewerFragment extends Fragment {
      */
 
     private void savePatchSet(String jsonResponse) {
-        PreferenceManager.getDefaultSharedPreferences(mParent)
-                .edit()
-                .putString(KEY_STORED_PATCHSET, jsonResponse)
-                .commit();
+        // Caching disabled
     }
 
     private String getStoredPatchSet() {
-        return PreferenceManager.getDefaultSharedPreferences(mParent)
-                .getString(KEY_STORED_PATCHSET, "");
-    }
-
-    public void setChangeId(String changeid) {
-        this.mSelectedChange = changeid;
+        return ""; // Caching disabled
     }
 
     private CommitterObject committerObject = null;

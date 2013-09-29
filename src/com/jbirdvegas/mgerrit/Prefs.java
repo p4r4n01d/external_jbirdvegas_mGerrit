@@ -43,6 +43,7 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
     private static final String SERVER_TIMEZONE_KEY = "server_timezone";
     private static final String LOCAL_TIMEZONE_KEY = "local_timezone";
     public static final String CURRENT_PROJECT = "current_project";
+    public static final String SELECTED_CHANGE = "last_changeid";
     private CheckBoxPreference mAnimation;
 
     @Override
@@ -181,5 +182,13 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
 
     public static String getCurrentProject(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getString(CURRENT_PROJECT, "");
+    }
+
+    public static void setSelectedChange(Context context, String changeid) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(SELECTED_CHANGE, changeid).commit();
+    }
+
+    public static String getSelectedChange(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(SELECTED_CHANGE, "");
     }
 }

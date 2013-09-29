@@ -120,7 +120,7 @@ public class GerritControllerActivity extends FragmentActivity {
             // TODO: In two-pane mode, list items should be given the 'activated' state when touched.
         }
 
-            if (!CardsFragment.mSkipStalking) {
+        if (!CardsFragment.mSkipStalking) {
             try {
                 mCommitterObject = getIntent()
                         .getExtras()
@@ -467,7 +467,13 @@ public class GerritControllerActivity extends FragmentActivity {
         }
     }
 
-    public void onChangeSelected(String changeID) {
+    /**
+     * Handler for when a change is selected in the list.
+     * @param changeID The currently selected change ID
+     * @param expand Whether to expand the change and view the change details.
+     *               Relevant only to the tablet layout.
+     */
+    public void onChangeSelected(String changeID, boolean expand) {
         Bundle arguments = new Bundle();
         arguments.putString(PatchSetViewerFragment.CHANGE_ID, changeID);
 
@@ -480,7 +486,7 @@ public class GerritControllerActivity extends FragmentActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.change_detail_fragment, fragment)
                     .commit();
-        } else {
+        } else if (expand) {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, PatchSetViewerActivity.class);
