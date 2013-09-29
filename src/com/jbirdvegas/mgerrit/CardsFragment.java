@@ -182,7 +182,7 @@ public abstract class CardsFragment extends Fragment
                     changes.getString(status_index));
 
             CommitCard card = new CommitCard(commit, mParent.getCommitterObject(),
-                    mRequestQueue, this);
+                    mRequestQueue, mParent);
 
             commitCardList.add(card);
         }
@@ -195,7 +195,7 @@ public abstract class CardsFragment extends Fragment
                 new JSONCommit(jsonObject, context),
                 mParent.getCommitterObject(),
                 mRequestQueue,
-                this);
+                mParent);
     }
 
     @Override

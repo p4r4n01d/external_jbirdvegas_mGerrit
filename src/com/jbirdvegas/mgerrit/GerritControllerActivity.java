@@ -48,13 +48,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.helpers.GerritTeamsHelper;
 import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
 import com.jbirdvegas.mgerrit.listeners.MyTabListener;
 import com.jbirdvegas.mgerrit.message.*;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
-import com.jbirdvegas.mgerrit.objects.GerritMessage;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.GooFileObject;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
@@ -76,6 +74,8 @@ public class GerritControllerActivity extends FragmentActivity {
     private String mGerritWebsite;
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
+
+    private String mSelectedChangeId;
 
     /**
      * Keep track of all the GerritTask instances so the dialog can be dismissed
@@ -102,6 +102,9 @@ public class GerritControllerActivity extends FragmentActivity {
     private String mCurrentProject;
     private Menu mMenu;
 
+    // Indicates if we are running this in tablet mode.
+    private boolean mTwoPane;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,7 +112,17 @@ public class GerritControllerActivity extends FragmentActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
 
-        if (!CardsFragment.mSkipStalking) {
+        if (findViewById(R.id.change_detail_fragment) != null) {
+            // The detail container view will be present only in the
+            // large-screen layouts (res/values-large and
+            // res/values-sw600dp). If this view is present, then the
+            // activity should be in two-pane mode.
+            mTwoPane = true;
+
+            // TODO: In two-pane mode, list items should be given the 'activated' state when touched.
+        }
+
+            if (!CardsFragment.mSkipStalking) {
             try {
                 mCommitterObject = getIntent()
                         .getExtras()
@@ -453,6 +466,30 @@ public class GerritControllerActivity extends FragmentActivity {
             changelog.setVisible(true);
         } else {
             changelog.setVisible(false);
+        }
+    }
+
+    public String getSelectedChange() {
+        return mSelectedChangeId;
+    }
+
+    public void onChangeSelected(String changeID) {
+        mSelectedChangeId = changeID;
+
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            PatchSetViewerFragment fragment = new PatchSetViewerFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.change_detail_fragment, fragment)
+                    .commit();
+
+        } else {
+            // In single-pane mode, simply start the detail activity
+            // for the selected item ID.
+            Intent detailIntent = new Intent(this, PatchSetViewerActivity.class);
+            startActivity(detailIntent);
         }
     }
 
