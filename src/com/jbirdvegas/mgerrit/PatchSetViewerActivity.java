@@ -36,10 +36,20 @@ public class PatchSetViewerActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.commit_list);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Copy all the intent arguments over to the fragment
+        PatchSetViewerFragment fragment = new PatchSetViewerFragment();
+        Bundle args = new Bundle();
+        args.putAll(getIntent().getExtras());
+        fragment.setArguments(args);
+
+        // Display the fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, fragment)
+                .commit();
     }
 
     @Override

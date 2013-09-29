@@ -17,6 +17,7 @@ package com.jbirdvegas.mgerrit;
  *  limitations under the License.
  */
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -54,9 +55,12 @@ public class PatchSetViewerFragment extends Fragment {
     private static final String KEY_STORED_PATCHSET = "storedPatchset";
     private CardUI mCardsUI;
     private RequestQueue mRequestQueue;
-    private GerritControllerActivity mParent;
+    private Activity mParent;
     private View mCurrentFragment;
     private GerritURL mUrl;
+    private String mSelectedChange;
+
+    public static final String CHANGE_ID = "changeID";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -70,16 +74,23 @@ public class PatchSetViewerFragment extends Fragment {
         init();
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mSelectedChange = getArguments().getString(CHANGE_ID);
+    }
+
     private void init()
     {
-        mParent = (GerritControllerActivity) this.getActivity();
+        mParent = this.getActivity();
         mCurrentFragment = this.getView();
 
         mCardsUI = (CardUI) mCurrentFragment.findViewById(R.id.commit_cards);
         mRequestQueue = Volley.newRequestQueue(mParent);
 
         mUrl = new GerritURL();
-        mUrl.setChangeID(mParent.getSelectedChange());
+
+        mUrl.setChangeID(mSelectedChange);
         mUrl.requestChangeDetail(true);
         executeGerritTask(mUrl.toString());
     }
@@ -178,6 +189,10 @@ public class PatchSetViewerFragment extends Fragment {
     private String getStoredPatchSet() {
         return PreferenceManager.getDefaultSharedPreferences(mParent)
                 .getString(KEY_STORED_PATCHSET, "");
+    }
+
+    public void setChangeId(String changeid) {
+        this.mSelectedChange = changeid;
     }
 
     private CommitterObject committerObject = null;

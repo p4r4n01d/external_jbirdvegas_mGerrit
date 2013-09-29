@@ -75,8 +75,6 @@ public class GerritControllerActivity extends FragmentActivity {
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
 
-    private String mSelectedChangeId;
-
     /**
      * Keep track of all the GerritTask instances so the dialog can be dismissed
      *  when this activity is paused.
@@ -469,30 +467,27 @@ public class GerritControllerActivity extends FragmentActivity {
         }
     }
 
-    public String getSelectedChange() {
-        return mSelectedChangeId;
-    }
-
     public void onChangeSelected(String changeID) {
-        mSelectedChangeId = changeID;
+        Bundle arguments = new Bundle();
+        arguments.putString(PatchSetViewerFragment.CHANGE_ID, changeID);
 
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             PatchSetViewerFragment fragment = new PatchSetViewerFragment();
+            fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.change_detail_fragment, fragment)
                     .commit();
-
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, PatchSetViewerActivity.class);
+            detailIntent.putExtras(arguments);
             startActivity(detailIntent);
         }
     }
-
 
     /**
      * A {@link android.support.v4.app.FragmentStatePagerAdapter} that returns a
