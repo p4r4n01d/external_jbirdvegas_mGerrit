@@ -10,8 +10,6 @@ Outstanding
 	- Only load the new stuff and don't reset all the cards views if not necesscary.
 - Do not default to one specific gerrit - open up the list of Gerrits to choose from. This applies only when there is no app data (e.g. mgerrit has just been installed)
 - Give a visual aid to which Gerrit source is currently selected in Gerrit selection dialog
-- Master-detail view
-	- Convert PatchSetViewerActivity into a Fragment
 - When selecting a committer, use the currently selected tab to determine which changes of theirs to view
 - More feedback on which Gerrit is selected
 	- Change gerrit selector icon to match the current Gerrit
@@ -56,6 +54,12 @@ CardsUI Library
 	- Decrease padding between cards
 	- Investigate card swiping
 	- Include card stripe colouring support/update library to Androguide
+
+Tablet (master-detail layout)
+-----------------------------
+    - Syncronise detail fragment with the change list (across tabs and Gerrit instances).
+    - Selection indicator for the currently selected change.
+        - Visual aid to show that the details pane expands the selected change (arrow perhaps?)
 
 CM Gerrit (Requires Server side changes)
 ----------------------------------------
