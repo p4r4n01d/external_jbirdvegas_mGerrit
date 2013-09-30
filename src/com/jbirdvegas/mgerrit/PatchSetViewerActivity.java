@@ -2,7 +2,7 @@ package com.jbirdvegas.mgerrit;
 
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)
- *  Author: Jon Stanford (JBirdVegas), 2013
+ *  Author: Evan Conway (P4R4N01D), 2013
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
