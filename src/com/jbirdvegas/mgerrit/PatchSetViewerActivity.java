@@ -40,16 +40,25 @@ public class PatchSetViewerActivity extends FragmentActivity {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Copy all the intent arguments over to the fragment
-        PatchSetViewerFragment fragment = new PatchSetViewerFragment();
-        Bundle args = new Bundle();
-        args.putAll(getIntent().getExtras());
-        fragment.setArguments(args);
+        /* If there was a fragment state save from previous configurations of
+         * this activity, then it doesn't need to be added again.*/
+        if (savedInstanceState == null) {
+            /* Create the detail fragment and add it to the activity
+             * using a fragment transaction.
+             * Copy all the intent arguments over to the fragment */
+            PatchSetViewerFragment fragment = new PatchSetViewerFragment();
+            Bundle args = new Bundle();
+            args.putAll(getIntent().getExtras());
+            fragment.setArguments(args);
 
-        // Display the fragment
-        getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, fragment)
-                .commit();
+            // Display the fragment
+            getSupportFragmentManager().beginTransaction()
+                    .replace(android.R.id.content, fragment)
+                    .commit();
+        }
+        else {
+            setContentView(R.layout.commit_list);
+        }
     }
 
     @Override
