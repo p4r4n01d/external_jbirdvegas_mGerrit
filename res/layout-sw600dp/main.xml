@@ -29,6 +29,7 @@
         android:id="@+id/change_list_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="0.5"
         android:name="com.jbirdvegas.mgerrit.ChangeListFragment"
         tools:layout="@layout/change_list" />
 
@@ -36,8 +37,9 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/change_detail_fragment"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="0.5"
         android:name="com.jbirdvegas.mgerrit.PatchSetViewerFragment"
         tools:layout="@layout/commit_list" />
 </LinearLayout>

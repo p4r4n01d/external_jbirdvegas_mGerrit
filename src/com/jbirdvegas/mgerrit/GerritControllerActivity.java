@@ -113,7 +113,7 @@ public class GerritControllerActivity extends FragmentActivity {
         }
 
         FragmentManager fm = getSupportFragmentManager();
-        mChangeList = (ChangeListFragment) fm.findFragmentById(R.id.change_detail_fragment);
+        mChangeList = (ChangeListFragment) fm.findFragmentById(R.id.change_list_fragment);
 
         if (!CardsFragment.mSkipStalking) {
             try {
