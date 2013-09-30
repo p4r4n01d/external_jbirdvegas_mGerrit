@@ -36,6 +36,7 @@ import com.jbirdvegas.mgerrit.cards.PatchSetCommentsCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetMessageCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetPropertiesCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetReviewersCard;
+import com.jbirdvegas.mgerrit.database.SelectedChange;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
@@ -53,6 +54,7 @@ import org.json.JSONException;
 public class PatchSetViewerFragment extends Fragment {
     private static final String TAG = PatchSetViewerFragment.class.getSimpleName();
     private static final String KEY_STORED_PATCHSET = "storedPatchset";
+
     private CardUI mCardsUI;
     private RequestQueue mRequestQueue;
     private Activity mParent;
@@ -61,6 +63,7 @@ public class PatchSetViewerFragment extends Fragment {
     private String mSelectedChange;
 
     public static final String CHANGE_ID = "changeID";
+    public static final String STATUS = "queryStatus";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -82,9 +85,8 @@ public class PatchSetViewerFragment extends Fragment {
 
         if (getArguments() != null) {
             mSelectedChange = getArguments().getString(CHANGE_ID);
-            Prefs.setSelectedChange(mParent.getApplicationContext(), mSelectedChange);
-        } else {
-            mSelectedChange = Prefs.getSelectedChange(mParent.getApplicationContext());
+            String status = getArguments().getString(CHANGE_ID);
+            SelectedChange.setSelectedChange(mParent.getApplicationContext(), mSelectedChange, status);
         }
     }
 

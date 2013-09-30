@@ -473,9 +473,10 @@ public class GerritControllerActivity extends FragmentActivity {
      * @param expand Whether to expand the change and view the change details.
      *               Relevant only to the tablet layout.
      */
-    public void onChangeSelected(String changeID, boolean expand) {
+    public void onChangeSelected(String changeID, String status, boolean expand) {
         Bundle arguments = new Bundle();
         arguments.putString(PatchSetViewerFragment.CHANGE_ID, changeID);
+        arguments.putString(PatchSetViewerFragment.STATUS, status);
 
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by

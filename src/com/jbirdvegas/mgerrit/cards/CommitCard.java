@@ -128,7 +128,7 @@ public class CommitCard extends Card {
                 Intent intent = new Intent(context, PatchSetViewerFragment.class);
                 // example website
                 // http://gerrit.aokp.co/changes/?q=7615&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=CURRENT_FILES&o=DETAILED_LABELS
-                mActivity.onChangeSelected(mCommit.getChangeId(), true);
+                mActivity.onChangeSelected(mCommit.getChangeId(), mCommit.getStatus().toString(), true);
             }
         };
 
