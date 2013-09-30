@@ -85,15 +85,6 @@ public class GerritControllerActivity extends FragmentActivity {
 
     BroadcastReceiver mListener;
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections.
-     */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
-    private ActionBar mActionBar;
-
-    ArrayList<CharSequence> mTitles;
     private DefaultGerritReceivers receivers;
 
     // This is maintained for checking if the project has changed without looking
@@ -102,6 +93,7 @@ public class GerritControllerActivity extends FragmentActivity {
 
     // Indicates if we are running this in tablet mode.
     private boolean mTwoPane;
+    private ChangeListFragment mChangeList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -119,6 +111,9 @@ public class GerritControllerActivity extends FragmentActivity {
 
             // TODO: In two-pane mode, list items should be given the 'activated' state when touched.
         }
+
+        FragmentManager fm = getSupportFragmentManager();
+        mChangeList = (ChangeListFragment) fm.findFragmentById(R.id.change_detail_fragment);
 
         if (!CardsFragment.mSkipStalking) {
             try {
@@ -171,13 +166,6 @@ public class GerritControllerActivity extends FragmentActivity {
         GerritURL.setProject(Prefs.getCurrentProject(this));
 
         receivers = new DefaultGerritReceivers(this);
-
-        // Setup tabs //
-        setupTabs();
-
-        mTitles = new ArrayList<CharSequence>();
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++)
-            mTitles.add(mSectionsPagerAdapter.getPageTitle(i));
     }
 
     // Register to receive messages.
@@ -191,48 +179,6 @@ public class GerritControllerActivity extends FragmentActivity {
                 ErrorDuringConnection.TYPE);
         LocalBroadcastManager.getInstance(this).registerReceiver(mListener,
                 new IntentFilter(TheApplication.PREF_CHANGE_TYPE));
-    }
-
-    /** MUST BE CALLED ON MAIN THREAD */
-    private void setupTabs() {
-        // setup action bar for tabs
-        mActionBar = getActionBar();
-        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        mActionBar.setDisplayShowTitleEnabled(true);
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the app.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        /** The {@link android.support.v4.view.ViewPager} that will host the section contents. */
-        mViewPager = (ViewPager) findViewById(R.id.tabs);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        // When swiping between different sections, select the corresponding
-        // tab. We can also use ActionBar.Tab#select() to do this if we have
-        // a reference to the Tab.
-        mViewPager
-                .setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
-                {
-                    @Override
-                    public void onPageSelected(int position)
-                    {
-                        mActionBar.setSelectedNavigationItem(position);
-                        mSectionsPagerAdapter.getFragment(position).refresh(false);
-                    }
-                });
-
-        // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-            // Create a tab with text corresponding to the page title defined by
-            // the adapter. Also specify this Activity object, which implements
-            // the TabListener interface, as the callback (mListener) for when
-            // this tab is selected.
-            mActionBar.addTab(mActionBar.newTab()
-                    .setText(mSectionsPagerAdapter.getPageTitle(i))
-                    .setTabListener(new MyTabListener(mViewPager, this)));
-        }
     }
 
     @Override
@@ -411,7 +357,7 @@ public class GerritControllerActivity extends FragmentActivity {
      *  resumed.
      */
     public void refreshTabs() {
-        mSectionsPagerAdapter.refreshTabs();
+        mChangeList.refreshTabs();
     }
 
     public CommitterObject getCommitterObject() { return mCommitterObject; }
@@ -493,96 +439,6 @@ public class GerritControllerActivity extends FragmentActivity {
             Intent detailIntent = new Intent(this, PatchSetViewerActivity.class);
             detailIntent.putExtras(arguments);
             startActivity(detailIntent);
-        }
-    }
-
-    /**
-     * A {@link android.support.v4.app.FragmentStatePagerAdapter} that returns a
-     * fragment corresponding to one of the sections/tabs/pages.
-     */
-    class SectionsPagerAdapter extends FragmentStatePagerAdapter
-    {
-        public int mPageCount = 3;
-
-        ReviewTab mReviewTab = null;
-        MergedTab mMergedTab = null;
-        AbandonedTab mAbandonedTab = null;
-
-        SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        /** Called to instantiate the fragment for the given page.
-         * IMPORTANT: Do not use this to monitor the currently selected page as it is used
-         *  to load neighbouring tabs that may not be selected. */
-        public Fragment getItem(int position) {
-            CardsFragment fragment;
-
-            switch (position) {
-                case 0:
-                    fragment = new ReviewTab();
-                    mReviewTab = (ReviewTab) fragment;
-                    break;
-                case 1:
-                    fragment = new MergedTab();
-                    mMergedTab = (MergedTab) fragment;
-                    break;
-                case 2:
-                    fragment = new AbandonedTab();
-                    mAbandonedTab = (AbandonedTab) fragment;
-                    break;
-                default: return null;
-            }
-
-            return fragment;
-        }
-
-        // The ViewPager monitors the current tab position so we can get the
-        //  ViewPager from the enclosing class and use the fragment recording
-        //  to get the current fragment
-        public CardsFragment getCurrentFragment() {
-            int pos = GerritControllerActivity.this.mViewPager.getCurrentItem();
-            return getFragment(pos);
-        }
-
-        public CardsFragment getFragment(int pos) {
-            switch (pos) {
-                case 0: return mReviewTab;
-                case 1: return mMergedTab;
-                case 2: return mAbandonedTab;
-                default: return null;
-            }
-        }
-
-        @Override
-        /** Return the number of views available. */
-        public int getCount() { return mPageCount; }
-
-        @Override
-        /** Called by the ViewPager to obtain a title string to describe
-         *  the specified page. */
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0: return getString(R.string.reviewable);
-                case 1: return getString(R.string.merged);
-                case 2: return getString(R.string.abandoned);
-            }
-            return null;
-        }
-
-        private void refreshTabs() {
-            if (mReviewTab != null) mReviewTab.markDirty();
-            if (mMergedTab != null) mMergedTab.markDirty();
-            if (mAbandonedTab != null) mAbandonedTab.markDirty();
-            // Its possible the current fragment may be null... if that happens
-            // reload the page
-            CardsFragment currentFragment = getCurrentFragment();
-            if (currentFragment == null) {
-                onCreate(null);
-            } else {
-                currentFragment.refresh(true);
-            }
         }
     }
 }
