@@ -1,9 +1,15 @@
 package com.jbirdvegas.mgerrit.search;
 
+import android.content.Context;
+
+import com.jbirdvegas.mgerrit.database.UserChanges;
+
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -128,8 +134,16 @@ public abstract class SearchKeyword {
         return whereQuery.toString();
     }
 
-    public static void search(String query) {
-        String where = constructDbSearchQuery(constructTokens(query));
+    public static void search(Context context, String query, String status) {
+        Set<SearchKeyword> tokens = constructTokens(query);
+        String where = constructDbSearchQuery(tokens);
+
+        List<String> bindArgs = new ArrayList<String>();
+        for (SearchKeyword token : tokens) {
+            bindArgs.add(token.getParam());
+        }
+
+        UserChanges.findCommits(context, status, where, bindArgs);
     }
 
     public abstract String buildSearch();

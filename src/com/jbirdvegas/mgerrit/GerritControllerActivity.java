@@ -20,6 +20,7 @@ package com.jbirdvegas.mgerrit;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -46,6 +47,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.jbirdvegas.mgerrit.helpers.GerritTeamsHelper;
@@ -124,6 +126,30 @@ public class GerritControllerActivity extends FragmentActivity {
         FragmentManager fm = getSupportFragmentManager();
         mChangeList = (ChangeListFragment) fm.findFragmentById(R.id.change_list_fragment);
 
+        mGerritWebsite = Prefs.getCurrentGerrit(this);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        /* Initially set the current Gerrit globally here.
+         *  We can rely on callbacks to know when they change */
+        GerritURL.setGerrit(Prefs.getCurrentGerrit(this));
+        GerritURL.setProject(Prefs.getCurrentProject(this));
+
+        mListener = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String key = intent.getStringExtra(TheApplication.PREF_CHANGE_KEY);
+                if (key.equals(Prefs.GERRIT_KEY))
+                    onGerritChanged(Prefs.getCurrentGerrit(GerritControllerActivity.this));
+                else if (key.equals(Prefs.CURRENT_PROJECT))
+                    onProjectChanged(Prefs.getCurrentProject(GerritControllerActivity.this));
+            }
+        };
+        // Don't register listener here. It is registered in onResume instead.
+
+        handleIntent(this.getIntent());
+    }
+
+    private void init() {
         if (!CardsFragment.mSkipStalking) {
             try {
                 mCommitterObject = getIntent()
@@ -152,27 +178,7 @@ public class GerritControllerActivity extends FragmentActivity {
             Log.d(TAG, "Changelog was null");
         }
 
-        mGerritWebsite = Prefs.getCurrentGerrit(this);
         mGerritTasks = new HashSet<GerritTask>();
-
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-        mListener = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String key = intent.getStringExtra(TheApplication.PREF_CHANGE_KEY);
-                if (key.equals(Prefs.GERRIT_KEY))
-                    onGerritChanged(Prefs.getCurrentGerrit(GerritControllerActivity.this));
-                else if (key.equals(Prefs.CURRENT_PROJECT))
-                    onProjectChanged(Prefs.getCurrentProject(GerritControllerActivity.this));
-            }
-        };
-        // Don't register listener here. It is registered in onResume instead.
-
-        /* Initially set the current Gerrit globally here.
-         *  We can rely on callbacks to know when they change */
-        GerritURL.setGerrit(Prefs.getCurrentGerrit(this));
-        GerritURL.setProject(Prefs.getCurrentProject(this));
 
         receivers = new DefaultGerritReceivers(this);
     }
@@ -201,7 +207,31 @@ public class GerritControllerActivity extends FragmentActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.gerrit_instances_menu, menu);
         this.mMenu = menu;
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(true);
+        // Let the change list fragment handle queries directly.
+        searchView.setOnQueryTextListener(mChangeList);
+
         return true;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent)
+    {
+        // Searching is already handled when the query text changes.
+        if (!Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            init();
+        }
     }
 
     private AlertDialog alertDialog = null;

@@ -26,10 +26,12 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import java.util.ArrayList;
 
-public class ChangeListFragment extends Fragment {
+public class ChangeListFragment extends Fragment
+    implements SearchView.OnQueryTextListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -89,6 +91,26 @@ public class ChangeListFragment extends Fragment {
 
     public void refreshTabs() {
         mSectionsPagerAdapter.refreshTabs();
+    }
+
+    public CardsFragment getCurrentFragment() {
+        return mSectionsPagerAdapter.getCurrentFragment();
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        /* Although the submit request is handled when the query changes,
+         *  return false here to hide the soft keyboard.
+         */
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        // TODO: Pass this on to the current CardsFragment instance
+        /* TODO: The current status can be injected into the query (e.g. status:open)
+         *  if it is not already present */
+        return false;
     }
 
     /**

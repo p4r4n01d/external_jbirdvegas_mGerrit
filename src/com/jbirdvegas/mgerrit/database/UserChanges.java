@@ -235,6 +235,20 @@ public class UserChanges extends DatabaseTable {
     }
 
     /**
+     * List the commits for a given change status and subject
+     * @param context Context for database access
+     * @param status The change status to search for
+     * @param query A constructed where query string
+     * @param args Any bind arguments to be bound to the SQL query
+     * @return A CursorLoader
+     */
+    public static CursorLoader findCommits(Context context, String status,
+                                           String query, List<String> args) {
+        StringBuilder builder = new StringBuilder(query);
+        return findCommits(context, status, builder, args);
+    }
+
+    /**
      * Helper method for change list search queries
      * @param context Context for database access
      * @param status The change status to search for
