@@ -138,14 +138,17 @@ public class UserChanges extends DatabaseTable {
                                            String project) {
         StringBuilder builder = new StringBuilder();
         List<String> bindArgs = new ArrayList<String>();
+        boolean addAnd = false;
 
         if (committerID != null) {
-            builder.append(" AND ").append(C_USER_ID).append(" = ?");
+            builder.append(C_USER_ID).append(" = ?");
             bindArgs.add(committerID.toString());
+            addAnd = true;
         }
 
         if (project != null) {
-            builder.append(" AND ").append(C_PROJECT).append(" = ?");
+            if (addAnd) builder.append(" AND ");
+            builder.append(C_PROJECT).append(" = ?");
             bindArgs.add(project);
         }
 

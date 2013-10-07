@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.fima.cardsui.objects.Card;
+import com.fima.cardsui.objects.RecyclableCard;
 import com.jbirdvegas.mgerrit.CardsFragment;
 import com.jbirdvegas.mgerrit.GerritControllerActivity;
 import com.jbirdvegas.mgerrit.PatchSetViewerFragment;
@@ -42,12 +43,14 @@ import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommitCard extends Card {
+public class CommitCard extends RecyclableCard {
     private static final String TAG = CommitCard.class.getSimpleName();
 
     private final CommitterObject mCommitterObject;
     private final RequestQueue mRequestQuery;
     private final GerritControllerActivity mActivity;
+    private final int mGreen;
+    private final int mRed;
     private JSONCommit mCommit;
     private TextView mProjectTextView;
     private ChangeLogRange mChangeLogRange;
@@ -60,18 +63,13 @@ public class CommitCard extends Card {
         this.mCommitterObject = committerObject;
         this.mRequestQuery = requestQueue;
         this.mActivity = activity;
+
+        this.mGreen = mActivity.getResources().getColor(R.color.text_green);
+        this.mRed = mActivity.getResources().getColor(R.color.text_red);
     }
 
     @Override
-    public View getCardContent(final Context context) {
-        int mGreen = context.getResources().getColor(R.color.text_green);
-        int mRed = context.getResources().getColor(R.color.text_red);
-
-        // We are inflating a layout for each card, this is not good when we could be re-using them!
-        LayoutInflater inflater = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View commitCardView = inflater.inflate(R.layout.commit_card, null);
-
+    protected void applyTo(View commitCardView) {
         // I hate UI code so instead of embedding a LinearLayout for just an
         // ImageView with an associated TextView we just use the TextView's
         // built in CompoundDrawablesWithIntrinsicBounds(Drawable, Drawable, Drawable, Drawable)
@@ -82,7 +80,7 @@ public class CommitCard extends Card {
             ownerTextView.setText(mCommit.getOwnerObject().getName());
             ownerTextView.setTag(mCommit.getOwnerObject());
             TrackingClickListener trackingClickListener =
-                    new TrackingClickListener(context, mCommit.getOwnerObject());
+                    new TrackingClickListener(mActivity, mCommit.getOwnerObject());
             if (CardsFragment.inProject) {
                 trackingClickListener.addProjectToStalk(mCommit.getProject());
             }
@@ -95,7 +93,7 @@ public class CommitCard extends Card {
         mProjectTextView.setText(mCommit.getProject());
         mProjectTextView.setTextSize(18f);
         TrackingClickListener trackingClickListener =
-                new TrackingClickListener(context, mCommit.getProject(), mChangeLogRange);
+                new TrackingClickListener(mActivity, mCommit.getProject(), mChangeLogRange);
         if (mCommitterObject != null) {
             trackingClickListener.addUserToStalk(mCommitterObject);
         }
@@ -104,7 +102,7 @@ public class CommitCard extends Card {
         ((TextView) commitCardView.findViewById(R.id.commit_card_title))
                 .setText(mCommit.getSubject());
         ((TextView) commitCardView.findViewById(R.id.commit_card_last_updated))
-                .setText(mCommit.getLastUpdatedDate(context));
+                .setText(mCommit.getLastUpdatedDate(mActivity));
         ((TextView) commitCardView.findViewById(R.id.commit_card_commit_status))
                 .setText(mCommit.getStatus().toString());
         if (mCommit.getStatus().toString() == "MERGED") {
@@ -126,7 +124,6 @@ public class CommitCard extends Card {
         View.OnClickListener cardListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(context, PatchSetViewerFragment.class);
                 // example website
                 // http://gerrit.aokp.co/changes/?q=7615&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=CURRENT_FILES&o=DETAILED_LABELS
                 mActivity.onChangeSelected(mCommit.getChangeId(), mCommit.getStatus().toString(), true);
@@ -145,9 +142,9 @@ public class CommitCard extends Card {
                 Intent intent = new Intent(android.content.Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                intent.putExtra(Intent.EXTRA_SUBJECT, String.format(context.getString(R.string.commit_shared_from_mgerrit), mCommit.getChangeId()));
+                intent.putExtra(Intent.EXTRA_SUBJECT, String.format(mActivity.getString(R.string.commit_shared_from_mgerrit), mCommit.getChangeId()));
                 intent.putExtra(Intent.EXTRA_TEXT, mCommit.getWebAddress() + " #mGerrit");
-                context.startActivity(intent);
+                mActivity.startActivity(intent);
             }
         });
         browserView.setOnClickListener(new View.OnClickListener() {
@@ -156,7 +153,7 @@ public class CommitCard extends Card {
                 if (mCommit.getWebAddress() != null) {
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                             Uri.parse(mCommit.getWebAddress()));
-                    context.startActivity(browserIntent);
+                    mActivity.startActivity(browserIntent);
                 } else {
                     Toast.makeText(view.getContext(),
                             R.string.failed_to_find_url,
@@ -174,7 +171,11 @@ public class CommitCard extends Card {
             messageTv.setVisibility(View.GONE);
             changedFilesTv.setVisibility(View.GONE);
         }
-        return commitCardView;
+    }
+
+    @Override
+    protected int getCardLayoutId() {
+        return R.layout.commit_card;
     }
 
     public CommitCard setChangeLogRange(ChangeLogRange logRange) {

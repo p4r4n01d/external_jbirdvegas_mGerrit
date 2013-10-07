@@ -26,13 +26,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.fima.cardsui.objects.Card;
+import com.fima.cardsui.objects.RecyclableCard;
 import com.jbirdvegas.mgerrit.PatchSetViewerFragment;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.helpers.GravatarHelper;
 import com.jbirdvegas.mgerrit.listeners.TrackingClickListener;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 
-public class PatchSetPropertiesCard extends Card {
+public class PatchSetPropertiesCard extends RecyclableCard {
     private final JSONCommit mJSONCommit;
     private final PatchSetViewerFragment mPatchSetViewerFragment;
     private final RequestQueue mRequestQuery;
@@ -53,14 +54,11 @@ public class PatchSetPropertiesCard extends Card {
     }
 
     @Override
-    public View getCardContent(Context context) {
-        LayoutInflater inflater = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.properties_card, null);
-        mSubject = (TextView) rootView.findViewById(R.id.prop_card_subject);
-        mOwner = (TextView) rootView.findViewById(R.id.prop_card_owner);
-        mAuthor = (TextView) rootView.findViewById(R.id.prop_card_author);
-        mCommitter = (TextView) rootView.findViewById(R.id.prop_card_committer);
+    protected void applyTo(View convertView) {
+        mSubject = (TextView) convertView.findViewById(R.id.prop_card_subject);
+        mOwner = (TextView) convertView.findViewById(R.id.prop_card_owner);
+        mAuthor = (TextView) convertView.findViewById(R.id.prop_card_author);
+        mCommitter = (TextView) convertView.findViewById(R.id.prop_card_committer);
 
         mSubject.setText(mJSONCommit.getSubject());
         mOwner.setText(mJSONCommit.getOwnerObject().getName());
@@ -76,8 +74,8 @@ public class PatchSetPropertiesCard extends Card {
         mOwner.setTag(mJSONCommit.getOwnerObject());
         setContextMenu(mOwner);
         setClicksToActionViews(
-                (ImageView) rootView.findViewById(R.id.properties_card_share_info),
-                (ImageView) rootView.findViewById(R.id.properties_card_view_in_browser));
+                (ImageView) convertView.findViewById(R.id.properties_card_share_info),
+                (ImageView) convertView.findViewById(R.id.properties_card_view_in_browser));
         try {
             // set text will throw NullPointer if
             // we don't have author/committer objects
@@ -106,12 +104,16 @@ public class PatchSetPropertiesCard extends Card {
                     mJSONCommit.getCommitterObject().getEmail(),
                     mRequestQuery);
         } catch (NullPointerException npe) {
-            rootView.findViewById(R.id.prop_card_author)
+            convertView.findViewById(R.id.prop_card_author)
                     .setVisibility(View.GONE);
-            rootView.findViewById(R.id.prop_card_committer)
+            convertView.findViewById(R.id.prop_card_committer)
                     .setVisibility(View.GONE);
         }
-        return rootView;
+    }
+
+    @Override
+    protected int getCardLayoutId() {
+        return R.layout.properties_card;
     }
 
     private void setClicksToActionViews(ImageView share, ImageView browser) {

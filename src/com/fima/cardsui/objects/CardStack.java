@@ -1,5 +1,7 @@
 package com.fima.cardsui.objects;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.text.TextUtils;
@@ -7,10 +9,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.fima.cardsui.StackAdapter;
 import com.fima.cardsui.SwipeDismissTouchListener;
 import com.fima.cardsui.SwipeDismissTouchListener.OnDismissCallback;
@@ -20,8 +21,6 @@ import com.jbirdvegas.mgerrit.R;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.Animator.AnimatorListener;
 import com.nineoldandroids.animation.ObjectAnimator;
-
-import java.util.ArrayList;
 
 public class CardStack extends AbstractCard {
     private static final float _12F = 12f;
@@ -33,42 +32,71 @@ public class CardStack extends AbstractCard {
     private StackAdapter mAdapter;
     private int mPosition;
     private Context mContext;
+    private CardStack mStack;
 
     public CardStack() {
         cards = new ArrayList<Card>();
+        mStack = this;
     }
 
+    public CardStack(String title) {
+        cards = new ArrayList<Card>();
+        mStack = this;
+
+        setTitle(title);
+    }
     public ArrayList<Card> getCards() {
         return cards;
     }
 
     public void add(Card newCard) {
         cards.add(newCard);
+
     }
 
     @Override
-    public View getView(Context context, View convertView) {
-        return getView(context, convertView, false);
+    public View getView(Context context) {
+        return getView(context, null, false);
     }
 
     @Override
+    public View getView(Context context, boolean swipable) {
+        return getView(context, null, swipable);
+    }
+
     public View getView(Context context, View convertView, boolean swipable) {
 
         mContext = context;
 
-        convertView = LayoutInflater.from(context).inflate(
+        // try to recycle views if possible
+        Log.d("CardStack", String.format("Checking to recycle view. convertView is %s", (convertView == null ? "null" : "not null")));
+        if (convertView != null) {
+            Log.d("CardStack", String.format("Checking types.  convertView is %d, need %d", convertView.getId(), R.id.stackRoot));
+            // can only convert something with the correct root element
+            if (convertView.getId() == R.id.stackRoot)
+                if (convert(convertView))
+                    return convertView;
+        }
+
+        final View view = LayoutInflater.from(context).inflate(
                 R.layout.item_stack, null);
 
-        final RelativeLayout container = (RelativeLayout) convertView
+        assert view != null;
+        final RelativeLayout container = (RelativeLayout) view
                 .findViewById(R.id.stackContainer);
+        final TextView title = (TextView) view.findViewById(R.id.stackTitle);
 
-        setTitle(convertView);
+        if (!TextUtils.isEmpty(this.title)) {
+            if (stackTitleColor == null)
+                stackTitleColor = context.getResources().getString(R.color.card_title_text);
+
+            title.setTextColor(Color.parseColor(stackTitleColor));
+            title.setText(this.title);
+            title.setVisibility(View.VISIBLE);
+        }
 
         final int cardsArraySize = cards.size();
         final int lastCardPosition = cardsArraySize - 1;
-
-        Animation anim = AnimationUtils.loadAnimation(context, R.anim.cards_incoming_anim);
-        boolean animationsEnabled = Prefs.getAnimationPreference(context);
 
         Card card;
         View cardView;
@@ -80,27 +108,23 @@ public class CardStack extends AbstractCard {
 
             int topPx = 0;
 
-            if (lastCardPosition == i) {
-                // last card
+            // handle the view
+            if (i == 0) {
+                cardView = card.getViewFirst(context);
+            }
+            else if (i == lastCardPosition) {
                 cardView = card.getViewLast(context);
-                cardView.setOnClickListener(card.getClickListener());
-            } else {
-                if (0 == i) {
-                    // first card
-                    cardView = card.getViewFirst(context);
-
-                } else {
-                    // any other card
-                    cardView = card.getView(context, null);
-
-                }
-                cardView.setOnClickListener(getClickListener(this, container, i));
+            }
+            else {
+                cardView = card.getView(context);
             }
 
-            // if user wants animations
-            if (animationsEnabled) {
-                // add Google Now style animation
-                cardView.startAnimation(anim);
+            // handle the listener
+            if (i == lastCardPosition) {
+                cardView.setOnClickListener(card.getClickListener());
+            }
+            else {
+                cardView.setOnClickListener(getClickListener(this, container, i));
             }
 
             if (i > 0) {
@@ -112,7 +136,7 @@ public class CardStack extends AbstractCard {
 
             cardView.setLayoutParams(lp);
 
-            if (card.isSwipable()) {
+            if (swipable) {
                 cardView.setOnTouchListener(new SwipeDismissTouchListener(
                         cardView, card, new OnDismissCallback() {
 
@@ -123,7 +147,7 @@ public class CardStack extends AbstractCard {
                         c.OnSwipeCard();
                         cards.remove(c);
 
-                        mAdapter.setItems(CardStack.this, getPosition());
+                        mAdapter.setItems(mStack, getPosition());
 
                         // refresh();
                         mAdapter.notifyDataSetChanged();
@@ -135,17 +159,46 @@ public class CardStack extends AbstractCard {
             container.addView(cardView);
         }
 
-        return convertView;
+        return view;
     }
 
-    private void setTitle(View view) {
-        final TextView title = (TextView) view.findViewById(R.id.stackTitle);
-
-        if (!TextUtils.isEmpty(this.title)) {
-            title.setTextColor(Color.parseColor(stackTitleColor));
-            title.setText(this.title);
-            title.setVisibility(View.VISIBLE);
+    /**
+     * Attempt to modify the convertView instead of inflating a new View for this CardStack.
+     * If convertView isn't compatible, it isn't modified.
+     * @param convertView view to try reusing
+     * @return true on success, false if the convertView is not compatible
+     */
+    private boolean convert(View convertView) {
+        // only convert singleton stacks
+        if (cards.size() != 1) {
+            Log.d("CardStack", "Can't convert view: num cards is " + cards.size());
+            return false;
         }
+
+        RelativeLayout container = (RelativeLayout) convertView.findViewById(R.id.stackContainer);
+        if (container == null) {
+            Log.d("CardStack", "Can't convert view: can't find stackContainer");
+            return false;
+        }
+
+        if (container.getChildCount() != 1) {
+            Log.d("CardStack", "Can't convert view: child count is " + container.getChildCount());
+            return false;
+        }
+
+        // check to see if they're compatible Card types
+        Card card = cards.get(0);
+        View convertCardView = container.getChildAt(0);
+
+        if (convertCardView == null || convertCardView.getId() != card.getId()) {
+            Log.d("CardStack", String.format("Can't convert view: child Id is 0x%x, card Id is 0x%x", convertCardView != null ? convertCardView.getId() : 0, card.getId()));
+            return false;
+        }
+
+        if (card.convert(convertCardView))
+            return true;
+
+        return false;
     }
 
     public Card remove(int index) {
@@ -354,6 +407,7 @@ public class CardStack extends AbstractCard {
 
                 Card card = cardStack.remove(index);
                 cardStack.add(card);
+
                 mAdapter.setItems(cardStack, cardStack.getPosition());
 
                 // refresh();
