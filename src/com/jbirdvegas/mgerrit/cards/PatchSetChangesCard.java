@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.fima.cardsui.objects.Card;
+import com.fima.cardsui.objects.RecyclableCard;
 import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.dialogs.DiffDialog;
@@ -38,17 +39,17 @@ import com.jbirdvegas.mgerrit.objects.JSONCommit;
 
 import java.util.List;
 
-public class PatchSetChangesCard extends Card {
+public class PatchSetChangesCard extends RecyclableCard {
     private static final String TAG = PatchSetChangesCard.class.getSimpleName();
     private static final boolean VERBOSE = false;
     private JSONCommit mCommit;
     private LayoutInflater mInflater;
-    private final Activity mCardsActivity;
+    private final Activity mActivity;
     private AlertDialog mAlertDialog;
 
     public PatchSetChangesCard(JSONCommit commit, Activity activity) {
         mCommit = commit;
-        mCardsActivity = activity;
+        mActivity = activity;
     }
 
     @Override
@@ -61,6 +62,7 @@ public class PatchSetChangesCard extends Card {
         if (changedFileList == null) {
             // EEK! just show a simple not found message
             // TODO Show some error message?
+            Log.e(TAG, "Could not find the list of changed files for this commit.");
         } else {
             for (ChangedFile changedFile : changedFileList) {
                 // generate and add the Changed File Views
@@ -120,7 +122,7 @@ public class PatchSetChangesCard extends Card {
         innerRootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                AlertDialog.Builder ad = new AlertDialog.Builder(mCardsActivity)
+                AlertDialog.Builder ad = new AlertDialog.Builder(mActivity)
                         .setTitle(R.string.choose_diff_view);
                 // TODO XXX ABANDONED till APIs are stable on Google's side :(
                 ad.setPositiveButton(R.string.context_menu_view_diff_dialog, new DialogInterface.OnClickListener() {
@@ -134,7 +136,7 @@ public class PatchSetChangesCard extends Card {
                         String base = "%schanges/%s/revisions/current/patch";
                         String base64 = "%schanges/%s/revisions/%s/files/%s/content";
                         String url = String.format(base,
-                                Prefs.getCurrentGerrit(mCardsActivity),
+                                Prefs.getCurrentGerrit(mActivity),
                                 mCommit.getId());
                                 //mCommit.getCurrentRevision(),
                                 //URLEncoder.encode(((ChangedFile) view.getTag()).getPath()));
@@ -163,17 +165,27 @@ public class PatchSetChangesCard extends Card {
         return innerRootView;
     }
 
+    @Override
+    protected void applyTo(View convertView) {
+        // TODO: Switch to listview
+    }
+
+    @Override
+    protected int getCardLayoutId() {
+        return R.layout.patchset_file_changed_list_item;
+    }
+
     // creates the Diff viewer dialog
     private void launchDiffDialog(String url, ChangedFile changedFile) {
         Log.d(TAG, "Attempting to contact: " + url);
-        DiffDialog diffDialog = new DiffDialog(mCardsActivity, url, changedFile);
+        DiffDialog diffDialog = new DiffDialog(mActivity, url, changedFile);
         diffDialog.addExceptionCallback(new DiffDialog.DiffFailCallback() {
             @Override
             public void killDialogAndErrorOut(Exception e) {
                 if (mAlertDialog != null) {
                     mAlertDialog.cancel();
                 }
-                Tools.showErrorDialog(mCardsActivity, e);
+                Tools.showErrorDialog(mActivity, e);
             }
         });
         mAlertDialog = diffDialog.create();

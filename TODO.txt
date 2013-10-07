@@ -37,6 +37,8 @@ Outstanding
 - Check BroadcastReceivers across activities
 	- E.g. If a broadcast response is broadcast delivered while the ProjectsList activity is open for a change query, the broadcast should be
 		(re-)delivered to the activity that was listening to broadcasts matching the actual query
+- Change detail viewpager
+	- Viewpager to swipe through changes in the change detail screen (phone layout only)
 
 Database
 --------
@@ -48,12 +50,19 @@ Searching (Requires database), action bar
 		- mimic Gerrit web interface queries
 		- Support searching for a specific commit heading (default). e.g. searching for "commit:[translation]" will show a heading for Commits and list all the commits with "[translation]" in the title.
 		- Where it is ambigious (e.g. search results from commits and committers) show results under section headings. These section headings should be collapsable.
+	- Right navigation filter draw
+		- Modular: users choose a supported filter type from a spinner and a layout is inflated corresponding to that filter type from where they can fill out the filter parameters.
+			- Main layouts will be either a text field or a spinner
+		- Filter options modify search query (present in either action bar (search) or filter draw)
+		- Idea: Users can do filtering and bypass the filter draw entirely. The filter draw provides assistance on how to formulate queries that the web interface uses.
+		- We are going to support new filter types (keywords) and/or new parameters for them (e.g. date range filtering for the age keyword)
 
 CardsUI Library
 ----------------
 	- Decrease padding between cards
 	- Investigate card swiping
 	- Include card stripe colouring support/update library to Androguide
+		- This now proports to support view recycling
 
 Tablet (master-detail layout)
 -----------------------------

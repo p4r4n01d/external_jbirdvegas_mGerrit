@@ -5,50 +5,68 @@ import android.view.View;
 
 public abstract class AbstractCard {
 
-    protected int image;
+	protected int image;
+	protected String description, color, titleColor, desc, title, titlePlay;
+	protected Boolean hasOverflow, isClickable;
+	protected int imageRes;
+	protected Object data;
 
-    protected String description, color, titleColor, desc, title, titlePlay;
+	public abstract View getView(Context context);
 
-    protected Boolean hasOverflow, isClickable;
+	public abstract View getView(Context context, boolean swipable);
 
-    public abstract View getView(Context context, View convertView);
+	public String getTitle() {
+		return title;
+	}
 
-    public abstract View getView(Context context, View convertView, boolean swipable);
+	public String getTitlePlay() {
+		return titlePlay;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public String getDesc() {
+		return desc;
+	}
 
-    public String getTitlePlay() {
-        return titlePlay;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public String getDesc() {
-        return desc;
-    }
+	public int getImage() {
+		return image;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getColor() {
+		return color;
+	}
 
-    public int getImage() {
-        return image;
-    }
+	public String getTitleColor() {
+		return titleColor;
+	}
 
-    public String getColor() {
-        return color;
-    }
+	public Boolean getHasOverflow() {
+		return hasOverflow;
+	}
 
-    public String getTitleColor() {
-        return titleColor;
-    }
+	public Boolean getIsClickable() {
+		return isClickable;
+	}
 
-    public Boolean getHasOverflow() {
-        return hasOverflow;
-    }
+	public int getImageRes() {
+		return imageRes;
+	}
 
-    public Boolean getIsClickable() {
-        return isClickable;
-    }
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
 
+	/**
+	 * @param data
+	 *            the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
 }

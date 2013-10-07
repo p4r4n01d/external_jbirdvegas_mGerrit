@@ -138,14 +138,17 @@ public class UserChanges extends DatabaseTable {
                                            String project) {
         StringBuilder builder = new StringBuilder();
         List<String> bindArgs = new ArrayList<String>();
+        boolean addAnd = false;
 
         if (committerID != null) {
-            builder.append(" AND ").append(C_USER_ID).append(" = ?");
+            builder.append(C_USER_ID).append(" = ?");
             bindArgs.add(committerID.toString());
+            addAnd = true;
         }
 
         if (project != null) {
-            builder.append(" AND ").append(C_PROJECT).append(" = ?");
+            if (addAnd) builder.append(" AND ");
+            builder.append(C_PROJECT).append(" = ?");
             bindArgs.add(project);
         }
 
@@ -232,6 +235,20 @@ public class UserChanges extends DatabaseTable {
     // Removes the extraneous 0s off the milliseconds in server timestamps
     private static String trimDate(String date) {
         return date.substring(0, date.length() - 6);
+    }
+
+    /**
+     * List the commits for a given change status and subject
+     * @param context Context for database access
+     * @param status The change status to search for
+     * @param query A constructed where query string
+     * @param args Any bind arguments to be bound to the SQL query
+     * @return A CursorLoader
+     */
+    public static CursorLoader findCommits(Context context, String status,
+                                           String query, List<String> args) {
+        StringBuilder builder = new StringBuilder(query);
+        return findCommits(context, status, builder, args);
     }
 
     /**
