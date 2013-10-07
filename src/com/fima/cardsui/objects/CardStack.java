@@ -1,7 +1,5 @@
 package com.fima.cardsui.objects;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.text.TextUtils;
@@ -16,11 +14,12 @@ import com.fima.cardsui.StackAdapter;
 import com.fima.cardsui.SwipeDismissTouchListener;
 import com.fima.cardsui.SwipeDismissTouchListener.OnDismissCallback;
 import com.fima.cardsui.Utils;
-import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.Animator.AnimatorListener;
 import com.nineoldandroids.animation.ObjectAnimator;
+
+import java.util.ArrayList;
 
 public class CardStack extends AbstractCard {
     private static final float _12F = 12f;
@@ -45,6 +44,7 @@ public class CardStack extends AbstractCard {
 
         setTitle(title);
     }
+
     public ArrayList<Card> getCards() {
         return cards;
     }
@@ -111,19 +111,16 @@ public class CardStack extends AbstractCard {
             // handle the view
             if (i == 0) {
                 cardView = card.getViewFirst(context);
-            }
-            else if (i == lastCardPosition) {
+            } else if (i == lastCardPosition) {
                 cardView = card.getViewLast(context);
-            }
-            else {
+            } else {
                 cardView = card.getView(context);
             }
 
             // handle the listener
             if (i == lastCardPosition) {
                 cardView.setOnClickListener(card.getClickListener());
-            }
-            else {
+            } else {
                 cardView.setOnClickListener(getClickListener(this, container, i));
             }
 
@@ -165,6 +162,7 @@ public class CardStack extends AbstractCard {
     /**
      * Attempt to modify the convertView instead of inflating a new View for this CardStack.
      * If convertView isn't compatible, it isn't modified.
+     *
      * @param convertView view to try reusing
      * @return true on success, false if the convertView is not compatible
      */

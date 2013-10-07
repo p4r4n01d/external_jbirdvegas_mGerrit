@@ -1,7 +1,5 @@
 package com.fima.cardsui;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +7,8 @@ import android.widget.BaseAdapter;
 
 import com.fima.cardsui.objects.AbstractCard;
 import com.fima.cardsui.objects.CardStack;
+
+import java.util.ArrayList;
 
 public class StackAdapter extends BaseAdapter {
 

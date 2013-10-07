@@ -14,16 +14,6 @@ public abstract class Card extends AbstractCard {
 
     // handle swiping on a per card bases
     protected boolean mSwipable = false;
-
-    public boolean isSwipable() {
-        return mSwipable;
-    }
-
-    public Card setSwipableCard(boolean swipable) {
-        this.mSwipable = swipable;
-        return this;
-    }
-
     protected View mCardLayout;
     private OnCardSwiped onCardSwipedListener;
     private OnClickListener mListener;
@@ -72,6 +62,15 @@ public abstract class Card extends AbstractCard {
         this.hasOverflow = hasOverflow;
         this.isClickable = isClickable;
         this.imageRes = imageRes;
+    }
+
+    public boolean isSwipable() {
+        return mSwipable;
+    }
+
+    public Card setSwipableCard(boolean swipable) {
+        this.mSwipable = swipable;
+        return this;
     }
 
     @Override
@@ -201,17 +200,18 @@ public abstract class Card extends AbstractCard {
         return R.layout.item_play_card_empty_first;
     }
 
-    public interface OnCardSwiped {
-        public void onCardSwiped(Card card, View layout);
-    }
-
     /**
      * Attempt to reuse convertCardView.  Should not modify convertCardView if it's
      * not compatible.  The implementer should check the card content part and
      * verify that it matches.
+     *
      * @param convertCardView the view to convert, with root Id equal to Card.getId()
      * @return true on success, false if not compatible
      */
     public abstract boolean convert(View convertCardView);
+
+    public interface OnCardSwiped {
+        public void onCardSwiped(Card card, View layout);
+    }
 
 }

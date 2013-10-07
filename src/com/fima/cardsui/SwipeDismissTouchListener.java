@@ -32,7 +32,7 @@ import com.nineoldandroids.view.ViewHelper;
 
 /**
  * A {@link android.view.View.OnTouchListener} that makes any {@link View}
- * dismissable when the user swipes (drags her finger) horizontally across the
+ * dismissable when the user swipes (drags their finger) horizontally across the
  * view.
  * 
  * <p>
