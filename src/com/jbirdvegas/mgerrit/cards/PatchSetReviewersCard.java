@@ -53,7 +53,6 @@ public class PatchSetReviewersCard extends RecyclableCard {
     @Override
     protected void applyTo(View convertView) {
         // Locate the views if necessary (these views are constant)
-
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
         if (convertView.getTag() == null) {
             viewHolder = new ViewHolder();

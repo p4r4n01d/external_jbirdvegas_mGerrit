@@ -43,40 +43,24 @@ public class PatchSetChangesCard extends RecyclableCard {
     private static final String TAG = PatchSetChangesCard.class.getSimpleName();
     private static final boolean VERBOSE = false;
     private JSONCommit mCommit;
-    private LayoutInflater mInflater;
     private final Activity mActivity;
     private AlertDialog mAlertDialog;
+    private final int mGreen;
+    private final int mRed;
 
     public PatchSetChangesCard(JSONCommit commit, Activity activity) {
         mCommit = commit;
         mActivity = activity;
-    }
 
-    @Override
-    public View getCardContent(final Context context) {
-        mInflater = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewGroup rootView = (ViewGroup) mInflater.inflate(R.layout.linear_layout, null);
-        List<ChangedFile> changedFileList = mCommit.getChangedFiles();
-        // its possible for this to be null so watch out
-        if (changedFileList == null) {
-            // EEK! just show a simple not found message
-            // TODO Show some error message?
-            Log.e(TAG, "Could not find the list of changed files for this commit.");
-        } else {
-            for (ChangedFile changedFile : changedFileList) {
-                // generate and add the Changed File Views
-                if (rootView != null) {
-                    rootView.addView(generateChangedFileView(changedFile, context));
-                }
-
-            }
-        }
-        return rootView;
+        mGreen = mActivity.getResources().getColor(R.color.text_green);
+        mRed = mActivity.getResources().getColor(R.color.text_red);
     }
 
     private View generateChangedFileView(final ChangedFile changedFile, final Context context) {
-        View innerRootView = mInflater.inflate(R.layout.patchset_file_changed_list_item, null);
+
+        LayoutInflater inflater = (LayoutInflater)
+                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View innerRootView = inflater.inflate(R.layout.patchset_file_changed_list_item, null);
         innerRootView.setTag(changedFile);
         TextView path = (TextView)
                 innerRootView.findViewById(R.id.changed_file_path);
@@ -105,7 +89,6 @@ public class PatchSetChangesCard extends RecyclableCard {
                 inserted.setVisibility(View.GONE);
                 insText.setVisibility(View.GONE);
             } else {
-                int mGreen = context.getResources().getColor(R.color.text_green);
                 inserted.setText('+' + String.valueOf(changedFile.getInserted()));
                 inserted.setTextColor(mGreen);
             }
@@ -114,7 +97,6 @@ public class PatchSetChangesCard extends RecyclableCard {
                 deleted.setVisibility(View.GONE);
                 delText.setVisibility(View.GONE);
             } else {
-                int mRed = context.getResources().getColor(R.color.text_red);
                 deleted.setText('-' + String.valueOf(changedFile.getDeleted()));
                 deleted.setTextColor(mRed);
             }
@@ -167,12 +149,28 @@ public class PatchSetChangesCard extends RecyclableCard {
 
     @Override
     protected void applyTo(View convertView) {
-        // TODO: Switch to listview
+
+        ViewGroup view = (ViewGroup) convertView;
+        List<ChangedFile> changedFileList = mCommit.getChangedFiles();
+        // its possible for this to be null so watch out
+        if (changedFileList == null) {
+            // EEK! just show a simple not found message
+            // TODO Show some error message?
+            Log.e(TAG, "Could not find the list of changed files for this commit.");
+        } else {
+            for (ChangedFile changedFile : changedFileList) {
+                // generate and add the Changed File Views
+                if (view != null) {
+                    view.addView(generateChangedFileView(changedFile, mActivity));
+                }
+
+            }
+        }
     }
 
     @Override
     protected int getCardLayoutId() {
-        return R.layout.patchset_file_changed_list_item;
+        return R.layout.linear_layout;
     }
 
     // creates the Diff viewer dialog
