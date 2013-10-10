@@ -95,14 +95,8 @@ public class PatchSetCommentsCard extends RecyclableCard {
         // replace replace emoticons with drawables
         commentMessage.setText(EmoticonSupportHelper.getSmiledText(mContext, comment.getMessage()));
         // set gravatar icon for commenter
-        GravatarHelper.populateProfilePicture(
-                (ImageView) commentView.findViewById(R.id.comment_gravatar),
-                comment.getAuthorObject().getEmail(),
-                mRequestQuery);
         NetworkImageView gravatar = (NetworkImageView) commentView.findViewById(R.id.comment_gravatar);
-
-        gravatar.setImageUrl(GravatarHelper.getGravatarUrl(comment.getAuthorObject().getEmail()),
-                new ImageLoader(mRequestQuery, new BitmapLruCache(mContext)));
+        GravatarHelper.populateProfilePicture(gravatar, comment.getAuthorObject().getEmail(), mRequestQuery);
         return commentView;
     }
 
