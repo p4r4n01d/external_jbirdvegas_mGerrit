@@ -121,4 +121,10 @@
     <string name="projects_search_hint">Search projects</string>
     <string name="changes_search_hint">Search changes</string>
     <string name="failed_to_find_url">Failed to find project\'s URL</string>
+    <string name="code_review_plus_two">Looks good to me, approved</string>
+    <string name="code_review_plus_one">Looks good to me, but someone else must approve</string>
+    <string name="code_review_minus_one">I would prefer that you didn\'t submit this</string>
+    <string name="code_review_minus_two">Do not submit</string>
+    <string name="verified_plus_one">Verified</string>
+    <string name="verified_minus_one">Fails</string>
 </resources>
