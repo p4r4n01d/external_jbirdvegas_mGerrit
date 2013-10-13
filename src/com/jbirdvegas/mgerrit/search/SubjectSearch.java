@@ -25,6 +25,7 @@ public class SubjectSearch extends SearchKeyword {
     static {
         registerKeyword(OP_NAME, SubjectSearch.class);
         registerKeyword("subject", SubjectSearch.class);
+        registerKeyword("intitle", SubjectSearch.class);
     }
 
     public SubjectSearch(String param) {

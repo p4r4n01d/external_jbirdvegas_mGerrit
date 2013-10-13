@@ -122,11 +122,12 @@ public abstract class SearchKeyword {
     public static Set<SearchKeyword> constructTokens(String query) {
         Set<SearchKeyword> set = new HashSet<SearchKeyword>();
         String currentToken = "";
+
         for (int i = 0, n = query.length(); i < n; i++) {
             char c = query.charAt(i);
             if (Character.isWhitespace(c)) {
                 if (currentToken.length() > 0) {
-                    set.add(buildToken(currentToken));
+                    addToSetIfNotNull(buildToken(currentToken), set);
                     currentToken = "";
                 }
             } else if (c == '"') {
@@ -144,9 +145,15 @@ public abstract class SearchKeyword {
 
         // Have to check if a token was terminated by end of string
         if (currentToken.length() > 0) {
-            set.add(buildToken(currentToken));
+            addToSetIfNotNull(buildToken(currentToken), set);
         }
         return set;
+    }
+
+    private static void addToSetIfNotNull(SearchKeyword token, Set<SearchKeyword> set) {
+        if (token != null) {
+            set.add(token);
+        }
     }
 
     public static String constructDbSearchQuery(Set<SearchKeyword> tokens) {
@@ -154,6 +161,7 @@ public abstract class SearchKeyword {
         Iterator<SearchKeyword> it = tokens.iterator();
         while (it.hasNext()) {
             SearchKeyword token = it.next();
+            if (token == null) continue;
             whereQuery.append(token.buildSearch());
             if (it.hasNext()) whereQuery.append(" AND ");
         }
