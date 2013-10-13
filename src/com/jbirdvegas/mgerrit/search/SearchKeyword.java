@@ -1,10 +1,13 @@
 package com.jbirdvegas.mgerrit.search;
 
 import android.content.Context;
+import android.support.v4.content.CursorLoader;
+import android.util.Log;
 
 import com.jbirdvegas.mgerrit.database.UserChanges;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,13 +35,31 @@ import java.util.Set;
  */
 public abstract class SearchKeyword {
 
+    public static final String TAG = "SearchKeyword";
+
     private final String mOpName;
     private final String mOpParam;
     private String mOperator;
 
-    private static final Map<String, Class<? extends SearchKeyword>>_KEYWORDS;
+    // Initialise the map of search keywords supported
+    private static final Set<Class<? extends SearchKeyword>> _CLASSES;
+    private static Map<String, Class<? extends SearchKeyword>> _KEYWORDS;
     static {
         _KEYWORDS = new HashMap<String, Class<? extends SearchKeyword>>();
+        _CLASSES = new HashSet<Class<? extends SearchKeyword>>();
+
+        // Add each search keyword here
+        _CLASSES.add(ChangeSearch.class);
+        _CLASSES.add(SubjectSearch.class);
+
+        // This will load the class calling the class's static block
+        for (Class<? extends SearchKeyword> clazz : _CLASSES) {
+            try {
+                Class.forName(clazz.getName());
+            } catch (ClassNotFoundException e) {
+                Log.e(TAG, String.format("Could not load class '%s'", clazz.getSimpleName()));
+            }
+        }
     }
 
     public SearchKeyword(String name, String param) {
@@ -82,8 +103,8 @@ public abstract class SearchKeyword {
             if (name.equalsIgnoreCase(entry.getKey())) {
                 Constructor<? extends SearchKeyword> constructor = null;
                 try {
-                    constructor = entry.getValue().getDeclaredConstructor(String.class, String.class);
-                    constructor.newInstance(name, param);
+                    constructor = entry.getValue().getDeclaredConstructor(String.class);
+                    return constructor.newInstance(param);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -120,10 +141,15 @@ public abstract class SearchKeyword {
                 currentToken += c;
             }
         }
+
+        // Have to check if a token was terminated by end of string
+        if (currentToken.length() > 0) {
+            set.add(buildToken(currentToken));
+        }
         return set;
     }
 
-    private static String constructDbSearchQuery(Set<SearchKeyword> tokens) {
+    public static String constructDbSearchQuery(Set<SearchKeyword> tokens) {
         StringBuilder whereQuery = new StringBuilder();
         Iterator<SearchKeyword> it = tokens.iterator();
         while (it.hasNext()) {
@@ -134,17 +160,13 @@ public abstract class SearchKeyword {
         return whereQuery.toString();
     }
 
-    public static void search(Context context, String query, String status) {
-        Set<SearchKeyword> tokens = constructTokens(query);
-        String where = constructDbSearchQuery(tokens);
-
-        List<String> bindArgs = new ArrayList<String>();
-        for (SearchKeyword token : tokens) {
-            bindArgs.add(token.getParam());
-        }
-
-        UserChanges.findCommits(context, status, where, bindArgs);
-    }
-
     public abstract String buildSearch();
+
+    /**
+     * Formats the bind argument for query binding.
+     * May be overriden to include wildcards in the parameter for like queries
+     */
+    public String getEscapeArgument() {
+        return getParam();
+    }
 }

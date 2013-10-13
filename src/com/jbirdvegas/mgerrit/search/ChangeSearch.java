@@ -23,8 +23,8 @@ public class ChangeSearch extends SearchKeyword {
     public static final String OP_NAME = "change";
 
     static {
-        registerKeyword(OP_NAME, SubjectSearch.class);
-        registerKeyword("changeid", SubjectSearch.class);
+        registerKeyword(OP_NAME, ChangeSearch.class);
+        registerKeyword("changeid", ChangeSearch.class);
     }
 
     public ChangeSearch(String param) {
@@ -34,5 +34,10 @@ public class ChangeSearch extends SearchKeyword {
     @Override
     public String buildSearch() {
         return UserChanges.C_CHANGE_ID + " LIKE ?";
+    }
+
+    @Override
+    public String getEscapeArgument() {
+        return new StringBuilder().append(getParam()).append('%').toString();
     }
 }

@@ -17,7 +17,6 @@ package com.jbirdvegas.mgerrit;
  *  limitations under the License.
  */
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.SearchManager;
@@ -31,12 +30,9 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -52,7 +48,6 @@ import android.widget.Toast;
 
 import com.jbirdvegas.mgerrit.helpers.GerritTeamsHelper;
 import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
-import com.jbirdvegas.mgerrit.listeners.MyTabListener;
 import com.jbirdvegas.mgerrit.message.*;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
@@ -150,7 +145,7 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     private void init() {
-        if (!CardsFragment.mSkipStalking) {
+        if (!CardsFragment.sSkipStalking) {
             try {
                 mCommitterObject = getIntent()
                         .getExtras()

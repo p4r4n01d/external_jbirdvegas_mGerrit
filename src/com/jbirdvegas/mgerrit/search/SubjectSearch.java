@@ -36,4 +36,9 @@ public class SubjectSearch extends SearchKeyword {
         return UserChanges.C_SUBJECT + " LIKE ?";
     }
 
+    @Override
+    public String getEscapeArgument() {
+        return new StringBuilder().append('%').append(getParam()).append('%').toString();
+    }
+
 }

@@ -110,6 +110,7 @@ public class ChangeListFragment extends Fragment
         // TODO: Pass this on to the current CardsFragment instance
         /* TODO: The current status can be injected into the query (e.g. status:open)
          *  if it is not already present */
+        getCurrentFragment().setSearchQuery(newText);
         return false;
     }
 
