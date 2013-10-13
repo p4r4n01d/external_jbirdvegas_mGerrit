@@ -211,6 +211,20 @@ public class GerritControllerActivity extends FragmentActivity {
         searchView.setIconifiedByDefault(true);
         // Let the change list fragment handle queries directly.
         searchView.setOnQueryTextListener(mChangeList);
+        searchView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                SearchView view = (SearchView) v;
+                if (view.isIconified()) {
+                    mMenu.findItem(R.id.menu_team_instance).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                    mMenu.findItem(R.id.menu_projects).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                } else {
+                    mMenu.findItem(R.id.menu_team_instance).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                    mMenu.findItem(R.id.menu_projects).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                }
+            }
+        });
 
         return true;
     }

@@ -99,18 +99,17 @@ public class ChangeListFragment extends Fragment
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        /* Although the submit request is handled when the query changes,
-         *  return false here to hide the soft keyboard.
-         */
+        // Pass this on to the current CardsFragment instance
+        getCurrentFragment().setSearchQuery(query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        // TODO: Pass this on to the current CardsFragment instance
-        /* TODO: The current status can be injected into the query (e.g. status:open)
-         *  if it is not already present */
-        getCurrentFragment().setSearchQuery(newText);
+        // Handled when the search is submitted instead.
+        if (newText.isEmpty()) {
+            getCurrentFragment().setSearchQuery("");
+        }
         return false;
     }
 

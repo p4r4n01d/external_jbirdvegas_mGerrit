@@ -354,6 +354,11 @@ public abstract class CardsFragment extends Fragment
      * @param query The search query text
      */
     public void setSearchQuery(String query) {
+        // Clear any previous searches that where made
+        if (query == null || query.isEmpty()) {
+            getLoaderManager().restartLoader(0, null, this);
+        }
+
         Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
         if (tokens == null || tokens.isEmpty()) {
             return;
@@ -372,6 +377,9 @@ public abstract class CardsFragment extends Fragment
         Bundle bundle = new Bundle();
         bundle.putString("WHERE", where);
         bundle.putStringArrayList("BIND_ARGS", bindArgs);
+
+        // OnLoaderReset is not called when restarting a loader so unbind the data here
+        mCards.clearCards();
         getLoaderManager().restartLoader(0, bundle, this);
     }
 
