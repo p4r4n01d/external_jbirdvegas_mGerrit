@@ -127,4 +127,5 @@
     <string name="code_review_minus_two">Do not submit</string>
     <string name="verified_plus_one">Verified</string>
     <string name="verified_minus_one">Fails</string>
+    <string name="change_status_update">A new change status was selected</string>
 </resources>

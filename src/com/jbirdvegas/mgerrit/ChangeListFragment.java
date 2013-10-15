@@ -28,6 +28,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 
+import com.jbirdvegas.mgerrit.database.SelectedChange;
+import com.jbirdvegas.mgerrit.message.StatusSelected;
+import com.jbirdvegas.mgerrit.objects.JSONCommit;
+
 import java.util.ArrayList;
 
 public class ChangeListFragment extends Fragment
@@ -80,6 +84,8 @@ public class ChangeListFragment extends Fragment
                     @Override
                     public void onPageSelected(int position)
                     {
+                        String status = mSectionsPagerAdapter.getStatusAtPostion(position);
+                        new StatusSelected(mParent, status).sendUpdateMessage();
                         mSectionsPagerAdapter.getFragment(position).refresh(false);
                     }
                 });
@@ -127,6 +133,15 @@ public class ChangeListFragment extends Fragment
 
         SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
+        }
+
+        public String getStatusAtPostion(int position) {
+            switch (position) {
+                case 0: return JSONCommit.Status.NEW.toString();
+                case 1: return JSONCommit.Status.MERGED.toString();
+                case 2: return JSONCommit.Status.ABANDONED.toString();
+                default: return null;
+            }
         }
 
         @Override

@@ -1,18 +1,11 @@
 package com.jbirdvegas.mgerrit.search;
 
-import android.content.Context;
-import android.support.v4.content.CursorLoader;
 import android.util.Log;
 
-import com.jbirdvegas.mgerrit.database.UserChanges;
-
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;

@@ -105,6 +105,19 @@ public class Changes extends DatabaseTable {
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE + "/#", ITEM_ID);
     }
 
+    public static String getChangeStatus(Context context, String changeID) {
+        Uri uri = DBParams.fetchOneRow(CONTENT_URI);
+        String status = null;
+
+        Cursor c = context.getContentResolver().query(uri,
+                new String[] { C_STATUS },
+                C_CHANGE_ID + " = ?",
+                new String[] { changeID },
+                null);
+        if (c.moveToFirst()) status = c.getString(0);
+        return status;
+    }
+
     public static String getMostRecentChange(Context context, String status) {
         Uri uri = DBParams.fetchOneRow(CONTENT_URI);
         String changeID = null;
@@ -115,7 +128,7 @@ public class Changes extends DatabaseTable {
                 new String[] { C_CHANGE_ID },
                 C_STATUS + " = ?",
                 new String[] { status },
-                C_UPDATED + " DESC");
+                SORT_BY);
         if (c.moveToFirst()) {
             changeID = c.getString(0);
         }

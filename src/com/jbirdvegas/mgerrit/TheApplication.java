@@ -1,13 +1,18 @@
 package com.jbirdvegas.mgerrit;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
+import com.jbirdvegas.mgerrit.message.StatusSelected;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
+import com.jbirdvegas.mgerrit.objects.JSONCommit;
 
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)
@@ -33,17 +38,30 @@ public class TheApplication extends Application
     public static final String PREF_CHANGE_TYPE = "Preference Changed";
     public static final String PREF_CHANGE_KEY = "Preference Key";
 
+    // This should be set to the status corresponding to the initially selected tab
+    private static String sLastSelectedStatus = JSONCommit.Status.NEW.toString();
+
+    private static final BroadcastReceiver mStatusReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            sLastSelectedStatus = intent.getStringExtra(StatusSelected.STATUS);
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mStatusReceiver,
+                new IntentFilter(StatusSelected.TYPE));
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
         mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mStatusReceiver);
     }
 
     /**
@@ -67,5 +85,9 @@ public class TheApplication extends Application
         Intent intent = new Intent(PREF_CHANGE_TYPE);
         intent.putExtra(PREF_CHANGE_KEY, key);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    public static String getLastSelectedStatus() {
+        return sLastSelectedStatus;
     }
 }
