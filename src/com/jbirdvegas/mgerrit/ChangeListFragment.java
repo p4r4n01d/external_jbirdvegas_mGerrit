@@ -47,6 +47,9 @@ public class ChangeListFragment extends Fragment
     private View mThisFragment;
     private ArrayList<CharSequence> mTitles;
 
+    // This should be set to the status corresponding to the initially selected tab
+    private String mSelectedStatus = JSONCommit.Status.NEW.toString();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -86,6 +89,7 @@ public class ChangeListFragment extends Fragment
                     {
                         String status = mSectionsPagerAdapter.getStatusAtPostion(position);
                         new StatusSelected(mParent, status).sendUpdateMessage();
+                        mSelectedStatus = status;
                         mSectionsPagerAdapter.getFragment(position).refresh(false);
                     }
                 });
@@ -101,6 +105,10 @@ public class ChangeListFragment extends Fragment
 
     public CardsFragment getCurrentFragment() {
         return mSectionsPagerAdapter.getCurrentFragment();
+    }
+
+    public String getStatus() {
+        return mSelectedStatus;
     }
 
     @Override
@@ -137,9 +145,9 @@ public class ChangeListFragment extends Fragment
 
         public String getStatusAtPostion(int position) {
             switch (position) {
-                case 0: return JSONCommit.Status.NEW.toString();
-                case 1: return JSONCommit.Status.MERGED.toString();
-                case 2: return JSONCommit.Status.ABANDONED.toString();
+                case 0: return JSONCommit.KEY_STATUS_OPEN;
+                case 1: return JSONCommit.KEY_STATUS_MERGED;
+                case 2: return JSONCommit.KEY_STATUS_ABANDONED;
                 default: return null;
             }
         }
