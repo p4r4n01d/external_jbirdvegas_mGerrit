@@ -1,18 +1,13 @@
 package com.jbirdvegas.mgerrit;
 
 import android.app.Application;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
-import com.jbirdvegas.mgerrit.message.StatusSelected;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
-import com.jbirdvegas.mgerrit.objects.JSONCommit;
 
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)

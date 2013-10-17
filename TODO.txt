@@ -22,7 +22,6 @@ Outstanding
     - Change preferences (either temporarily or permently) to the gerrit from the URL
     - When given a change link open that specific change
     - When given a Gerrit link just change the current Gerrit
-- When there are no comments on a change, don't display comments card
 - Ability to track projects across different Gerrits
     - Example, I could be following CM's Gerrit and view mGerrit changes on AOKP's Gerrit
     - May want to put this in a new slide-out menu
@@ -61,12 +60,10 @@ CardsUI Library
 ----------------
 	- Decrease padding between cards
 	- Investigate card swiping
-	- Include card stripe colouring support/update library to Androguide
-		- This now proports to support view recycling
+	- Include card stripe colouring support
 
 Tablet (master-detail layout)
 -----------------------------
-    - Syncronise detail fragment with the change list (across tabs and Gerrit instances).
     - Selection indicator for the currently selected change.
         - Visual aid to show that the details pane expands the selected change (arrow perhaps?)
 
