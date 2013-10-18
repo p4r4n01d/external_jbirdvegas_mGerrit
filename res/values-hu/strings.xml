@@ -39,7 +39,6 @@
     <string name="commit_author">Szerző:</string>
     <string name="commit_owner">Tulajdonos:</string>
     <string name="failed_to_parse_json_response">Sikertelen válasz</string>
-    <string name="ok">ok</string>
     <string name="show_exception">Kivétel megjelenítése</string>
     <string name="exit">Kilépés</string>
     <string name="gerrit_call_failed">Nem kapott választ a Gerrit-től, ellenőrizd a kapcsolatot és próbáld újra.

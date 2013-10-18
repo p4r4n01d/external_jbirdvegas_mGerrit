@@ -41,7 +41,6 @@
     <string name="commit_author">저자</string>
     <string name="commit_owner">소유자</string>
     <string name="failed_to_parse_json_response">Failed to parse response from</string>
-    <string name="ok">확인</string>
     <string name="show_exception">예외 표시</string>
     <string name="exit">나가기</string>
     <string name="gerrit_call_failed">Failed to get useful response from Gerrit instance please check your connection

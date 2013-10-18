@@ -36,7 +36,6 @@
   <string name="commit_author">Автор:</string>
   <string name="commit_owner">Владелец:</string>
   <string name="failed_to_parse_json_response">Не удалось получить ответ от</string>
-  <string name="ok">хорошо</string>
   <string name="show_exception">Показать исключение</string>
   <string name="exit">Выход</string>
   <string name="gerrit_call_failed">Не удалось получить ответ от Gerrit, пожалуйста, проверьте соединение и попытайтесь снова.</string>

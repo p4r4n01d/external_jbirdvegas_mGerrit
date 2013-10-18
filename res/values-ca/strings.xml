@@ -38,7 +38,6 @@
     <string name="commit_author">Autor</string>
     <string name="commit_owner">Propietari</string>
     <string name="failed_to_parse_json_response">No s\'ha pogut analitzar la resposta de</string>
-    <string name="ok">d\'acord</string>
     <string name="show_exception">Mostra l\'excepció</string>
     <string name="exit">Surt</string>
     <string name="gerrit_call_failed">No s\'ha pogut aconseguir una resposta útil de la instància Gerrit. Comproveu la connexió i torneu a intentar-ho.</string>
@@ -83,7 +82,6 @@
     <string name="failed_to_decode_base64">No s\'ha pogut descodificar la resposta Base64.</string>
     <string name="return_was_null">La resposta és nul·la... Visualitzeu-ho al navegador</string>
     <string name="apache_commons_title">Apache Commons Codec v1.8</string>
-    <string name="apache_commons_website">http://commons.apache.org/proper/commons-codec/</string>
     <string name="using_gerrit_toast">S\'està utilitzant Gerrit:</string>
     <string name="google_now_style_animations_title">Anima les targetes</string>
     <string name="google_now_style_animations_summary">Habilita les animacions a l\'estil Google Now en dibuixar les targetes</string>

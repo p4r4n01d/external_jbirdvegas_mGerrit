@@ -37,7 +37,6 @@
     <string name="commit_author">作者:</string>
     <string name="commit_owner">オーナー:</string>
     <string name="failed_to_parse_json_response">解析失敗:</string>
-    <string name="ok">ok</string>
     <string name="show_exception">例外を表示</string>
     <string name="exit">終了</string>
     <string name="gerrit_call_failed">Gerritインスタンスのデータ取得に失敗しました。接続を確認して再度試してください。</string>

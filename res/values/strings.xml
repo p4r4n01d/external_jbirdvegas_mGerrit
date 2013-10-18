@@ -17,7 +17,7 @@
   -->
 
 <resources>
-    <string name="app_name" translatable="false">mGerrit</string>
+    <string name="app_name">mGerrit</string>
     <string name="reviewable">Review</string>
     <string name="merged">Merged</string>
     <string name="abandoned">Abandoned</string>
@@ -41,7 +41,6 @@
     <string name="commit_author">Author:</string>
     <string name="commit_owner">Owner:</string>
     <string name="failed_to_parse_json_response">Failed to parse response from</string>
-    <string name="ok">ok</string>
     <string name="show_exception">Show Exception</string>
     <string name="exit">Exit</string>
     <string name="gerrit_call_failed">Failed to get useful response from Gerrit instance please check your connection
@@ -91,7 +90,7 @@
     <string name="please_select_update_for_range">Please select file to view changelog</string>
     <string name="download_rom_zip">Download ROM zip</string>
     <string name="failed_to_decode_base64">Failed to decode the Base64 response.</string>
-    <string name="return_was_null">Responce was null… Please view in browser</string>
+    <string name="return_was_null">Response was null… Please view in browser</string>
     <string name="apache_commons_title">Apache Commons Codec v1.8</string>
     <string name="apache_commons_website" translatable="false">http://commons.apache.org/proper/commons-codec/</string>
     <string name="using_gerrit_toast">Using Gerrit:</string>

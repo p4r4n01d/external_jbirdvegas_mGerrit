@@ -36,7 +36,6 @@
     <string name="commit_author">Autor:</string>
     <string name="commit_owner">Vlastník:</string>
     <string name="failed_to_parse_json_response">Chyba při parsování odpovědi</string>
-    <string name="ok">ok</string>
     <string name="show_exception">Zobrazit vyjímku</string>
     <string name="exit">Ukončit</string>
     <string name="gerrit_call_failed">Načítání použitelné odpovědi z Gerritu selhalo. Je třeba zkontrolovat internetové připojení a zkusit znovu </string>
@@ -56,7 +55,6 @@
     <string name="owner_gravatar">Gravatar profilu vlastníka</string>
     <string name="author_gravatar">Gravatar profilu autora</string>
     <string name="committer_gravatar">Gravatar profilu odesilatele</string>
-    <string name="koush_url_imageview_helper_title">Koush Duttův UrlImageViewHelper</string>
     <string name="menu_refresh">Obnovit</string>
     <string name="current_revision_is_draft_message">Aktuální revize je draft.
         Některé informace nebudou k dispozici
