@@ -37,8 +37,8 @@
         <item>@string/abandoned</item>
     </string-array>
     <string-array name="status_entry_values" translatable="false">
-        <item>@string/status_explaination_new</item>
-        <item>@string/status_explaination_merged</item>
-        <item>@string/status_explaination_abandoned</item>
+        <item>@string/status_explanation_new</item>
+        <item>@string/status_explanation_merged</item>
+        <item>@string/status_explanation_abandoned</item>
     </string-array>
 </resources>
