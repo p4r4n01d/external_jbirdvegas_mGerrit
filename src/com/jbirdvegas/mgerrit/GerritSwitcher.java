@@ -19,13 +19,12 @@ package com.jbirdvegas.mgerrit;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
@@ -45,6 +44,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Dialog that lists the available Gerrit source options and
+ *  allows the user to select one of them or add a new source.
+ *  The selected Gerrit source is shown with a selected radio button
+ *  (recorded in the adapter, but managed through callbacks here).
+ *
+ *  Note: This must use the non-support library DialogFragment
+ *   (android.app.DialogFragment) to be invoked from the Preferences
+ *   as there is no PreferenceFragment class in the support library.
+ */
 public class GerritSwitcher extends DialogFragment {
 
     public static final String TAG = "GerritSwitcher";

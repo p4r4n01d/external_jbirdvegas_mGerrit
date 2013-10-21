@@ -19,6 +19,7 @@ package com.jbirdvegas.mgerrit;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.DialogFragment;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,7 +29,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -261,8 +261,9 @@ public class GerritControllerActivity extends FragmentActivity {
                 return true;
             case R.id.menu_team_instance:
                 DialogFragment newFragment = new GerritSwitcher();
-                String tag = getResources().getString(R.string.add_gerrit_team);
-                newFragment.show(getSupportFragmentManager(), tag);
+                String tag = getResources().getString(R.string.choose_gerrit_instance);
+                // Must use getFragmentManager not getSupportFragmentManager here
+                newFragment.show(getFragmentManager(), tag);
                 return true;
             case R.id.menu_projects:
                 intent = new Intent(this, ProjectsList.class);

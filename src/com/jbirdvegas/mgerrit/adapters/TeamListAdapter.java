@@ -132,7 +132,7 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails> {
 
         } else {
             if (convertView == null) {
-                convertView = mInflator.inflate(R.layout.add_team_dialog, null);
+                convertView = mInflator.inflate(R.layout.add_team_row, null);
             }
 
             viewHolder = (ViewHolder) convertView.getTag();
