@@ -19,15 +19,16 @@ package com.jbirdvegas.mgerrit;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.webkit.URLUtil;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -40,9 +41,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 public class GerritSwitcher extends DialogFragment {
 
@@ -50,25 +51,38 @@ public class GerritSwitcher extends DialogFragment {
 
     Context mContext;
     List<GerritDetails> gerritData;
-    Dialog mDialog;
     private ListView mListView;
     private TeamListAdapter mAdapter;
 
-    ToastRunnable showToast = new ToastRunnable();
-    Handler handler = new Handler();
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    Pattern urlPattern = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+        mContext = this.getActivity();
+        Resources res = mContext.getResources();
+        initialiseGerritList(res);
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        // Get the layout inflater
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        mAdapter = new TeamListAdapter(mContext, gerritData);
 
-        builder.setView(inflater.inflate(R.layout.add_team_dialog, null))
-                .setMessage(R.string.choose_gerrit_instance)
+        // Set the current Gerrit as selected
+        String currentGerrit = Prefs.getCurrentGerrit(mContext);
+        int pos = mAdapter.setSelectedGerrit(currentGerrit);
+
+        builder.setSingleChoiceItems(mAdapter, pos, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which >= 0) {
+                    mAdapter.setSelectedGerrit(which);
+                }
+            }
+        })
+                .setTitle(R.string.choose_gerrit_instance)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // Only dismiss the dialog if a Gerrit has been selected
@@ -97,58 +111,29 @@ public class GerritSwitcher extends DialogFragment {
         teams.addAll(teamsHelper.getGerritNamesList());
         urls.addAll(teamsHelper.getGerritUrlsList());
 
+        Set<GerritDetails> gerrits = new HashSet<GerritDetails>();
+
         int min = Math.min(teams.size(), urls.size());
         for (int i = 0; i < min; i++) {
-            gerritData.add(new GerritDetails(teams.get(i), urls.get(i)));
+            gerrits.add(new GerritDetails(teams.get(i), urls.get(i)));
         }
-
-        // Set the current Gerrit as selected
-        String currentGerrit = Prefs.getCurrentGerrit(mContext);
-        mAdapter.setSelectedGerrit(currentGerrit);
+        gerritData = new ArrayList<GerritDetails>(gerrits);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onStart() {
+        super.onStart();
 
-        mContext = this.getActivity();
-        Resources res = mContext.getResources();
-        mDialog = this.getDialog();
+        // This enables the soft keyboard to show up when an EditText field is focused.
+        getDialog().getWindow().
+                clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
-        initialiseGerritList(res);
-
-        mListView = (ListView) mDialog.findViewById(R.id.lvGerritTeams);
-        mAdapter = new TeamListAdapter(mContext, gerritData);
-
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO: This position might be the placeholder
-                mAdapter.setSelectedGerrit(position);
-            }
-        });
+        mListView = ((AlertDialog) getDialog()).getListView();
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 // on long click delete the file and refresh the list
-                GerritDetails team = gerritData.get(i);
-                File target = new File(GerritTeamsHelper.mExternalCacheDir + "/" + team.getGerritName());
-
-                boolean success = target.delete();
-                StringBuilder builder = new StringBuilder().append("Attempt to delete: ")
-                        .append(target.getAbsolutePath())
-                        .append(" was a ");
-                if (success) {
-                    builder.append("success.");
-                } else {
-                    builder.append("failure.");
-                    Log.v(TAG, "Files present:" + Arrays.toString(GerritTeamsHelper.mExternalCacheDir.list()));
-                }
-
-                gerritData.remove(i);
-                mAdapter.notifyDataSetChanged();
-                return success;
+                return removeItem(i);
             }
         });
     }
@@ -157,9 +142,20 @@ public class GerritSwitcher extends DialogFragment {
      * @return Whether the new gerrit was set
      */
     private boolean onCommitSelection() {
-        // TODO: If the placeholder was selected, we should make sure it is non-empty
-        String gerritUrl = mAdapter.getSelectedGerrit();
-        if (isUrlValid(gerritUrl)) {
+        GerritDetails gerrit = mAdapter.getSelectedGerrit();
+        String gerritName = gerrit.getGerritName().trim();
+        String gerritUrl = gerrit.getGerritUrl().trim();
+
+        if (gerritName == null || gerritName.length() < 1) {
+            Toast.makeText(mContext, "The Gerrit name set was invalid", Toast.LENGTH_SHORT).show();
+            return false;
+        } else if (isUrlValid(gerritUrl)) {
+            // ensure we end with /
+            if ('/' != gerritUrl.charAt(gerritUrl.length() - 1)) {
+                gerritUrl += "/";
+            }
+            Log.v(TAG, "saving url: " + gerritUrl);
+            GerritTeamsHelper.saveTeam(gerritName, gerritUrl);
             Prefs.setCurrentGerrit(mContext, gerritUrl);
             return true;
         } else {
@@ -170,24 +166,48 @@ public class GerritSwitcher extends DialogFragment {
 
     // Validator for URLs
     private boolean isUrlValid(String url) {
-        Matcher m = urlPattern.matcher(url);
-        return m.matches();
+        return (url != null)
+                && (URLUtil.isHttpUrl(url)
+                || URLUtil.isHttpsUrl(url)
+                && url.contains("."));
     }
 
-    private class ToastRunnable {
-
-        private String mString;
-
-        private Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(mContext, mString, Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        Runnable showToast(String s) {
-            mString = s;
-            return runnable;
+    /**
+     * Remove a Gerrit instance from the list
+     * @param position
+     * @return
+     */
+    private boolean removeItem(int position) {
+        // If the placeholder is at this position, this cannot succeed.
+        if (position > gerritData.size()) {
+            return false;
         }
+        // Cannot remove the currently selected Gerrit
+        String setGerrit = Prefs.getCurrentGerrit(mContext);
+        String thisItem = mAdapter.getItem(position).getGerritUrl();
+        if (setGerrit.equals(thisItem)) {
+            return false;
+        }
+
+        GerritDetails team = gerritData.get(position);
+        File target = new File(GerritTeamsHelper.mExternalCacheDir + "/" + team.getGerritName());
+
+        boolean success = target.delete();
+        StringBuilder builder = new StringBuilder().append("Attempt to delete: ")
+                .append(target.getAbsolutePath())
+                .append(" was a ");
+        if (success) {
+            builder.append("success.");
+        } else {
+            builder.append("failure.");
+            Log.v(TAG, "Files present:" + Arrays.toString(GerritTeamsHelper.mExternalCacheDir.list()));
+        }
+
+        /* We don't need to worry about an item not being selected in the adapter from removing this
+         *  element as it can always move down one position. We are not deleting the last element
+         *  (the placeholder) */
+        gerritData.remove(position);
+        mAdapter.notifyDataSetChanged();
+        return success;
     }
 }

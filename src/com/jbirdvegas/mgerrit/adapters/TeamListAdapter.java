@@ -18,14 +18,13 @@ package com.jbirdvegas.mgerrit.adapters;
  */
 
 import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.jbirdvegas.mgerrit.R;
@@ -33,12 +32,11 @@ import com.jbirdvegas.mgerrit.objects.GerritDetails;
 
 import java.util.List;
 
-public class TeamListAdapter extends ArrayAdapter<GerritDetails>
-    implements TextWatcher {
+public class TeamListAdapter extends ArrayAdapter<GerritDetails> {
 
     private LayoutInflater mInflator;
     private int mSelectedPos;
-    private String gerritPlaceholderUrl;
+    private ViewHolder gerritPlaceholder;
 
     List<GerritDetails> data;
 
@@ -57,7 +55,10 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails>
      */
     public GerritDetails getItem(int position) {
         // Override this so we don't get out of range exceptions
-        return (position > data.size()) ? data.get(position) : null;
+        if (position < 0 || position > data.size()) {
+            return null;
+        }
+        return data.get(position);
     }
 
     @Override
@@ -66,25 +67,30 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails>
         return data.size() + 1;
     }
 
-    public String getSelectedGerrit() {
+    public GerritDetails getSelectedGerrit() {
         if (mSelectedPos < data.size()) {
-            return data.get(mSelectedPos).getGerritUrl();
+            return data.get(mSelectedPos);
         }
-        return gerritPlaceholderUrl;
+        String name = gerritPlaceholder.gerritEditName.getText().toString();
+        String url = gerritPlaceholder.gerritEditUrl.getText().toString();
+        return new GerritDetails(name, url);
     }
 
-    public void setSelectedGerrit(String selectedGerrit) {
+    public int setSelectedGerrit(String selectedGerritUrl) {
         for (int i = 0; i < data.size(); i++) {
             GerritDetails gerrit = data.get(i);
-            if (selectedGerrit.equals(gerrit.getGerritUrl())) {
+            if (selectedGerritUrl.equals(gerrit.getGerritUrl())) {
                 mSelectedPos = i;
                 break;
             }
         }
+        return mSelectedPos;
     }
 
-    public void setSelectedGerrit(int position) {
+    public int setSelectedGerrit(int position) {
         this.mSelectedPos = position;
+        notifyDataSetChanged();
+        return mSelectedPos;
     }
 
     @Override
@@ -98,9 +104,9 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails>
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
-        String gerritUrl = null;
+        String gerritUrl;
 
         // Row specific handling
         if (getItemViewType(position) == 0) {
@@ -108,20 +114,22 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails>
                 convertView = mInflator.inflate(R.layout.gerrit_row, null);
             }
 
-            GerritDetails data = getItem(position);
+            GerritDetails rowData = getItem(position);
 
             viewHolder = (ViewHolder) convertView.getTag();
             if (viewHolder == null) {
                 viewHolder = new ViewHolder();
-                viewHolder.gerritName = (TextView) convertView.findViewById(R.id.txtGerritName);
+                viewHolder.gerritName = (CheckedTextView) convertView.findViewById(R.id.txtGerritName);
                 viewHolder.gerritUrl = (TextView) convertView.findViewById(R.id.txtGerritURL);
-                viewHolder.gerritIsSelected = (CheckBox) convertView.findViewById(R.id.chkGerritSelected);
                 convertView.setTag(viewHolder);
             }
 
-            gerritUrl = data.getGerritUrl();
-            viewHolder.gerritName.setText(data.getGerritName());
+            gerritUrl = rowData.getGerritUrl();
+            viewHolder.gerritName.setText(rowData.getGerritName());
             viewHolder.gerritUrl.setText(gerritUrl);
+
+            viewHolder.gerritName.setChecked(position == mSelectedPos);
+
         } else {
             if (convertView == null) {
                 convertView = mInflator.inflate(R.layout.add_team_dialog, null);
@@ -130,14 +138,24 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails>
             viewHolder = (ViewHolder) convertView.getTag();
             if (viewHolder == null) {
                 viewHolder = new ViewHolder();
+                viewHolder.gerritEditName = (EditText) convertView.findViewById(R.id.add_team_name_edittext);
                 viewHolder.gerritEditUrl = (EditText) convertView.findViewById(R.id.add_team_url_edittext);
-                viewHolder.gerritIsSelected = (CheckBox) convertView.findViewById(R.id.chkGerritSelected);
+                viewHolder.gerritIsSelected = (RadioButton) convertView.findViewById(R.id.chkGerritSelected);
                 convertView.setTag(viewHolder);
             }
+            gerritPlaceholder = viewHolder;
+            viewHolder.gerritIsSelected.setChecked(mSelectedPos == position);
 
-            viewHolder.gerritEditUrl.addTextChangedListener(this);
+            View.OnClickListener clickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    TeamListAdapter.this.setSelectedGerrit(position);
+                }
+            };
+
+            viewHolder.gerritEditName.setOnClickListener(clickListener);
+            viewHolder.gerritEditUrl.setOnClickListener(clickListener);
         }
-        viewHolder.gerritIsSelected.setChecked(mSelectedPos == position);
 
         return convertView;
     }
@@ -147,26 +165,11 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails>
         return false;
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        // Not used
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        // Not used
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-        // Save the contents so we can retrieve it when necessary
-        gerritPlaceholderUrl = s.toString();
-    }
-
     private static class ViewHolder {
-        TextView gerritName;
+        CheckedTextView gerritName;
         TextView gerritUrl;
-        CheckBox gerritIsSelected;
+        RadioButton gerritIsSelected;
+        EditText gerritEditName;
         EditText gerritEditUrl;
     }
 

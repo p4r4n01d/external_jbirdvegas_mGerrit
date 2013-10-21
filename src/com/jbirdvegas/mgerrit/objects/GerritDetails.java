@@ -43,4 +43,21 @@ public class GerritDetails {
     public void setGerritUrl(String gerritUrl) {
         this.gerritUrl = gerritUrl;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GerritDetails that = (GerritDetails) o;
+
+        if (!gerritUrl.equals(that.gerritUrl)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return gerritUrl.hashCode();
+    }
 }

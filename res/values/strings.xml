@@ -100,8 +100,8 @@
     <string name="add_gerrit_team">New Gerrit</string>
     <string name="please_enter_gerrit_name">Please enter the Gerrit instance\'s name</string>
     <string name="please_enter_gerrit_url">Please enter the Gerrit url</string>
-    <string name="add_team_url">New Gerrit team URL.</string>
-    <string name="add_gerrit_url">New Gerrit team name</string>
+    <string name="add_team_url">New Gerrit team URL</string>
+    <string name="add_gerrit_name">New Gerrit team name</string>
     <string name="save">Save</string>
     <string name="handshake_fail_message">Failed handshake try installing provider\'s certificate on your device.
     </string>
