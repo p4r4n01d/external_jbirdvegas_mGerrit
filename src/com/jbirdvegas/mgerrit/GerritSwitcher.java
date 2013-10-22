@@ -81,14 +81,12 @@ public class GerritSwitcher extends DialogFragment {
 
         // Set the current Gerrit as selected
         String currentGerrit = Prefs.getCurrentGerrit(mContext);
-        int pos = mAdapter.setSelectedGerrit(currentGerrit);
+        int pos = mAdapter.findItem(currentGerrit);
 
         builder.setSingleChoiceItems(mAdapter, pos, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (which >= 0) {
-                    mAdapter.setSelectedGerrit(which);
-                }
+                // Not used
             }
         })
                 .setTitle(R.string.choose_gerrit_instance)
@@ -145,13 +143,14 @@ public class GerritSwitcher extends DialogFragment {
                 return removeItem(i);
             }
         });
+        mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
 
     /**
      * @return Whether the new gerrit was set
      */
     private boolean onCommitSelection() {
-        GerritDetails gerrit = mAdapter.getSelectedGerrit();
+        GerritDetails gerrit = mAdapter.getItem(mListView.getCheckedItemPosition());
         String gerritName = gerrit.getGerritName().trim();
         String gerritUrl = gerrit.getGerritUrl().trim();
 

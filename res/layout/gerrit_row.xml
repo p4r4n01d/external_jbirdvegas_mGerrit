@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<com.jbirdvegas.mgerrit.objects.CheckableView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,13 +8,13 @@
     android:paddingLeft="6dp"
     android:paddingRight="6dp">
 
-    <CheckedTextView
+    <TextView
         android:id="@+id/txtGerritName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        tools:text="AOKP"
-        android:checkMark="?android:attr/listChoiceIndicatorSingle"/>
+        android:focusable="false"
+        tools:text="AOKP"/>
 
     <TextView
         android:id="@+id/txtGerritURL"
@@ -24,5 +24,15 @@
         android:layout_marginLeft="10sp"
         android:textColor="@color/card_text"
         android:textSize="12sp"
+        android:focusable="false"
         tools:text="https://gerrit.aokp.co"/>
-</RelativeLayout>
+
+    <RadioButton
+        android:id="@android:id/toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:clickable="false"
+        android:focusable="false"
+        android:checkMark="?android:attr/listChoiceIndicatorSingle"/>
+</com.jbirdvegas.mgerrit.objects.CheckableView>

@@ -51,9 +51,12 @@ public class GerritDetails {
 
         GerritDetails that = (GerritDetails) o;
 
-        if (!gerritUrl.equals(that.gerritUrl)) return false;
+        return gerritUrl.equals(that.gerritUrl);
+    }
 
-        return true;
+    public boolean equals(String s) {
+        if (s == null) return false;
+        return gerritUrl.equals(s);
     }
 
     @Override
