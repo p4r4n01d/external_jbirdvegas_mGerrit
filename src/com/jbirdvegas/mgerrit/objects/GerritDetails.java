@@ -19,7 +19,7 @@ package com.jbirdvegas.mgerrit.objects;
  *
  *  Very basic container class for the Gerrit switcher
  */
-public class GerritDetails {
+public class GerritDetails implements Comparable<GerritDetails> {
     String gerritName;
     String gerritUrl;
 
@@ -62,5 +62,10 @@ public class GerritDetails {
     @Override
     public int hashCode() {
         return gerritUrl.hashCode();
+    }
+
+    @Override
+    public int compareTo(GerritDetails another) {
+        return gerritName.compareTo(another.gerritName);
     }
 }

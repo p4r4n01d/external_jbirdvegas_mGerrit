@@ -18,6 +18,8 @@ package com.jbirdvegas.mgerrit.adapters;
  */
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.jbirdvegas.mgerrit.R;
@@ -37,8 +40,9 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails> {
 
     private LayoutInflater mInflator;
     private ViewHolder gerritPlaceholder;
+    private String gerritName, gerritUrl = "https://";
 
-    List<GerritDetails> data;
+    private List<GerritDetails> data;
 
     public TeamListAdapter(Context context, List<GerritDetails> objects) {
         super(context, R.layout.gerrit_row, objects);
@@ -56,15 +60,13 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails> {
     public GerritDetails getItem(int position) {
         // Override this so we don't get out of range exceptions
         if (position == data.size()) {
-            String name = gerritPlaceholder.gerritEditName.getText().toString();
-            String url = gerritPlaceholder.gerritEditUrl.getText().toString();
-            if (name == null) {
-                name = "";
+            if (gerritName == null) {
+                gerritName = "";
             }
-            if (url == null) {
-                url = "";
+            if (gerritUrl == null) {
+                gerritUrl = "";
             }
-            return new GerritDetails(name, url);
+            return new GerritDetails(gerritName, gerritUrl);
         }
         return data.get(position);
     }
@@ -147,23 +149,40 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails> {
             final ListView lv = (ListView) parent;
             viewHolder.row.setChecked(lv.isItemChecked(position));
 
-            // Have to set a focus change listener rather than an onClick listener here
+            /* Cannot set an onClick listener here, it will be ignored when the edit event
+             * is handled.
+             * Listview.setItemChecked requests a layout pass after setting an item's
+             *  Checked state. This means that all further (unhandled) events on this
+             *  item are lost. */
             View.OnTouchListener touchListener = new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (MotionEvent.ACTION_UP == event.getAction())
-                        lv.setItemChecked(position, true);
+                    if (MotionEvent.ACTION_DOWN == event.getAction()) {
+                        if (!lv.isItemChecked(position))
+                            lv.setItemChecked(position, true);
+                    }
                     return false;
                 }
             };
 
             // If you set a listener here, it disables the EditText field
-            //viewHolder.gerritEditName.setOnTouchListener(touchListener);
-            //viewHolder.gerritEditUrl.setOnTouchListener(touchListener);
+            viewHolder.gerritEditName.setOnTouchListener(touchListener);
+            viewHolder.gerritEditUrl.setOnTouchListener(touchListener);
 
             // Bind the data (if there is any)
             viewHolder.gerritEditName.setText(rowData.getGerritName());
             viewHolder.gerritEditUrl.setText(rowData.getGerritUrl());
+
+            // Set the text watchers so we can save the data before it gets recycled
+            viewHolder.gerritEditName.addTextChangedListener(edtNameWatcher);
+            viewHolder.gerritEditUrl.addTextChangedListener(edtUrlWatcher);
+
+            viewHolder.gerritChecked.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    lv.setItemChecked(position, !lv.isItemChecked(position));
+                }
+            });
         }
 
         return convertView;
@@ -174,15 +193,44 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails> {
         return false;
     }
 
+    TextWatcher edtNameWatcher = new SimpleTextWatcher() {
+        @Override
+        public void afterTextChanged(Editable s) {
+            gerritName = s.toString();
+        }
+    };
+
+    TextWatcher edtUrlWatcher = new SimpleTextWatcher() {
+        @Override
+        public void afterTextChanged(Editable s) {
+            gerritUrl = s.toString();
+        }
+    };
+
     private static class ViewHolder {
         final CheckableView row;
         TextView gerritName;
         TextView gerritUrl;
         EditText gerritEditName;
         EditText gerritEditUrl;
+        RadioButton gerritChecked;
 
         private ViewHolder(CheckableView view) {
             row = view;
+            gerritChecked = (RadioButton) view.findViewById(R.id.chk_gerrit_selected);
+        }
+    }
+
+    // Provide empty implementations of the TextWatcher callbacks not being used.
+    private abstract class SimpleTextWatcher implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // Not used
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // Not used
         }
     }
 }

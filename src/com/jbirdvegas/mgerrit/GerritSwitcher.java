@@ -58,8 +58,8 @@ public class GerritSwitcher extends DialogFragment {
 
     public static final String TAG = "GerritSwitcher";
 
-    Context mContext;
-    List<GerritDetails> gerritData;
+    private Context mContext;
+    private List<GerritDetails> gerritData;
     private ListView mListView;
     private TeamListAdapter mAdapter;
 
@@ -125,6 +125,7 @@ public class GerritSwitcher extends DialogFragment {
             gerrits.add(new GerritDetails(teams.get(i), urls.get(i)));
         }
         gerritData = new ArrayList<GerritDetails>(gerrits);
+        Collections.sort(gerritData);
     }
 
     @Override
@@ -155,19 +156,19 @@ public class GerritSwitcher extends DialogFragment {
         String gerritUrl = gerrit.getGerritUrl().trim();
 
         if (gerritName == null || gerritName.length() < 1) {
-            Toast.makeText(mContext, "The Gerrit name set was invalid", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.invalid_gerrit_name), Toast.LENGTH_SHORT).show();
             return false;
         } else if (isUrlValid(gerritUrl)) {
             // ensure we end with /
             if ('/' != gerritUrl.charAt(gerritUrl.length() - 1)) {
                 gerritUrl += "/";
             }
-            Log.v(TAG, "saving url: " + gerritUrl);
+            Log.v(TAG, "Saving url: " + gerritUrl);
             GerritTeamsHelper.saveTeam(gerritName, gerritUrl);
             Prefs.setCurrentGerrit(mContext, gerritUrl);
             return true;
         } else {
-            Toast.makeText(mContext, "The Gerrit URL set was invalid", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.invalid_gerrit_url), Toast.LENGTH_SHORT).show();
             return false;
         }
     }

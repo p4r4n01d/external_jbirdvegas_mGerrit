@@ -28,7 +28,7 @@
         tools:text="https://gerrit.aokp.co"/>
 
     <RadioButton
-        android:id="@android:id/toggle"
+        android:id="@+id/chk_gerrit_selected"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
