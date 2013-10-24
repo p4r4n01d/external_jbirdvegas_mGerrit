@@ -102,10 +102,7 @@ public class GerritURL implements Parcelable
         }
 
         if (mListProjects) {
-            return new StringBuilder(0)
-                    .append(sGerritBase)
-                    .append("projects/?d")
-                    .toString();
+            return sGerritBase + "projects/?d";
         }
 
         StringBuilder builder = new StringBuilder(0)
@@ -169,8 +166,7 @@ public class GerritURL implements Parcelable
     public String getQuery() {
         if (mStatus == null) return null;
         else {
-            return new StringBuilder().append(JSONCommit.KEY_STATUS)
-                    .append(":").append(mStatus).toString();
+            return JSONCommit.KEY_STATUS + ":" + mStatus;
         }
     }
 
