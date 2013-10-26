@@ -47,6 +47,8 @@ import com.jbirdvegas.mgerrit.message.*;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.GooFileObject;
+import com.jbirdvegas.mgerrit.search.ProjectSearch;
+import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 
 import java.util.HashSet;
@@ -85,6 +87,7 @@ public class GerritControllerActivity extends FragmentActivity {
 
     // This will be null if mTwoPane is false (i.e. not tablet mode)
     private PatchSetViewerFragment mChangeDetail;
+    private SearchView searchView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -198,7 +201,7 @@ public class GerritControllerActivity extends FragmentActivity {
 
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(true);
@@ -218,6 +221,8 @@ public class GerritControllerActivity extends FragmentActivity {
                 }
             }
         });
+
+        setupSearchQuery();
         return true;
     }
 
@@ -291,10 +296,11 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     public void onProjectChanged(String newProject) {
+        String query = getSearchQuery();
+        query = SearchKeyword.replaceKeyword(query, new ProjectSearch(newProject));
+        searchView.setIconified(false);
+        searchView.setQuery(query, true);
         mCurrentProject = newProject;
-        GerritURL.setProject(newProject);
-        CardsFragment.inProject = (newProject != null && !newProject.equals(""));
-        refreshTabs();
     }
 
     /* Mark all of the tabs as dirty to trigger a refresh when they are next
@@ -329,13 +335,13 @@ public class GerritControllerActivity extends FragmentActivity {
         super.onResume();
         registerReceivers();
 
-        // Manually check if the project changed (e.g. we are resuming from the Projects List)
-        String s = Prefs.getCurrentProject(this);
-        if (!s.equals(mCurrentProject)) onProjectChanged(s);
-
         // Manually check if the Gerrit source changed (from the Preferences)
-        s = Prefs.getCurrentGerrit(this);
+        String s = Prefs.getCurrentGerrit(this);
         if (!s.equals(mGerritWebsite)) onGerritChanged(s);
+
+        // Manually check if the project changed (e.g. we are resuming from the Projects List)
+        s = Prefs.getCurrentProject(this);
+        if (!s.equals(mCurrentProject)) onProjectChanged(s);
     }
 
     @Override
@@ -380,6 +386,10 @@ public class GerritControllerActivity extends FragmentActivity {
         }
     }
 
+    public String getSearchQuery() {
+        return searchView.getQuery().toString();
+    }
+
     public ChangeListFragment getChangeList() {
         return mChangeList;
     }
@@ -389,5 +399,15 @@ public class GerritControllerActivity extends FragmentActivity {
      */
     public PatchSetViewerFragment getChangeDetail() {
         return mChangeDetail;
+    }
+
+    // Call this ONLY after the searchView has been initialised
+    private void setupSearchQuery() {
+        if (!mCurrentProject.equals("")) {
+            String query = getSearchQuery().toString();
+            query = SearchKeyword.replaceKeyword(query, new ProjectSearch(mCurrentProject));
+            searchView.setIconified(false);
+            searchView.setQuery(query, false); // Don't submit (it will be submitted initially)
+        }
     }
 }

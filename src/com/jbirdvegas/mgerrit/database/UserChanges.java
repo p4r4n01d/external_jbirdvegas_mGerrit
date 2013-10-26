@@ -131,11 +131,9 @@ public class UserChanges extends DatabaseTable {
      * @param context Context for database access
      * @param status The change status to search for
      * @param committerID The email of the committer
-     * @param project The full path of the project to search for
      * @return A CursorLoader
      */
-    public static CursorLoader listCommits(Context context, String status, Integer committerID,
-                                           String project) {
+    public static CursorLoader listCommits(Context context, String status, Integer committerID) {
         StringBuilder builder = new StringBuilder();
         List<String> bindArgs = new ArrayList<String>();
         boolean addAnd = false;
@@ -146,20 +144,13 @@ public class UserChanges extends DatabaseTable {
             addAnd = true;
         }
 
-        if (project != null) {
-            if (addAnd) builder.append(" AND ");
-            builder.append(C_PROJECT).append(" = ?");
-            bindArgs.add(project);
-        }
-
         return findCommits(context, status, builder, bindArgs);
     }
 
-    public static CursorLoader listCommits(Context context, String status, CommitterObject committer,
-                                           String project) {
+    public static CursorLoader listCommits(Context context, String status, CommitterObject committer) {
         Integer accountID = null;
         if (committer != null)  accountID = committer.getAccountId();
-        return listCommits(context, status, accountID, project);
+        return listCommits(context, status, accountID);
     }
 
     /** Insert the list of commits into the database **/

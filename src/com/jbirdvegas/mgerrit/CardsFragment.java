@@ -17,13 +17,16 @@ package com.jbirdvegas.mgerrit;
  *  limitations under the License.
  */
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,11 +36,9 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.fima.cardsui.objects.Card;
-import com.fima.cardsui.objects.CardStack;
 import com.fima.cardsui.views.CardUI;
 import com.jbirdvegas.mgerrit.cards.CommitCard;
 import com.jbirdvegas.mgerrit.cards.ImageCard;
-import com.jbirdvegas.mgerrit.cards.ProjectCard;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
@@ -45,6 +46,7 @@ import com.jbirdvegas.mgerrit.objects.ChangeLogRange;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
+import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
@@ -57,13 +59,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 public abstract class CardsFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String KEY_STORED_CARDS = "storedCards";
     public static final String KEY_DEVELOPER = "committer_object";
     public static final String AT_SYMBOL = "@";
     public static final String KEY_OWNER = "owner";
@@ -73,38 +75,34 @@ public abstract class CardsFragment extends Fragment
     public static boolean sSkipStalking;
     private static final boolean DEBUG = true;
     private static final boolean CHATTY = false;
+    public static final String SEARCH_QUERY = "SEARCH";
     protected String TAG = "CardsFragment";
 
     private GerritURL mUrl;
 
     private RequestQueue mRequestQueue;
 
-    public static boolean inProject;
     private ChangeLogRange mChangelogRange;
     private GerritControllerActivity mParent;
-    private View mCurrentFragment;
 
     CardUI mCards;
 
     // Indicates that this fragment will need to be refreshed
     private boolean mIsDirty = false;
 
-
-    // draws a stack of cards
-    // Currently not used as the number of cards tends
-    // to be so large the stack is impractical to navigate
-    protected void drawCardsFromListToStack(List<CommitCard> cards, CardUI cardUI) {
-        CardStack cardStack = new CardStack();
-        for (CommitCard card : cards) {
-            cardStack.add(card);
+    // Broadcast receiver to receive processed search query changes
+    private BroadcastReceiver mSearchQueryListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // OnLoaderReset is not called when restarting a loader so unbind the data here
+            mCards.clearCards();
+            getLoaderManager().restartLoader(0, intent.getExtras(), CardsFragment.this);
         }
-        cardUI.addStack(cardStack);
-        // once we finish adding all the cards begin building the screen
-        cardUI.refresh();
-    }
+    };
 
     // renders each card separately
     protected void drawCardsFromList(List<CommitCard> cards, CardUI cardUI) {
+        cardUI.clearCards();
         for (Card card : cards) {
             cardUI.addCard(card);
         }
@@ -210,9 +208,8 @@ public abstract class CardsFragment extends Fragment
     private void init(Bundle savedInstanceState)
     {
         mParent = (GerritControllerActivity) this.getActivity();
-        mCurrentFragment = this.getView();
+        View mCurrentFragment = this.getView();
 
-        long timerStart = System.currentTimeMillis();
         mCards = (CardUI) mCurrentFragment.findViewById(R.id.commit_cards);
         mCards.setSwipeable(true);
         mRequestQueue = Volley.newRequestQueue(mParent);
@@ -227,26 +224,19 @@ public abstract class CardsFragment extends Fragment
 
     private void setup()
     {
-        boolean followingUser = false;
-        // track if we are in project
-        String project = Prefs.getCurrentProject(mParent);
-        inProject = (!"".equals(project));
 
         CommitterObject user = mParent.getCommitterObject();
         if (!sSkipStalking) {
             String userEmail = "";
 
-            if (user == null) followingUser = false;
-            else userEmail = user.getEmail();
+            if (user != null) userEmail = user.getEmail();
             if (userEmail != null
                     && !userEmail.trim().isEmpty()
-                    && userEmail.contains(AT_SYMBOL)) {
+                    && userEmail.contains(CardsFragment.AT_SYMBOL)) {
 
                 mCards.addCard(stalkUser(user));
             }
         }
-
-        if (inProject) mCards.addCard(getProjectCard());
 
         try {
             mChangelogRange = mParent.getIntent()
@@ -262,7 +252,32 @@ public abstract class CardsFragment extends Fragment
         }
 
         sendRequest(false);
-        getLoaderManager().initLoader(0, null, this);
+
+        // We cannot use the search query here as the SearchView may not have been initialised yet.
+
+        // If we have set a project add it to the arguments here
+        String project = Prefs.getCurrentProject(mParent);
+
+        if (!project.equals("")) {
+            HashSet<SearchKeyword> tokens = new HashSet<SearchKeyword>();
+            tokens.add(new ProjectSearch(project));
+            processTokens(tokens);
+        } else {
+            getLoaderManager().initLoader(0, null, this);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(mParent).registerReceiver(mSearchQueryListener,
+                new IntentFilter(CardsFragment.SEARCH_QUERY));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(mParent).unregisterReceiver(mSearchQueryListener);
     }
 
     private void loadChangeLog(final ChangeLogRange logRange) {
@@ -325,10 +340,6 @@ public abstract class CardsFragment extends Fragment
         return commitCardList;
     }
 
-    private Card getProjectCard() {
-        return new ProjectCard(mParent, Prefs.getCurrentProject(mParent));
-    }
-
     /**
      * Each tab provides its own query for ?p=status:[open:merged:abandoned]
      *
@@ -336,21 +347,8 @@ public abstract class CardsFragment extends Fragment
      */
     abstract String getQuery();
 
-    /**
-     * Set the search query. This will construct the SQL query and restart
-     *  the loader to perform the query
-     * @param query The search query text
-     */
-    public void setSearchQuery(String query) {
-        // Clear any previous searches that where made
-        if (query == null || query.isEmpty()) {
-            getLoaderManager().restartLoader(0, null, this);
-            return;
-        }
-
-        Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
+    public boolean processTokens(Set<SearchKeyword> tokens) {
         if (tokens != null && !tokens.isEmpty()) {
-
             String where = SearchKeyword.constructDbSearchQuery(tokens);
             if (where != null && !where.isEmpty()) {
                 ArrayList<String> bindArgs = new ArrayList<String>();
@@ -365,10 +363,13 @@ public abstract class CardsFragment extends Fragment
                 // OnLoaderReset is not called when restarting a loader so unbind the data here
                 mCards.clearCards();
                 getLoaderManager().restartLoader(0, bundle, this);
-                return;
+                return true;
+            } else {
+                return false;
             }
         }
-        Log.w(TAG, "Could not process query: " + query);
+        getLoaderManager().restartLoader(0, null, this);
+        return true;
     }
 
     private void sendRequest(boolean forceUpdate) {
@@ -383,7 +384,6 @@ public abstract class CardsFragment extends Fragment
         if (!mIsDirty) return;
         mCards.clearCards();
 
-        if (inProject) mCards.addCard(getProjectCard());
         mIsDirty = false;
         getLoaderManager().restartLoader(0, null, this);
 
@@ -404,12 +404,10 @@ public abstract class CardsFragment extends Fragment
                 return UserChanges.findCommits(mParent, getQuery(), query, bindArgs);
             }
         }
-        String project = Prefs.getCurrentProject(mParent);
-        if ("".equals(project)) project = null;
 
         CommitterObject user = mParent.getCommitterObject();
 
-        return UserChanges.listCommits(mParent, getQuery(), user, project);
+        return UserChanges.listCommits(mParent, getQuery(), user);
     }
 
     @Override
@@ -423,6 +421,5 @@ public abstract class CardsFragment extends Fragment
         drawCardsFromList(generateCardsList(cursor), mCards);
         // Broadcast that we have finished loading changes
         new ChangeLoadingFinished(mParent, getQuery()).sendUpdateMessage();
-
     }
 }

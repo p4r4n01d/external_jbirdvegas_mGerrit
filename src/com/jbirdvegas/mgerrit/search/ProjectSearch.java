@@ -19,26 +19,21 @@ package com.jbirdvegas.mgerrit.search;
 
 import com.jbirdvegas.mgerrit.database.UserChanges;
 
-public class ChangeSearch extends SearchKeyword {
+public class ProjectSearch extends SearchKeyword {
 
-    public static final String OP_NAME = "change";
+    public static final String OP_NAME = "project";
 
     static {
-        registerKeyword(OP_NAME, ChangeSearch.class);
-        registerKeyword("changeid", ChangeSearch.class);
+        registerKeyword(OP_NAME, ProjectSearch.class);
     }
 
-    public ChangeSearch(String param) {
+    public ProjectSearch(String param) {
         super(OP_NAME, param);
     }
 
     @Override
     public String buildSearch() {
-        return UserChanges.C_CHANGE_ID + " LIKE ?";
-    }
-
-    @Override
-    public String getEscapeArgument() {
-        return getParam() + '%';
+        // Exact match only
+        return UserChanges.C_PROJECT + " = ?";
     }
 }

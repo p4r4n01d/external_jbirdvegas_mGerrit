@@ -1,15 +1,5 @@
 package com.jbirdvegas.mgerrit.search;
 
-import android.util.Log;
-
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)
  *  Author: Evan Conway (P4R4N01D), 2013
@@ -26,6 +16,17 @@ import java.util.Set;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
+import android.util.Log;
+
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 public abstract class SearchKeyword {
 
     public static final String TAG = "SearchKeyword";
@@ -44,6 +45,7 @@ public abstract class SearchKeyword {
         // Add each search keyword here
         _CLASSES.add(ChangeSearch.class);
         _CLASSES.add(SubjectSearch.class);
+        _CLASSES.add(ProjectSearch.class);
 
         // This will load the class calling the class's static block
         for (Class<? extends SearchKeyword> clazz : _CLASSES) {
@@ -65,6 +67,8 @@ public abstract class SearchKeyword {
         mOperator = operator;
         mOpParam = param;
     }
+
+
 
     protected static void registerKeyword(String opName, Class<? extends SearchKeyword> clazz) {
         _KEYWORDS.put(opName, clazz);
@@ -110,6 +114,14 @@ public abstract class SearchKeyword {
         else return null;
     }
 
+    /**
+     * Given a raw search query, this will attempt to process it
+     *  into the categories to search for (keywords) and their
+     *  arguments.
+     * @param query A raw search query in the form that Gerrit uses
+     * @return A set of SearchKeywords that can be used to construct
+     *  the database query
+     */
     public static Set<SearchKeyword> constructTokens(String query) {
         Set<SearchKeyword> set = new HashSet<SearchKeyword>();
         String currentToken = "";
@@ -123,7 +135,7 @@ public abstract class SearchKeyword {
                 }
             } else if (c == '"') {
                 int index = query.indexOf('"', i + 1);
-                currentToken += query.substring(i, index);
+                currentToken += query.substring(i, index + 1);
                 i = index + 1; // We have processed this many characters
             } else if (c == '{') {
                 int index = query.indexOf('}', i + 1);
@@ -139,6 +151,14 @@ public abstract class SearchKeyword {
             addToSetIfNotNull(buildToken(currentToken), set);
         }
         return set;
+    }
+
+    public static String getQuery(Set<SearchKeyword> tokens) {
+        String query = "";
+        for (SearchKeyword token : tokens) {
+            query += token.toString() + " ";
+        }
+        return query.trim();
     }
 
     private static void addToSetIfNotNull(SearchKeyword token, Set<SearchKeyword> set) {
@@ -167,5 +187,28 @@ public abstract class SearchKeyword {
      */
     public String getEscapeArgument() {
         return getParam();
+    }
+
+    public static String replaceKeyword(String query, SearchKeyword keyword) {
+        Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
+        for (SearchKeyword token : tokens) {
+            if (token instanceof ProjectSearch) {
+                tokens.remove(token);
+            }
+        }
+
+        if (!keyword.getParam().equals("")) {
+            tokens.add(keyword);
+        }
+        return SearchKeyword.getQuery(tokens);
+    }
+
+    public static int findKeyword(Set<SearchKeyword> tokens, Class<? extends SearchKeyword> clazz) {
+        int i = 0;
+        for (SearchKeyword token : tokens) {
+            if (token.getClass().equals(clazz)) return i;
+            else i++;
+        }
+        return -1;
     }
 }

@@ -17,11 +17,13 @@ package com.jbirdvegas.mgerrit;
  *  limitations under the License.
  */
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,8 +33,12 @@ import android.widget.SearchView;
 
 import com.jbirdvegas.mgerrit.message.StatusSelected;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
+import com.jbirdvegas.mgerrit.search.ProjectSearch;
+import com.jbirdvegas.mgerrit.search.SearchKeyword;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ChangeListFragment extends Fragment
         implements SearchView.OnQueryTextListener {
@@ -123,8 +129,20 @@ public class ChangeListFragment extends Fragment
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        // Pass this on to the current CardsFragment instance
-        getCurrentFragment().setSearchQuery(query);
+        Set<SearchKeyword> tokens = constructTokens(query);
+        if (tokens == null) {
+            Log.w(TAG, "Could not process query: " + query);
+        } else {
+            // If there is no project keyword in the query, it should be cleared
+            if (SearchKeyword.findKeyword(tokens, ProjectSearch.class) < 0) {
+                Prefs.setCurrentProject(mParent, null);
+            }
+            // Pass this on to the current CardsFragment instance
+            if (!processTokens(tokens)) {
+                Log.w(TAG, "Could not process query: " + query);
+            }
+        }
+
         return false;
     }
 
@@ -132,10 +150,55 @@ public class ChangeListFragment extends Fragment
     public boolean onQueryTextChange(String newText) {
         // Handled when the search is submitted instead.
         if (newText.isEmpty()) {
-            getCurrentFragment().setSearchQuery("");
+            onSearchQueryCleared();
+            // This should be called last and should always be processable
+            processTokens(null);
         }
         return false;
     }
+
+    /**
+     * Set the search query. This will construct the SQL query and restart
+     *  the loader to perform the query
+     * @param query The search query text
+     */
+    public Set<SearchKeyword> constructTokens(String query) {
+        // Clear any previous searches that where made
+        if (query == null || query.isEmpty()) {
+            return new HashSet<SearchKeyword>();
+        }
+
+        return SearchKeyword.constructTokens(query);
+    }
+
+    // Additional logic to be run when the search query is empty
+    private void onSearchQueryCleared() {
+        Prefs.setCurrentProject(mParent, null);
+    }
+
+    public boolean processTokens(Set<SearchKeyword> tokens) {
+        Bundle bundle = new Bundle();
+
+        if (tokens != null && !tokens.isEmpty()) {
+            String where = SearchKeyword.constructDbSearchQuery(tokens);
+            if (where != null && !where.isEmpty()) {
+                ArrayList<String> bindArgs = new ArrayList<String>();
+                for (SearchKeyword token : tokens) {
+                    bindArgs.add(token.getEscapeArgument());
+                }
+
+                bundle.putString("WHERE", where);
+                bundle.putStringArrayList("BIND_ARGS", bindArgs);
+            } else {
+                return false;
+            }
+        }
+        Intent intent = new Intent(CardsFragment.SEARCH_QUERY);
+        intent.putExtras(bundle);
+        LocalBroadcastManager.getInstance(mParent).sendBroadcast(intent);
+        return true;
+    }
+
 
     /**
      * A {@link android.support.v4.app.FragmentStatePagerAdapter} that returns a

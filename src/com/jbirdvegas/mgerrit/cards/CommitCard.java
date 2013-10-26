@@ -26,7 +26,6 @@ import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.fima.cardsui.objects.RecyclableCard;
-import com.jbirdvegas.mgerrit.CardsFragment;
 import com.jbirdvegas.mgerrit.GerritControllerActivity;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.helpers.GravatarHelper;
@@ -92,9 +91,6 @@ public class CommitCard extends RecyclableCard {
             viewHolder.owner.setTag(mCommit.getOwnerObject());
             TrackingClickListener trackingClickListener =
                     new TrackingClickListener(mActivity, mCommit.getOwnerObject());
-            if (CardsFragment.inProject) {
-                trackingClickListener.addProjectToStalk(mCommit.getProject());
-            }
             viewHolder.owner.setOnClickListener(trackingClickListener);
             GravatarHelper.attachGravatarToTextView(viewHolder.owner,
                     mCommit.getOwnerObject().getEmail(),
