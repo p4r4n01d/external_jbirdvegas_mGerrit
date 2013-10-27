@@ -135,11 +135,13 @@ public abstract class SearchKeyword {
                 }
             } else if (c == '"') {
                 int index = query.indexOf('"', i + 1);
-                currentToken += query.substring(i, index + 1);
+                // We don't want to store the quotation marks
+                currentToken += query.substring(i + 1, index);
                 i = index + 1; // We have processed this many characters
             } else if (c == '{') {
                 int index = query.indexOf('}', i + 1);
-                currentToken += query.substring(i, index + 1);
+                // We don't want to store these braces
+                currentToken += query.substring(i + 1, index);
                 i = index + 1; // We have processed this many characters
             } else {
                 currentToken += c;

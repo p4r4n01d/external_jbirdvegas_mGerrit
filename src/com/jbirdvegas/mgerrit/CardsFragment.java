@@ -398,15 +398,18 @@ public abstract class CardsFragment extends Fragment
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (args != null) {
-            String query = args.getString("WHERE");
-            ArrayList<String> bindArgs = args.getStringArrayList("BIND_ARGS");
-            if (query != null && bindArgs != null) {
-                return UserChanges.findCommits(mParent, getQuery(), query, bindArgs);
+            String databaseQuery = args.getString("WHERE");
+            if (databaseQuery != null && !databaseQuery.isEmpty()) {
+                if (args.getStringArrayList("BIND_ARGS") != null) {
+                    /* Create a copy as the findCommits function can modify the contents of bindArgs
+                     *  and we want each receiver to use the bindArgs from the original broadcast */
+                    ArrayList<String> bindArgs = new ArrayList<String>();
+                    bindArgs.addAll(args.getStringArrayList("BIND_ARGS"));
+                    return UserChanges.findCommits(mParent, getQuery(), databaseQuery, bindArgs);
+                }
             }
         }
-
         CommitterObject user = mParent.getCommitterObject();
-
         return UserChanges.listCommits(mParent, getQuery(), user);
     }
 

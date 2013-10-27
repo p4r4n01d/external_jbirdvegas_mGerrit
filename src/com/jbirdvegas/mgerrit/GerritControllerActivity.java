@@ -292,6 +292,9 @@ public class GerritControllerActivity extends FragmentActivity {
                 getString(R.string.using_gerrit_toast) + ' ' + newGerrit,
                 Toast.LENGTH_LONG).show();
         hideChangelogOption(newGerrit);
+
+        // Unset the project - we don't track these across Gerrit instances
+        Prefs.setCurrentProject(this, null);
         refreshTabs();
     }
 
