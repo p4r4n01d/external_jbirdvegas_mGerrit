@@ -184,8 +184,22 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
         setTrackingUser(context, committer.getAccountId());
     }
 
+    /**
+     * Set a user to be tracked.
+     *  Do not set this to clear the tracked user, use {@link clearTrackingUser(Context)} instead.
+     * @param context used to access SharedPreferences
+     * @param committer The userid of the user to track
+     */
     public static void setTrackingUser(Context context, Integer committer) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(TRACKING_USER, committer).commit();
+    }
+
+    /**
+     * Untrack the user currently being tracked
+     * @param context used to access SharedPreferences
+     */
+    public static void clearTrackingUser(Context context) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().remove(TRACKING_USER).commit();
     }
 
     public static Integer getTrackingUser(Context context) {

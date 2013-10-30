@@ -42,5 +42,4 @@ public class SubjectSearch extends SearchKeyword {
     public String[] getEscapeArgument() {
         return new String[] { getParam() + '%' };
     }
-
 }

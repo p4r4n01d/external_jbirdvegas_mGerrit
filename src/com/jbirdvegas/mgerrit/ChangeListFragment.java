@@ -33,6 +33,7 @@ import android.widget.SearchView;
 
 import com.jbirdvegas.mgerrit.message.StatusSelected;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
+import com.jbirdvegas.mgerrit.search.OwnerSearch;
 import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.search.SearchKeyword;
 
@@ -135,9 +136,17 @@ public class ChangeListFragment extends Fragment
             Log.w(TAG, "Could not process query: " + query);
         } else {
             // If there is no project keyword in the query, it should be cleared
-            if (SearchKeyword.findKeyword(tokens, ProjectSearch.class) < 0) {
+            if (SearchKeyword.findKeyword(tokens, ProjectSearch.class) < 0 &&
+                    !Prefs.getCurrentProject(mParent).equals("")) {
                 Prefs.setCurrentProject(mParent, null);
             }
+
+            // If there is no project keyword in the query, it should be cleared
+            if (SearchKeyword.findKeyword(tokens, OwnerSearch.class) < 0 &&
+                    Prefs.getTrackingUser(mParent) != null) {
+                Prefs.clearTrackingUser(mParent);
+            }
+
             // Pass this on to the current CardsFragment instance
             if (!processTokens(tokens)) {
                 Log.w(TAG, "Could not process query: " + query);
@@ -175,6 +184,7 @@ public class ChangeListFragment extends Fragment
     // Additional logic to be run when the search query is empty
     private void onSearchQueryCleared() {
         Prefs.setCurrentProject(mParent, null);
+        Prefs.clearTrackingUser(mParent);
     }
 
     public boolean processTokens(Set<SearchKeyword> tokens) {

@@ -291,6 +291,8 @@ public class GerritControllerActivity extends FragmentActivity {
 
         // Unset the project - we don't track these across Gerrit instances
         Prefs.setCurrentProject(this, null);
+        Prefs.clearTrackingUser(this);
+
         refreshTabs();
     }
 
@@ -304,7 +306,8 @@ public class GerritControllerActivity extends FragmentActivity {
 
     private void onUserTrackingChanged(Integer userTracking) {
         String query = getSearchQuery();
-        query = SearchKeyword.replaceKeyword(query, new OwnerSearch(userTracking.toString()));
+        String user = userTracking == null ? "" : userTracking.toString();
+        query = SearchKeyword.replaceKeyword(query, new OwnerSearch(user));
         searchView.setIconified(false);
         searchView.setQuery(query, true);
     }
@@ -406,9 +409,19 @@ public class GerritControllerActivity extends FragmentActivity {
 
     // Call this ONLY after the searchView has been initialised
     private void setupSearchQuery() {
+        String oldQuery = getSearchQuery().toString(), query;
+        query = oldQuery;
+
         if (!mCurrentProject.equals("")) {
-            String query = getSearchQuery().toString();
             query = SearchKeyword.replaceKeyword(query, new ProjectSearch(mCurrentProject));
+        }
+
+        Integer user = Prefs.getTrackingUser(this);
+        if (user != null) {
+            query = SearchKeyword.replaceKeyword(query, new OwnerSearch(user.toString()));
+        }
+
+        if (!oldQuery.equals(query)) {
             searchView.setIconified(false);
             searchView.setQuery(query, false); // Don't submit (it will be submitted initially)
         }
