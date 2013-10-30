@@ -93,7 +93,7 @@ public class Changes extends DatabaseTable {
                 + C_TOPIC + " text, "
                 + C_COMMIT_NUMBER + " INTEGER NOT NULL, "
                 + "FOREIGN KEY (" + C_OWNER + ") REFERENCES "
-                    + Users.TABLE + "(" + Users.C_EMAIL + "), "
+                    + Users.TABLE + "(" + Users.C_ACCOUNT_ID + "), "
                 + "FOREIGN KEY (" + C_PROJECT + ") REFERENCES "
                     + ProjectsTable.TABLE + "(" + ProjectsTable.C_PATH + "))");
     }

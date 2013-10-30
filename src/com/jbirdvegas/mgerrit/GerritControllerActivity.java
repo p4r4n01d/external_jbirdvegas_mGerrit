@@ -43,10 +43,16 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
-import com.jbirdvegas.mgerrit.message.*;
-import com.jbirdvegas.mgerrit.objects.CommitterObject;
+import com.jbirdvegas.mgerrit.message.ConnectionEstablished;
+import com.jbirdvegas.mgerrit.message.ErrorDuringConnection;
+import com.jbirdvegas.mgerrit.message.EstablishingConnection;
+import com.jbirdvegas.mgerrit.message.Finished;
+import com.jbirdvegas.mgerrit.message.HandshakeError;
+import com.jbirdvegas.mgerrit.message.InitializingDataTransfer;
+import com.jbirdvegas.mgerrit.message.ProgressUpdate;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.GooFileObject;
+import com.jbirdvegas.mgerrit.search.OwnerSearch;
 import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
@@ -59,8 +65,6 @@ public class GerritControllerActivity extends FragmentActivity {
 
     private static final String TAG = GerritControllerActivity.class.getSimpleName();
     private static final String GERRIT_INSTANCE = "gerrit";
-
-    private CommitterObject mCommitterObject;
     private String mGerritWebsite;
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
@@ -129,10 +133,13 @@ public class GerritControllerActivity extends FragmentActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String key = intent.getStringExtra(TheApplication.PREF_CHANGE_KEY);
-                if (key.equals(Prefs.GERRIT_KEY))
+                if (key.equals(Prefs.GERRIT_KEY)) {
                     onGerritChanged(Prefs.getCurrentGerrit(GerritControllerActivity.this));
-                else if (key.equals(Prefs.CURRENT_PROJECT))
+                } else if (key.equals(Prefs.CURRENT_PROJECT)) {
                     onProjectChanged(Prefs.getCurrentProject(GerritControllerActivity.this));
+                } else if (key.equals(Prefs.TRACKING_USER)) {
+                    onUserTrackingChanged(Prefs.getTrackingUser(GerritControllerActivity.this));
+                }
             }
         };
         // Don't register listener here. It is registered in onResume instead.
@@ -141,17 +148,6 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     private void init() {
-        if (!CardsFragment.sSkipStalking) {
-            try {
-                mCommitterObject = getIntent()
-                        .getExtras()
-                        .getParcelable(CardsFragment.KEY_DEVELOPER);
-            } catch (NullPointerException npe) {
-                // non author specific view
-                // use default
-            }
-        }
-
         // ensure we are not tracking a project unintentionally
         if ("".equals(Prefs.getCurrentProject(this))) {
             Prefs.setCurrentProject(this, null);
@@ -286,7 +282,7 @@ public class GerritControllerActivity extends FragmentActivity {
         }
     }
 
-    public void onGerritChanged(String newGerrit) {
+    private void onGerritChanged(String newGerrit) {
         mGerritWebsite = newGerrit;
         Toast.makeText(this,
                 getString(R.string.using_gerrit_toast) + ' ' + newGerrit,
@@ -298,12 +294,19 @@ public class GerritControllerActivity extends FragmentActivity {
         refreshTabs();
     }
 
-    public void onProjectChanged(String newProject) {
+    private void onProjectChanged(String newProject) {
         String query = getSearchQuery();
         query = SearchKeyword.replaceKeyword(query, new ProjectSearch(newProject));
         searchView.setIconified(false);
         searchView.setQuery(query, true);
         mCurrentProject = newProject;
+    }
+
+    private void onUserTrackingChanged(Integer userTracking) {
+        String query = getSearchQuery();
+        query = SearchKeyword.replaceKeyword(query, new OwnerSearch(userTracking.toString()));
+        searchView.setIconified(false);
+        searchView.setQuery(query, true);
     }
 
     /* Mark all of the tabs as dirty to trigger a refresh when they are next
@@ -313,9 +316,6 @@ public class GerritControllerActivity extends FragmentActivity {
     public void refreshTabs() {
         mChangeList.refreshTabs();
     }
-
-    public CommitterObject getCommitterObject() { return mCommitterObject; }
-    public void clearCommitterObject() { mCommitterObject = null; }
 
     @Override
     protected void onPause() {

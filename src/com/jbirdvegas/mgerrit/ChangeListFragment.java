@@ -37,6 +37,7 @@ import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.search.SearchKeyword;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -184,7 +185,7 @@ public class ChangeListFragment extends Fragment
             if (where != null && !where.isEmpty()) {
                 ArrayList<String> bindArgs = new ArrayList<String>();
                 for (SearchKeyword token : tokens) {
-                    bindArgs.add(token.getEscapeArgument());
+                    bindArgs.addAll(Arrays.asList(token.getEscapeArgument()));
                 }
 
                 bundle.putString("WHERE", where);

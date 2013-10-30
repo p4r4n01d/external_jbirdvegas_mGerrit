@@ -31,14 +31,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.fima.cardsui.objects.Card;
 import com.fima.cardsui.views.CardUI;
 import com.jbirdvegas.mgerrit.cards.CommitCard;
-import com.jbirdvegas.mgerrit.cards.ImageCard;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
@@ -46,8 +44,6 @@ import com.jbirdvegas.mgerrit.objects.ChangeLogRange;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
-import com.jbirdvegas.mgerrit.search.ProjectSearch;
-import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 
@@ -59,20 +55,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public abstract class CardsFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String KEY_DEVELOPER = "committer_object";
-    public static final String AT_SYMBOL = "@";
     public static final String KEY_OWNER = "owner";
     public static final String KEY_REVIEWER = "reviewer";
 
     // TODO: Could take this out and put it in GerritControllerActivity
-    public static boolean sSkipStalking;
     private static final boolean DEBUG = true;
     private static final boolean CHATTY = false;
     public static final String SEARCH_QUERY = "SEARCH";
@@ -154,8 +146,7 @@ public abstract class CardsFragment extends Fragment
                     changes.getString(updated_index),
                     changes.getString(status_index));
 
-            CommitCard card = new CommitCard(commit, mParent.getCommitterObject(),
-                    mRequestQueue, mParent);
+            CommitCard card = new CommitCard(commit, mRequestQueue, mParent);
 
             commitCardList.add(card);
         }
@@ -166,7 +157,6 @@ public abstract class CardsFragment extends Fragment
     private CommitCard getCommitCard(JSONObject jsonObject, Context context) {
         return new CommitCard(
                 new JSONCommit(jsonObject, context),
-                mParent.getCommitterObject(),
                 mRequestQueue,
                 mParent);
     }
@@ -175,34 +165,6 @@ public abstract class CardsFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.commit_list, container, false);
-    }
-
-    // committerObject == mParent.getCommitterObject()
-    private ImageCard stalkUser(final CommitterObject committerObject)
-    {
-        Toast.makeText(mParent,
-                // format string with a space
-                String.format("%s %s",
-                        getString(R.string.stalker_mode_toast),
-                        committerObject.getName()),
-                Toast.LENGTH_LONG).show();
-
-        // now add a project card if
-        // we are looking at a single project
-        ImageCard userImageCard = new ImageCard(mRequestQueue,
-                mParent,
-                this,
-                committerObject.getName(),
-                committerObject);
-        userImageCard.setOnCardSwipedListener(new Card.OnCardSwiped() {
-            @Override
-            public void onCardSwiped(Card card, View layout) {
-                mParent.clearCommitterObject();
-                CardsFragment.sSkipStalking = true;
-                mParent.refreshTabs();
-            }
-        });
-        return userImageCard;
     }
 
     private void init(Bundle savedInstanceState)
@@ -224,20 +186,6 @@ public abstract class CardsFragment extends Fragment
 
     private void setup()
     {
-
-        CommitterObject user = mParent.getCommitterObject();
-        if (!sSkipStalking) {
-            String userEmail = "";
-
-            if (user != null) userEmail = user.getEmail();
-            if (userEmail != null
-                    && !userEmail.trim().isEmpty()
-                    && userEmail.contains(CardsFragment.AT_SYMBOL)) {
-
-                mCards.addCard(stalkUser(user));
-            }
-        }
-
         try {
             mChangelogRange = mParent.getIntent()
                     .getExtras()
@@ -251,20 +199,10 @@ public abstract class CardsFragment extends Fragment
             if (DEBUG) Log.w(TAG, "Not making changelog");
         }
 
-        sendRequest(false);
+        sendRequest();
 
         // We cannot use the search query here as the SearchView may not have been initialised yet.
-
-        // If we have set a project add it to the arguments here
-        String project = Prefs.getCurrentProject(mParent);
-
-        if (!project.equals("")) {
-            HashSet<SearchKeyword> tokens = new HashSet<SearchKeyword>();
-            tokens.add(new ProjectSearch(project));
-            processTokens(tokens);
-        } else {
-            getLoaderManager().initLoader(0, null, this);
-        }
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -317,7 +255,6 @@ public abstract class CardsFragment extends Fragment
                                 mChangelogRange.startTime(), mChangelogRange.endTime(), commitDate));
                     }
                     if (mChangelogRange.isInRange(commitDate.getTime())) {
-                        commitCard.setChangeLogRange(mChangelogRange);
                         commitCardList.add(commitCard);
                         if (CHATTY) {
                             Log.d(TAG, "Commit included in changelog! "
@@ -347,32 +284,10 @@ public abstract class CardsFragment extends Fragment
      */
     abstract String getQuery();
 
-    public boolean processTokens(Set<SearchKeyword> tokens) {
-        if (tokens != null && !tokens.isEmpty()) {
-            String where = SearchKeyword.constructDbSearchQuery(tokens);
-            if (where != null && !where.isEmpty()) {
-                ArrayList<String> bindArgs = new ArrayList<String>();
-                for (SearchKeyword token : tokens) {
-                    bindArgs.add(token.getEscapeArgument());
-                }
-
-                Bundle bundle = new Bundle();
-                bundle.putString("WHERE", where);
-                bundle.putStringArrayList("BIND_ARGS", bindArgs);
-
-                // OnLoaderReset is not called when restarting a loader so unbind the data here
-                mCards.clearCards();
-                getLoaderManager().restartLoader(0, bundle, this);
-                return true;
-            } else {
-                return false;
-            }
-        }
-        getLoaderManager().restartLoader(0, null, this);
-        return true;
-    }
-
-    private void sendRequest(boolean forceUpdate) {
+    /**
+     * Start the updater to check for an update if necessary
+     */
+    private void sendRequest() {
         Intent it = new Intent(mParent, GerritService.class);
         it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
         it.putExtra(GerritService.URL_KEY, mUrl);
@@ -389,7 +304,7 @@ public abstract class CardsFragment extends Fragment
 
         if (forceUpdate) {
             SyncTime.clear(mParent);
-            sendRequest(forceUpdate);
+            sendRequest();
         }
     }
 
@@ -409,8 +324,7 @@ public abstract class CardsFragment extends Fragment
                 }
             }
         }
-        CommitterObject user = mParent.getCommitterObject();
-        return UserChanges.listCommits(mParent, getQuery(), user);
+        return UserChanges.findCommits(mParent, getQuery(), null, null);
     }
 
     @Override

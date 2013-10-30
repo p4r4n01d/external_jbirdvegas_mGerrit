@@ -77,7 +77,7 @@ public class UserChanges extends DatabaseTable {
 
 
     // --- Columns in Users table ---
-    // The numeric ID of the account.
+    // The numeric ID of the account (Identical to UserChanges.C_OWNER)
     public static final String C_USER_ID = Users.C_ACCOUNT_ID;
 
     /* The email address the user prefers to be contacted through.
@@ -124,33 +124,6 @@ public class UserChanges extends DatabaseTable {
     {
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE, ITEM_LIST);
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE + "/#", ITEM_ID);
-    }
-
-    /**
-     * List the commits for a given change status
-     * @param context Context for database access
-     * @param status The change status to search for
-     * @param committerID The email of the committer
-     * @return A CursorLoader
-     */
-    public static CursorLoader listCommits(Context context, String status, Integer committerID) {
-        StringBuilder builder = new StringBuilder();
-        List<String> bindArgs = new ArrayList<String>();
-        boolean addAnd = false;
-
-        if (committerID != null) {
-            builder.append(C_USER_ID).append(" = ?");
-            bindArgs.add(committerID.toString());
-            addAnd = true;
-        }
-
-        return findCommits(context, status, builder, bindArgs);
-    }
-
-    public static CursorLoader listCommits(Context context, String status, CommitterObject committer) {
-        Integer accountID = null;
-        if (committer != null)  accountID = committer.getAccountId();
-        return listCommits(context, status, accountID);
     }
 
     /** Insert the list of commits into the database **/
@@ -238,7 +211,17 @@ public class UserChanges extends DatabaseTable {
      */
     public static CursorLoader findCommits(Context context, String status,
                                            String query, List<String> args) {
-        StringBuilder builder = new StringBuilder(query);
+        StringBuilder builder;
+        if (query == null) {
+            builder = new StringBuilder("");
+        } else {
+            builder = new StringBuilder(query);
+        }
+
+        if (args == null) {
+            args = new ArrayList<String>();
+        }
+
         return findCommits(context, status, builder, args);
     }
 

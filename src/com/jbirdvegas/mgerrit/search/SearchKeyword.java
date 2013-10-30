@@ -46,6 +46,7 @@ public abstract class SearchKeyword {
         _CLASSES.add(ChangeSearch.class);
         _CLASSES.add(SubjectSearch.class);
         _CLASSES.add(ProjectSearch.class);
+        _CLASSES.add(OwnerSearch.class);
 
         // This will load the class calling the class's static block
         for (Class<? extends SearchKeyword> clazz : _CLASSES) {
@@ -187,8 +188,8 @@ public abstract class SearchKeyword {
      * Formats the bind argument for query binding.
      * May be overriden to include wildcards in the parameter for like queries
      */
-    public String getEscapeArgument() {
-        return getParam();
+    public String[] getEscapeArgument() {
+        return new String[] { getParam() };
     }
 
     public static String replaceKeyword(String query, SearchKeyword keyword) {
