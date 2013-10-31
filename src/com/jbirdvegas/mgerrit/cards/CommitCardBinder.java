@@ -80,13 +80,13 @@ public class CommitCardBinder implements SimpleCursorAdapter.ViewBinder {
                 }
             });
         } else if (view.getId() == R.id.commit_card_commit_status) {
-            TextView status = (TextView) view;
             String statusText = cursor.getString(columnIndex);
-            status.setText(statusText);
             if (statusText.equals("MERGED")) {
-                status.setTextColor(mGreen);
+                view.setBackgroundColor(mGreen);
             } else if (statusText.equals("ABANDONED")) {
-                status.setTextColor(mRed);
+                view.setBackgroundColor(mRed);
+            } else {
+                view.setBackgroundColor(mContext.getResources().getColor(android.R.color.white));
             }
         } else {
             return false;

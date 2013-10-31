@@ -59,7 +59,6 @@ CardsUI Library
 ----------------
 	- Decrease padding between cards
 	- Investigate card swiping
-	- Include card stripe colouring support
 
 Tablet (master-detail layout)
 -----------------------------

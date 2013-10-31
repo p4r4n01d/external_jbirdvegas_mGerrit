@@ -94,11 +94,14 @@ public class CommitCard extends RecyclableCard {
 
         viewHolder.cardTitle.setText(mCommit.getSubject());
         viewHolder.updated.setText(mCommit.getLastUpdatedDate(mActivity));
-        viewHolder.status.setText(mCommit.getStatus().toString());
-        if (mCommit.getStatus().toString().equals("MERGED")) {
-            viewHolder.status.setTextColor(mGreen);
-        } else if (mCommit.getStatus().toString().equals("ABANDONED")) {
-            viewHolder.status.setTextColor(mRed);
+
+        String statusText = mCommit.getStatus().toString();
+        if (statusText.equals("MERGED")) {
+            viewHolder.status.setBackgroundColor(mGreen);
+        } else if (statusText.equals("ABANDONED")) {
+            viewHolder.status.setBackgroundColor(mRed);
+        } else {
+            viewHolder.status.setBackgroundColor(mActivity.getResources().getColor(android.R.color.white));
         }
 
         View.OnClickListener cardListener = new View.OnClickListener() {
@@ -183,7 +186,7 @@ public class CommitCard extends RecyclableCard {
         TextView project;
         TextView cardTitle;
         TextView updated;
-        TextView status;
+        View status;
         ImageView browserView;
         ImageView shareView;
         ImageView moarInfo;
@@ -195,7 +198,7 @@ public class CommitCard extends RecyclableCard {
             project = (TextView) view.findViewById(R.id.commit_card_project_name);
             cardTitle = (TextView) view.findViewById(R.id.commit_card_title);
             updated = (TextView) view.findViewById(R.id.commit_card_last_updated);
-            status = (TextView) view.findViewById(R.id.commit_card_commit_status);
+            status = view.findViewById(R.id.commit_card_commit_status);
             browserView = (ImageView) view.findViewById(R.id.commit_card_view_in_browser);
             shareView = (ImageView) view.findViewById(R.id.commit_card_share_info);
             moarInfo = (ImageView) view.findViewById(R.id.commit_card_moar_info);
