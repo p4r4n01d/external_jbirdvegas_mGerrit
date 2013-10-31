@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -44,7 +43,6 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Logger;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -65,7 +63,6 @@ import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -78,6 +75,11 @@ public class GerritControllerActivity extends FragmentActivity {
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
 
+    public static final String NEW_CHANGE_SELECTED = "Change Selected";
+    public static final String CHANGE_ID_TAG = "ChangeID";
+    public static final String CHANGE_STATUS_TAG = "Status";
+    public static final String EXPAND_TAG = "expand";
+
     /**
      * Keep track of all the GerritTask instances so the dialog can be dismissed
      *  when this activity is paused.
@@ -86,7 +88,10 @@ public class GerritControllerActivity extends FragmentActivity {
 
     SharedPreferences mPrefs;
 
-    BroadcastReceiver mListener;
+    // Listener for preference changes
+    private BroadcastReceiver mPrefChangeListener;
+    // Listener for changes to which commit is selected
+    private BroadcastReceiver mChangeListener;
 
     private DefaultGerritReceivers receivers;
 
@@ -101,6 +106,7 @@ public class GerritControllerActivity extends FragmentActivity {
     // This will be null if mTwoPane is false (i.e. not tablet mode)
     private PatchSetViewerFragment mChangeDetail;
     private SearchView searchView;
+
 
     @Override
     protected void onStart() {
@@ -170,7 +176,8 @@ public class GerritControllerActivity extends FragmentActivity {
         GerritURL.setGerrit(Prefs.getCurrentGerrit(this));
         GerritURL.setProject(Prefs.getCurrentProject(this));
 
-        mListener = new BroadcastReceiver() {
+        // Don't register listeners here. It is registered in onResume instead.
+        mPrefChangeListener = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String key = intent.getStringExtra(TheApplication.PREF_CHANGE_KEY);
@@ -183,7 +190,16 @@ public class GerritControllerActivity extends FragmentActivity {
                 }
             }
         };
-        // Don't register listener here. It is registered in onResume instead.
+
+        mChangeListener = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String changeid = intent.getStringExtra(GerritControllerActivity.CHANGE_ID_TAG);
+                String status = intent.getStringExtra(GerritControllerActivity.CHANGE_STATUS_TAG);
+                boolean expand = intent.getBooleanExtra(GerritControllerActivity.EXPAND_TAG, false);
+                onChangeSelected(changeid, status, expand);
+            }
+        };
 
         handleIntent(this.getIntent());
     }
@@ -220,8 +236,10 @@ public class GerritControllerActivity extends FragmentActivity {
                 Finished.TYPE,
                 HandshakeError.TYPE,
                 ErrorDuringConnection.TYPE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mListener,
+        LocalBroadcastManager.getInstance(this).registerReceiver(mPrefChangeListener,
                 new IntentFilter(TheApplication.PREF_CHANGE_TYPE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mChangeListener,
+                new IntentFilter(GerritControllerActivity.NEW_CHANGE_SELECTED));
     }
 
     @Override
@@ -366,7 +384,8 @@ public class GerritControllerActivity extends FragmentActivity {
         super.onPause();
         receivers.unregisterReceivers();
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mListener);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mPrefChangeListener);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mChangeListener);
 
         Iterator<GerritTask> it = mGerritTasks.iterator();
         while (it.hasNext())

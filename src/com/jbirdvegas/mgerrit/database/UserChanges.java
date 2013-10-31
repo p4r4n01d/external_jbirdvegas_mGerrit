@@ -101,8 +101,8 @@ public class UserChanges extends DatabaseTable {
     // Sort by condition for querying results.
     public static final String SORT_BY = C_UPDATED + " DESC";
 
-    private static final String[] CHANGE_LIST_PROJECTION = new String[] {
-            C_CHANGE_ID, C_SUBJECT, C_PROJECT, C_UPDATED,
+    public static final String[] CHANGE_LIST_PROJECTION = new String[] {
+            Changes.TABLE + ".rowid AS _id", C_CHANGE_ID, C_SUBJECT, C_PROJECT, C_UPDATED,
             C_STATUS, C_TOPIC, C_USER_ID, C_EMAIL, C_NAME,
             C_COMMIT_NUMBER };
 

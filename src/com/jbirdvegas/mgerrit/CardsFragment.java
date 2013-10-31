@@ -31,12 +31,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.fima.cardsui.objects.Card;
 import com.fima.cardsui.views.CardUI;
+import com.jbirdvegas.mgerrit.adapters.ChangeListAdapter;
 import com.jbirdvegas.mgerrit.cards.CommitCard;
+import com.jbirdvegas.mgerrit.cards.CommitCardBinder;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
@@ -77,8 +80,6 @@ public abstract class CardsFragment extends Fragment
     private ChangeLogRange mChangelogRange;
     private GerritControllerActivity mParent;
 
-    CardUI mCards;
-
     // Indicates that this fragment will need to be refreshed
     private boolean mIsDirty = false;
 
@@ -86,11 +87,11 @@ public abstract class CardsFragment extends Fragment
     private BroadcastReceiver mSearchQueryListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // OnLoaderReset is not called when restarting a loader so unbind the data here
-            mCards.clearCards();
             getLoaderManager().restartLoader(0, intent.getExtras(), CardsFragment.this);
         }
     };
+    private ListView mListView;
+    private ChangeListAdapter mAdapter;
 
     // renders each card separately
     protected void drawCardsFromList(List<CommitCard> cards, CardUI cardUI) {
@@ -112,48 +113,6 @@ public abstract class CardsFragment extends Fragment
         setup();
     }
 
-    protected List<CommitCard> generateCardsList(Cursor changes) {
-        List<CommitCard> commitCardList = new LinkedList<CommitCard>();
-
-        /*
-         * TODO: Put this into JSONCommit:
-         *     - takes a map (Cursor column name -> annotated field name
-         *     - uses reflection to map the columns provided in the cursor to JSONCommit values
-         */
-
-        int changeid_index = changes.getColumnIndex(UserChanges.C_CHANGE_ID);
-        int subject_index = changes.getColumnIndex(UserChanges.C_SUBJECT);
-        int project_index = changes.getColumnIndex(UserChanges.C_PROJECT);
-        int updated_index = changes.getColumnIndex(UserChanges.C_UPDATED);
-        int status_index = changes.getColumnIndex(UserChanges.C_STATUS);
-        int changenum_index = changes.getColumnIndex(UserChanges.C_COMMIT_NUMBER);
-
-        // Committer object
-        int username_index = changes.getColumnIndex(UserChanges.C_NAME);
-        int useremail_index = changes.getColumnIndex(UserChanges.C_EMAIL);
-        int userid_index = changes.getColumnIndex(UserChanges.C_USER_ID);
-
-        while (changes.moveToNext()) {
-            CommitterObject committer = new CommitterObject(changes.getString(username_index),
-                    changes.getString(useremail_index),
-                    changes.getInt(userid_index));
-
-            JSONCommit commit = new JSONCommit(mParent, changes.getString(changeid_index),
-                    changes.getInt(changenum_index),
-                    changes.getString(project_index),
-                    changes.getString(subject_index),
-                    committer,
-                    changes.getString(updated_index),
-                    changes.getString(status_index));
-
-            CommitCard card = new CommitCard(commit, mRequestQueue, mParent);
-
-            commitCardList.add(card);
-        }
-        // Don't close the cursor, the loader manager does that
-        return commitCardList;
-    }
-
     private CommitCard getCommitCard(JSONObject jsonObject, Context context) {
         return new CommitCard(
                 new JSONCommit(jsonObject, context),
@@ -171,11 +130,21 @@ public abstract class CardsFragment extends Fragment
     {
         mParent = (GerritControllerActivity) this.getActivity();
         View mCurrentFragment = this.getView();
-
-        mCards = (CardUI) mCurrentFragment.findViewById(R.id.commit_cards);
-        mCards.setSwipeable(true);
         mRequestQueue = Volley.newRequestQueue(mParent);
-        // default to non author specific view
+
+        // Setup the list
+        int[] to = new int[] { R.id.commit_card_title, R.id.commit_card_commit_owner,
+                R.id.commit_card_project_name, R.id.commit_card_last_updated,
+                R.id.commit_card_commit_status };
+
+        String[] from = new String[] { UserChanges.C_SUBJECT, UserChanges.C_NAME,
+                UserChanges.C_PROJECT, UserChanges.C_UPDATED, UserChanges.C_STATUS };
+
+        mListView = (ListView) mCurrentFragment.findViewById(R.id.commit_cards);
+        mAdapter = new ChangeListAdapter(mParent, R.layout.commit_card, null, from, to, 0);
+        mListView.setAdapter(mAdapter);
+        mAdapter.setViewBinder(new CommitCardBinder(mParent, mRequestQueue));
+
 
         mUrl = new GerritURL();
 
@@ -224,10 +193,12 @@ public abstract class CardsFragment extends Fragment
             @Override
             public void onJSONResult(String s)
             {
-                drawCardsFromList(
+                /* This is broke at the moment. Maybe we could add a seperate list (CardsUI)
+                 *  to R.layout.commit_list to display this */
+                /*drawCardsFromList(
                         generateChangeLog(
                                 logRange, s),
-                        mCards);
+                        mCards);*/
             }
         }.execute(mUrl.toString());
     }
@@ -297,7 +268,6 @@ public abstract class CardsFragment extends Fragment
     protected void refresh(boolean forceUpdate)
     {
         if (!mIsDirty) return;
-        mCards.clearCards();
 
         mIsDirty = false;
         getLoaderManager().restartLoader(0, null, this);
@@ -330,12 +300,12 @@ public abstract class CardsFragment extends Fragment
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         // Naive implementation
-        mCards.clearCards();
+        mAdapter.swapCursor(null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        drawCardsFromList(generateCardsList(cursor), mCards);
+        mAdapter.swapCursor(cursor);
         // Broadcast that we have finished loading changes
         new ChangeLoadingFinished(mParent, getQuery()).sendUpdateMessage();
     }
