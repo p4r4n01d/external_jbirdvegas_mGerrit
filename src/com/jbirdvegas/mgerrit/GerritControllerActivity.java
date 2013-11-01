@@ -47,6 +47,7 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Logger;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.jbirdvegas.mgerrit.database.SelectedChange;
 import com.jbirdvegas.mgerrit.helpers.ROMHelper;
 import com.jbirdvegas.mgerrit.listeners.DefaultGerritReceivers;
 import com.jbirdvegas.mgerrit.message.ConnectionEstablished;
@@ -74,11 +75,6 @@ public class GerritControllerActivity extends FragmentActivity {
     private String mGerritWebsite;
     private GooFileObject mChangeLogStart;
     private GooFileObject mChangeLogStop;
-
-    public static final String NEW_CHANGE_SELECTED = "Change Selected";
-    public static final String CHANGE_ID_TAG = "ChangeID";
-    public static final String CHANGE_STATUS_TAG = "Status";
-    public static final String EXPAND_TAG = "expand";
 
     /**
      * Keep track of all the GerritTask instances so the dialog can be dismissed
@@ -194,9 +190,9 @@ public class GerritControllerActivity extends FragmentActivity {
         mChangeListener = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String changeid = intent.getStringExtra(GerritControllerActivity.CHANGE_ID_TAG);
-                String status = intent.getStringExtra(GerritControllerActivity.CHANGE_STATUS_TAG);
-                boolean expand = intent.getBooleanExtra(GerritControllerActivity.EXPAND_TAG, false);
+                String changeid = intent.getStringExtra(PatchSetViewerFragment.CHANGE_ID);
+                String status = intent.getStringExtra(PatchSetViewerFragment.STATUS);
+                boolean expand = intent.getBooleanExtra(PatchSetViewerFragment.EXPAND_TAG, false);
                 onChangeSelected(changeid, status, expand);
             }
         };
@@ -239,7 +235,7 @@ public class GerritControllerActivity extends FragmentActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mPrefChangeListener,
                 new IntentFilter(TheApplication.PREF_CHANGE_TYPE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mChangeListener,
-                new IntentFilter(GerritControllerActivity.NEW_CHANGE_SELECTED));
+                new IntentFilter(PatchSetViewerFragment.NEW_CHANGE_SELECTED));
     }
 
     @Override
@@ -440,6 +436,8 @@ public class GerritControllerActivity extends FragmentActivity {
         Bundle arguments = new Bundle();
         arguments.putString(PatchSetViewerFragment.CHANGE_ID, changeID);
         arguments.putString(PatchSetViewerFragment.STATUS, status);
+
+        SelectedChange.setSelectedChange(this, changeID);
 
         if (mTwoPane) {
             mChangeDetail.setSelectedChange(changeID);

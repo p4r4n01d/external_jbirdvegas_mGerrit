@@ -27,7 +27,7 @@ import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import com.jbirdvegas.mgerrit.GerritControllerActivity;
+import com.jbirdvegas.mgerrit.PatchSetViewerFragment;
 import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.cards.CommitCardBinder;
@@ -71,10 +71,11 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
             View.OnClickListener cardListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(GerritControllerActivity.NEW_CHANGE_SELECTED);
-                    intent.putExtra(GerritControllerActivity.CHANGE_ID_TAG, cursor.getString(changeid_index));
-                    intent.putExtra(GerritControllerActivity.CHANGE_STATUS_TAG, cursor.getString(status_index));
-                    intent.putExtra(GerritControllerActivity.EXPAND_TAG, true);
+                    Intent intent = new Intent(PatchSetViewerFragment.NEW_CHANGE_SELECTED);
+
+                    intent.putExtra(PatchSetViewerFragment.CHANGE_ID, cursor.getString(changeid_index));
+                    intent.putExtra(PatchSetViewerFragment.STATUS, cursor.getString(status_index));
+                    intent.putExtra(PatchSetViewerFragment.EXPAND_TAG, true);
                     LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                 }
             };

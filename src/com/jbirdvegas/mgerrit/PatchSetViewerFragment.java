@@ -73,6 +73,8 @@ public class PatchSetViewerFragment extends Fragment {
     private String mSelectedChange;
     private String mStatus;
 
+    public static final String NEW_CHANGE_SELECTED = "Change Selected";
+    public static final String EXPAND_TAG = "expand";
     public static final String CHANGE_ID = "changeID";
     public static final String STATUS = "queryStatus";
 
