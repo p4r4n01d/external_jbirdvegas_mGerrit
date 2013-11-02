@@ -20,6 +20,7 @@ package com.jbirdvegas.mgerrit;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -39,7 +40,7 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
     private static final CharSequence AOSP_VOLLEY = "open_source_aosp_volley";
     private static final CharSequence APACHE_COMMONS_KEY = "open_source_apache_commons";
     public static final String GERRIT_KEY = "gerrit_instances_key";
-    private static final String ANIMATION_KEY = "animation_key";
+    public static final String ANIMATION_KEY = "animation_key";
     private static final String SERVER_TIMEZONE_KEY = "server_timezone";
     private static final String LOCAL_TIMEZONE_KEY = "local_timezone";
     public static final String CURRENT_PROJECT = "current_project";
@@ -173,7 +174,11 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
     }
 
     public static void setCurrentProject(Context context, String project) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(CURRENT_PROJECT, project).commit();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String oldProject = prefs.getString(CURRENT_PROJECT, "");
+        if (!oldProject.equals(project)) {
+            prefs.edit().putString(CURRENT_PROJECT, project).commit();
+        }
     }
 
     public static String getCurrentProject(Context context) {
@@ -191,7 +196,11 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
      * @param committer The userid of the user to track
      */
     public static void setTrackingUser(Context context, Integer committer) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(TRACKING_USER, committer).commit();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int oldCommitter = prefs.getInt(TRACKING_USER, -1);
+        if (oldCommitter != committer) {
+            prefs.edit().putInt(TRACKING_USER, committer).commit();
+        }
     }
 
     /**

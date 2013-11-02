@@ -9,8 +9,7 @@ Outstanding
 	- Compare change updated timestamps and change ids to determine when the rest of the data is old and does not need to be changed
 	- Only load the new stuff and don't reset all the cards views if not necesscary.
 - Do not default to one specific gerrit - open up the list of Gerrits to choose from. This applies only when there is no app data (e.g. mgerrit has just been installed)
-- Give a visual aid to which Gerrit source is currently selected in Gerrit selection dialog
-- When selecting a committer, use the currently selected tab to determine which changes of theirs to view
+	- Could detect the current ROM and select that one by default
 - More feedback on which Gerrit is selected
 	- Change gerrit selector icon to match the current Gerrit
 		- If custom Gerrit either:
@@ -42,6 +41,7 @@ Database
 --------
     - Change set (details) table
 
+
 Searching (Requires database), action bar
 -----------------------------
 	- General searching:
@@ -55,19 +55,27 @@ Searching (Requires database), action bar
 		- Idea: Users can do filtering and bypass the filter draw entirely. The filter draw provides assistance on how to formulate queries that the web interface uses.
 		- We are going to support new filter types (keywords) and/or new parameters for them (e.g. date range filtering for the age keyword)
 
-CardsUI Library
-----------------
-	- Decrease padding between cards
-	- Investigate card swiping
+	- When expanded, the searchview should fill the action bar (with room for the overflow and app icon)
+	- Fix menu icons not appearing in action bar when search view collapsed
+
+
+Change List
+-----------
+	- Restore projects and owner cards
+		- Investigate card swiping
+	- Infinate list - load more changes when scrolled to the bottom of the list
+
 
 Tablet (master-detail layout)
 -----------------------------
     - Selection indicator for the currently selected change.
         - Visual aid to show that the details pane expands the selected change (arrow perhaps?)
 
-CM Gerrit (Requires Server side changes)
+
+CM Gerrit (Requires Server side changes to version 2.8+)
 ----------------------------------------
 	- Get change diffs
+
 
 Future Direction
 ----------------
@@ -75,6 +83,7 @@ Future Direction
 	- Not sure if Gerrit API(s) supports this
 	- Show system prompt such as "mgerrit is requesting access to...", such as when an Oauth2 token is requested (something similar to what happens when you use the Google Play Services APIs anyway).
 	- This will make way for mGerrit to become a full-blown Gerrit client/portal.
+
 
 More on Auth (privileged actions)
 ---------------------------------
@@ -88,15 +97,13 @@ More on Auth (privileged actions)
         - Track projects (sign up to emails)
             - Could even track these in mGerrit with updates view/tab
 
+
 Optional/Lower priority
 -----------------------
 	- Add support for API 7+
 		- Switch to ActionBarComapt/ActionbarScherlock
-	- Colour cards stripe instead of including 'new'/'merged'/'abandoned'. Suggest: open/review => black or transparent, merged => green, abandoned => red
 	- Colour each project in a sperate colour
 	- Add tab for reviewed (verified)
 	    - May be useful for admins or others wishing to cherry pick changes that compile
 	    - Either revied in past PS or reviewed in current patch set - up to server classification
-	- Shortcut for when mGerrit is in-built (not useful for market version)
-	    - This could be part of a custom build varient especially for AOKP
 

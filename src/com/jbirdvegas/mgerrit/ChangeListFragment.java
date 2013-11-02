@@ -141,7 +141,7 @@ public class ChangeListFragment extends Fragment
                 Prefs.setCurrentProject(mParent, null);
             }
 
-            // If there is no project keyword in the query, it should be cleared
+            // If there is no owner keyword in the query, it should be cleared
             if (SearchKeyword.findKeyword(tokens, OwnerSearch.class) < 0 &&
                     Prefs.getTrackingUser(mParent) != null) {
                 Prefs.clearTrackingUser(mParent);

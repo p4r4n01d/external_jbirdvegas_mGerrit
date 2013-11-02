@@ -35,8 +35,8 @@ import android.widget.ListView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
-import com.fima.cardsui.objects.Card;
-import com.fima.cardsui.views.CardUI;
+import com.haarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
+import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 import com.jbirdvegas.mgerrit.adapters.ChangeListAdapter;
 import com.jbirdvegas.mgerrit.cards.CommitCard;
 import com.jbirdvegas.mgerrit.cards.CommitCardBinder;
@@ -44,7 +44,6 @@ import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.objects.ChangeLogRange;
-import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
@@ -67,7 +66,6 @@ public abstract class CardsFragment extends Fragment
     public static final String KEY_OWNER = "owner";
     public static final String KEY_REVIEWER = "reviewer";
 
-    // TODO: Could take this out and put it in GerritControllerActivity
     private static final boolean DEBUG = true;
     private static final boolean CHATTY = false;
     public static final String SEARCH_QUERY = "SEARCH";
@@ -90,19 +88,14 @@ public abstract class CardsFragment extends Fragment
             getLoaderManager().restartLoader(0, intent.getExtras(), CardsFragment.this);
         }
     };
+
     private ListView mListView;
+    // Adapter that binds data to the listview
     private ChangeListAdapter mAdapter;
-
-    // renders each card separately
-    protected void drawCardsFromList(List<CommitCard> cards, CardUI cardUI) {
-        cardUI.clearCards();
-        for (Card card : cards) {
-            cardUI.addCard(card);
-        }
-
-        cardUI.setSwipeable(false);
-        cardUI.refresh();
-    }
+    // Wrapper for mAdapter, enabling animations
+    private SingleAnimationAdapter mAnimAdapter;
+    // Whether animations have been enabled
+    private boolean mAnimationsEnabled;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState)
@@ -142,9 +135,11 @@ public abstract class CardsFragment extends Fragment
 
         mListView = (ListView) mCurrentFragment.findViewById(R.id.commit_cards);
         mAdapter = new ChangeListAdapter(mParent, R.layout.commit_card, null, from, to, 0);
-        mListView.setAdapter(mAdapter);
         mAdapter.setViewBinder(new CommitCardBinder(mParent, mRequestQueue));
 
+        /* If animations have been enabled, setup and use an animation adapter, otherwise use
+         *  the regular adapter. The data should always be bound to mAdapter */
+        toggleAnimations(Prefs.getAnimationPreference(mParent));
 
         mUrl = new GerritURL();
 
@@ -175,17 +170,23 @@ public abstract class CardsFragment extends Fragment
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         LocalBroadcastManager.getInstance(mParent).registerReceiver(mSearchQueryListener,
                 new IntentFilter(CardsFragment.SEARCH_QUERY));
+
+        boolean animations = Prefs.getAnimationPreference(mParent);
+        if (animations != mAnimationsEnabled) {
+            toggleAnimations(animations);
+        }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         LocalBroadcastManager.getInstance(mParent).unregisterReceiver(mSearchQueryListener);
     }
+
 
     private void loadChangeLog(final ChangeLogRange logRange) {
         new GerritTask(mParent)
@@ -193,8 +194,8 @@ public abstract class CardsFragment extends Fragment
             @Override
             public void onJSONResult(String s)
             {
-                /* This is broke at the moment. Maybe we could add a seperate list (CardsUI)
-                 *  to R.layout.commit_list to display this */
+                /* This is broke at the moment. This will likely be supported by
+                 *  age interval searching when implemented */
                 /*drawCardsFromList(
                         generateChangeLog(
                                 logRange, s),
@@ -276,6 +277,24 @@ public abstract class CardsFragment extends Fragment
             SyncTime.clear(mParent);
             sendRequest();
         }
+    }
+
+    /**
+     * Enables or disables listview animations. This simply toggles the
+     *  adapter, initialising a new adapter if necessary.
+     * @param enable Whether to enable animations on the listview
+     */
+    public void toggleAnimations(boolean enable) {
+        if (enable) {
+            if (mAnimAdapter == null) {
+                mAnimAdapter = new SwingBottomInAnimationAdapter(mAdapter);
+                mAnimAdapter.setAbsListView(mListView);
+            }
+            mListView.setAdapter(mAnimAdapter);
+        } else {
+            mListView.setAdapter(mAdapter);
+        }
+        mAnimationsEnabled = enable;
     }
 
     public void markDirty() { mIsDirty = true; }

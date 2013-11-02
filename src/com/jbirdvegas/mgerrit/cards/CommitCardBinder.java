@@ -61,22 +61,24 @@ public class CommitCardBinder implements SimpleCursorAdapter.ViewBinder {
         if (view.getId() == R.id.commit_card_commit_owner) {
             TextView owner = (TextView) view;
             owner.setText(cursor.getString(columnIndex));
+            // Set the user so we can get it in the onClickListener
+            owner.setTag(cursor.getInt(userid_index));
             owner.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Prefs.setTrackingUser(mContext, cursor.getInt(userid_index));
+                    Prefs.setTrackingUser(mContext, (Integer) v.getTag());
                 }
             });
             GravatarHelper.attachGravatarToTextView(owner,
                     cursor.getString(useremail_index),
                     mRequestQuery);
         } else if (view.getId() == R.id.commit_card_project_name) {
-            TextView project = (TextView) view;
+            final TextView project = (TextView) view;
             project.setText(cursor.getString(columnIndex));
             project.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Prefs.setCurrentProject(mContext, cursor.getString(columnIndex));
+                    Prefs.setCurrentProject(mContext, project.getText().toString());
                 }
             });
         } else if (view.getId() == R.id.commit_card_commit_status) {
