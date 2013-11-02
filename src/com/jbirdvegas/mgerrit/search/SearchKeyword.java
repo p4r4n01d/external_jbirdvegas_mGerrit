@@ -47,6 +47,7 @@ public abstract class SearchKeyword {
         _CLASSES.add(SubjectSearch.class);
         _CLASSES.add(ProjectSearch.class);
         _CLASSES.add(OwnerSearch.class);
+        _CLASSES.add(TopicSearch.class);
 
         // This will load the class calling the class's static block
         for (Class<? extends SearchKeyword> clazz : _CLASSES) {
