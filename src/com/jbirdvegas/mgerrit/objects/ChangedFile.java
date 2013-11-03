@@ -19,32 +19,30 @@ package com.jbirdvegas.mgerrit.objects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ChangedFile implements Parcelable {
+
     private String path;
-    private int inserted;
-    private int deleted;
+
+    @SerializedName(JSONCommit.KEY_INSERTED)
+    private int inserted = -1;
+
+    @SerializedName(JSONCommit.KEY_DELETED)
+    private int deleted = -1;
 
     public ChangedFile(String draft) {
         path = draft;
-        inserted = -1;
-        deleted = -1;
     }
 
     private ChangedFile(String _path, JSONObject object) throws JSONException {
         path = _path;
-        try {
-            inserted = object.getInt(JSONCommit.KEY_INSERTED);
-        } catch (JSONException noInserted) {
-            inserted = Integer.MIN_VALUE;
-        }
-        try {
-            deleted = object.getInt(JSONCommit.KEY_DELETED);
-        } catch (JSONException noDeleted) {
-            deleted = Integer.MIN_VALUE;
-        }
+        new Gson().fromJson(object.toString(), this.getClass());
     }
 
     public String getPath() {
