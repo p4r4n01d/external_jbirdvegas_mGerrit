@@ -20,6 +20,9 @@ package com.jbirdvegas.mgerrit.search;
 import android.util.Log;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -71,7 +74,6 @@ public abstract class SearchKeyword {
     }
 
 
-
     protected static void registerKeyword(String opName, Class<? extends SearchKeyword> clazz) {
         _KEYWORDS.put(opName, clazz);
     }
@@ -95,22 +97,40 @@ public abstract class SearchKeyword {
      * @return
      */
     private static SearchKeyword buildToken(String name, String param) {
-
-        for (Entry<String, Class<? extends SearchKeyword>> entry : _KEYWORDS.entrySet()) {
-            if (name.equalsIgnoreCase(entry.getKey())) {
-                Constructor<? extends SearchKeyword> constructor;
-                try {
-                    constructor = entry.getValue().getDeclaredConstructor(String.class);
-                    return constructor.newInstance(param);
-                } catch (Exception e) {
-                    Log.e(TAG, "Could not call constructor for " + name, e);
-                }
+        Class<? extends SearchKeyword> keyword = getSearchKeywordType(name);
+        if (keyword == null) {
+            return null;
+        } else {
+            Constructor<? extends SearchKeyword> constructor;
+            try {
+                constructor = keyword.getDeclaredConstructor(String.class, String.class);
+                return constructor.newInstance(name, param);
+            } catch (Exception e) {
+                Log.e(TAG, "Could not call constructor for " + name, e);
             }
         }
         return null;
     }
 
-    private static SearchKeyword buildToken(String tokenStr) {
+    private static Class<? extends SearchKeyword> getSearchKeywordType(String name) {
+        for (Entry<String, Class<? extends SearchKeyword>> entry : _KEYWORDS.entrySet()) {
+            if (name.equalsIgnoreCase(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    protected static SearchKeyword buildToken(Class<? extends SearchKeyword> clazz, String tokenStr) {
+        for (Entry<String, Class<? extends SearchKeyword>> entry : _KEYWORDS.entrySet()) {
+            if (clazz.equals(entry.getValue())) {
+                buildToken(entry.getKey() + ":" + tokenStr);
+            }
+        }
+        return null;
+    }
+
+    protected static SearchKeyword buildToken(String tokenStr) {
         String[] s = tokenStr.split(":", 2);
         if (s.length == 2) return buildToken(s[0], s[1]);
         else return null;
@@ -133,21 +153,27 @@ public abstract class SearchKeyword {
 
         for (int i = 0, n = query.length(); i < n; i++) {
             char c = query.charAt(i);
-            if (Character.isWhitespace(c)) {
-                if (currentToken.length() > 0) {
-                    addToSetIfNotNull(buildToken(currentToken), set);
+            if (c == ':') {
+                // Determine what keyword we are constructing
+                Class<? extends SearchKeyword> clazz = getSearchKeywordType(currentToken);
+                StringBuilder builder = new StringBuilder(query.substring(i + 1));
+                SearchKeyword keyword;
+                if (clazz == null) {
+                    continue;
+                } else {
+                    try {
+                        Method method = clazz.getMethod("parse", StringBuilder.class);
+                        keyword = (SearchKeyword) method.invoke(null, clazz, builder);
+                    } catch (Exception e) {
+                        keyword = parse(clazz, builder);
+                    }
+
+                    addToSetIfNotNull(keyword, set);
+                    // Continue with the un-parsed string
+                    i = 0;
+                    query = builder.toString();
                     currentToken = "";
                 }
-            } else if (c == '"') {
-                int index = query.indexOf('"', i + 1);
-                // We don't want to store the quotation marks
-                currentToken += query.substring(i + 1, index);
-                i = index + 1; // We have processed this many characters
-            } else if (c == '{') {
-                int index = query.indexOf('}', i + 1);
-                // We don't want to store these braces
-                currentToken += query.substring(i + 1, index);
-                i = index + 1; // We have processed this many characters
             } else if (c == '\\') {
                 if (i + 1 < n) {
                     if (specialcharacters.indexOf(query.charAt(i+1)) >= 0) {
@@ -228,5 +254,60 @@ public abstract class SearchKeyword {
             else i++;
         }
         return -1;
+    }
+
+    /**
+     * Parse the parameter for a given SearchKeyword and construct an instance of it.
+     *  Note: The characters in the builder that have been parsed MUST be removed otherwise
+     *  they will be re-parsed invalidating the search query
+     * @param clazz The SearchKeyword to be constructed
+     * @param builder The un-parsed parameter as a StringBuilder
+     * @return An instance of the given SearchKeyword class
+     */
+    protected static SearchKeyword parse(Class<? extends SearchKeyword> clazz, StringBuilder builder) {
+        String currentToken = "";
+        String param = builder.toString();
+
+        // Characters that have special meaning that can be escaped
+        String specialcharacters = "\"{} \t:";
+
+        int index;
+        for (index = 0; index < param.length(); index++) {
+            char c = param.charAt(index);
+            if (Character.isWhitespace(c)) {
+                break;
+            } else if (c == '"') {
+                int index2 = param.indexOf('"', index + 1);
+                // We don't want to store the quotation marks
+                currentToken += param.substring(index + 1, index2);
+                index = index2 + 1; // We have processed this many characters
+            } else if (c == '{') {
+                int index2 = param.indexOf('}', index + 1);
+                // We don't want to store these braces
+                currentToken += param.substring(index + 1, index2);
+                index = index2 + 1; // We have processed this many characters
+            } else if (c == '\\') {
+                if (index + 1 < param.length()) {
+                    if (specialcharacters.indexOf(param.charAt(index+1)) >= 0) {
+                        // We have escaped a character, ignore the '\'
+                        currentToken += param.charAt(index+1);
+                        index++;
+                        continue;
+                    }
+                }
+                // Treat as literal '\' (i.e. as if we had "\\")
+                currentToken += c;
+            } else {
+                currentToken += c;
+            }
+        }
+
+        // Have to check if a token was terminated by end of string
+        if (currentToken.length() > 0) {
+            // Remove the characters that we have already parsed so they are not re-parsed
+            builder.delete(0, index);
+            return SearchKeyword.buildToken(clazz, currentToken);
+        }
+        throw new InvalidParameterException("Could not parse parameter '" + param + "'");
     }
 }
