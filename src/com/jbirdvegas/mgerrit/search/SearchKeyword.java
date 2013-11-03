@@ -128,6 +128,9 @@ public abstract class SearchKeyword {
         Set<SearchKeyword> set = new HashSet<SearchKeyword>();
         String currentToken = "";
 
+        // Characters that have special meaning that can be escaped
+        String specialcharacters = "\"{} \t:";
+
         for (int i = 0, n = query.length(); i < n; i++) {
             char c = query.charAt(i);
             if (Character.isWhitespace(c)) {
@@ -145,6 +148,17 @@ public abstract class SearchKeyword {
                 // We don't want to store these braces
                 currentToken += query.substring(i + 1, index);
                 i = index + 1; // We have processed this many characters
+            } else if (c == '\\') {
+                if (i + 1 < n) {
+                    if (specialcharacters.indexOf(query.charAt(i+1)) >= 0) {
+                        // We have escaped a character, ignore the '\'
+                        currentToken += query.charAt(i+1);
+                        i++;
+                        continue;
+                    }
+                }
+                // Treat as literal '\' (i.e. as if we had "\\")
+                currentToken += c;
             } else {
                 currentToken += c;
             }
