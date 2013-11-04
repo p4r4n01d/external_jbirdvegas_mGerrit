@@ -22,17 +22,22 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.jbirdvegas.mgerrit.database.Reviewers;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.objects.Projects;
 import com.jbirdvegas.mgerrit.objects.Reviewer;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 public final class Deserializers {
 
-    // Custom deserializer as we are separating the one object into two
+    // Custom deserializer as we are separating the one object into two (the committer is not nested)
     private static final JsonDeserializer<Reviewer> reviewerDeserializer = new JsonDeserializer<Reviewer>() {
 
         @Override
@@ -46,6 +51,33 @@ public final class Deserializers {
                 return reviewer;
             }
         };
+
+    // Custom deserializer to get all the reviewers and their associated labels
+    private static final JsonDeserializer<Reviewer[]> reviewersDeserializer = new JsonDeserializer<Reviewer[]>() {
+
+        @Override
+        public Reviewer[] deserialize(JsonElement jsonElement,
+                                    Type type,
+                                    JsonDeserializationContext jsonDeserializationContext)
+                throws JsonParseException {
+
+            ArrayList<Reviewer> reviewers = new ArrayList<Reviewer>();
+
+            JsonObject labels = jsonElement.getAsJsonObject();
+            for (Map.Entry<String, JsonElement> labelParent : labels.entrySet()) {
+                JsonObject label = labelParent.getValue().getAsJsonObject();
+                if (label.has("all")) {
+                    Reviewer[] rs = new Gson().fromJson(label.getAsJsonArray("all"), Reviewer[].class);
+                    for (Reviewer r : rs) {
+                        r.setLabel(label.getAsString()); // Set the label the value corresponds to
+                    }
+                    reviewers.addAll(Arrays.asList(rs));
+                }
+            }
+            Reviewer[] reviewersArray = new Reviewer[reviewers.size()];
+            return reviewers.toArray(reviewersArray);
+        }
+    };
 
     private static final JsonDeserializer<JSONCommit> commitDeserializer = new JsonDeserializer<JSONCommit>() {
 

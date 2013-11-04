@@ -27,12 +27,10 @@ import java.util.Arrays;
 
 class CommitCommentProcessor extends SyncProcessor<CommitComment[]> {
 
-    private final String mUrl;
     private final String mChangeid;
 
     CommitCommentProcessor(Context context, GerritURL url, String changeid) {
         super(context, url);
-        mUrl = url.toString();
         mChangeid = changeid;
     }
 

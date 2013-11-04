@@ -32,6 +32,8 @@ public class Reviewer implements Parcelable {
     @SerializedName("date")
     private final String mDate;
 
+    private String mLabel;
+
     public Reviewer(String value, String name, String email) {
         mValue = value;
         mCommitter = CommitterObject.getInstance(name, email);
@@ -82,5 +84,13 @@ public class Reviewer implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(mValue);
         mCommitter.writeToParcel(parcel, i);
+    }
+
+    public String getLabel() {
+        return mLabel;
+    }
+
+    public void setLabel(String label) {
+        this.mLabel = label;
     }
 }

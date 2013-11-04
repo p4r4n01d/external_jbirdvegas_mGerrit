@@ -378,6 +378,8 @@ public class JSONCommit implements Parcelable {
     @SerializedName(JSONCommit.KEY_WEBSITE)
     private String mWebAddress;
 
+    private List<Reviewer> mReviewers;
+
     @SerializedName(JSONCommit.KEY_VERIFIED)
     private List<Reviewer> mVerifiedReviewers;
 
@@ -579,6 +581,10 @@ public class JSONCommit implements Parcelable {
     public String getWebAddress() {
         return mWebAddress;
     }
+
+    public List<Reviewer> getReviewers() { return mReviewers; }
+
+    public void setReviewers(List<Reviewer> mReviewers) { this.mReviewers = mReviewers; }
 
     public List<Reviewer> getVerifiedReviewers() {
         return mVerifiedReviewers;

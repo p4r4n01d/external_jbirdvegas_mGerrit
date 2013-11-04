@@ -36,6 +36,12 @@ public class ChangedFile implements Parcelable {
     @SerializedName(JSONCommit.KEY_DELETED)
     private int deleted = -1;
 
+    @SerializedName(JSONCommit.KEY_STATUS)
+    private String status;
+
+    @SerializedName("binary")
+    private boolean isBinary = false;
+
     public ChangedFile(String draft) {
         path = draft;
     }
@@ -65,13 +71,13 @@ public class ChangedFile implements Parcelable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("ChangedFile");
-        sb.append("{path='").append(path).append('\'');
-        sb.append(", inserted=").append(inserted);
-        sb.append(", deleted=").append(deleted);
-        sb.append('}');
-        return sb.toString();
+        return "ChangedFile{" +
+                "path='" + path + '\'' +
+                ", inserted=" + inserted +
+                ", deleted=" + deleted +
+                ", status='" + status + '\'' +
+                ", isBinary=" + isBinary +
+                '}';
     }
 
     @Override
