@@ -24,7 +24,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.jbirdvegas.mgerrit.database.Reviewers;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.objects.Projects;
@@ -33,12 +32,13 @@ import com.jbirdvegas.mgerrit.objects.Reviewer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public final class Deserializers {
 
     // Custom deserializer as we are separating the one object into two (the committer is not nested)
-    private static final JsonDeserializer<Reviewer> reviewerDeserializer = new JsonDeserializer<Reviewer>() {
+    private static final JsonDeserializer<Reviewer> d_reviewer = new JsonDeserializer<Reviewer>() {
 
         @Override
         public Reviewer deserialize(JsonElement jsonElement,
@@ -53,10 +53,10 @@ public final class Deserializers {
         };
 
     // Custom deserializer to get all the reviewers and their associated labels
-    private static final JsonDeserializer<Reviewer[]> reviewersDeserializer = new JsonDeserializer<Reviewer[]>() {
+    private static final JsonDeserializer<List<Reviewer>> d_reviewers = new JsonDeserializer<List<Reviewer>>() {
 
         @Override
-        public Reviewer[] deserialize(JsonElement jsonElement,
+        public List<Reviewer> deserialize(JsonElement jsonElement,
                                     Type type,
                                     JsonDeserializationContext jsonDeserializationContext)
                 throws JsonParseException {
@@ -74,12 +74,11 @@ public final class Deserializers {
                     reviewers.addAll(Arrays.asList(rs));
                 }
             }
-            Reviewer[] reviewersArray = new Reviewer[reviewers.size()];
-            return reviewers.toArray(reviewersArray);
+            return reviewers;
         }
     };
 
-    private static final JsonDeserializer<JSONCommit> commitDeserializer = new JsonDeserializer<JSONCommit>() {
+    private static final JsonDeserializer<JSONCommit> d_commit = new JsonDeserializer<JSONCommit>() {
 
         @Override
         public JSONCommit deserialize(JsonElement jsonElement,
@@ -95,7 +94,8 @@ public final class Deserializers {
     // Register all of the custom deserializers here
     protected static void addDeserializers(GsonBuilder gsonBuilder) {
         gsonBuilder.registerTypeAdapter(Projects.class, new Projects());
-        gsonBuilder.registerTypeAdapter(Reviewer.class, reviewerDeserializer);
-        //gsonBuilder.registerTypeAdapter(JSONCommit.class, commitDeserializer); NOT CURRENTLY USED
+        gsonBuilder.registerTypeAdapter(Reviewer.class, d_reviewer);
+        gsonBuilder.registerTypeAdapter(Reviewer[].class, d_reviewers);
+        //gsonBuilder.registerTypeAdapter(JSONCommit.class, d_commit); NOT CURRENTLY USED
     }
 }

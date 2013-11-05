@@ -63,6 +63,14 @@ public class ChangedFile implements Parcelable {
         return this.deleted;
     }
 
+    public String getStatus() { return status; }
+
+    public void setStatus(String status) { this.status = status; }
+
+    public boolean isBinary() { return isBinary; }
+
+    public void setBinary(boolean binary) { this.isBinary = binary; }
+
     public static ChangedFile parseFromJSONObject(String _path,
                                                   JSONObject object)
             throws JSONException {

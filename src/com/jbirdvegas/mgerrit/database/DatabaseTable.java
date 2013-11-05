@@ -61,6 +61,7 @@ public abstract class DatabaseTable {
      */
     enum UriType {
         ChangesList, ChangesID,
+        ChangedFilesList, ChangedFilesID,
         CommitMarkerList, CommitMarkerID,
         FileInfoList, FileInfoID,
         MessageInfoList, MessageInfoID,
@@ -77,6 +78,7 @@ public abstract class DatabaseTable {
     static {
         tables = new ArrayList<Class<? extends DatabaseTable>>();
         tables.add(Changes.class);
+        tables.add(ChangedFiles.class);
         tables.add(CommitMarker.class);
         tables.add(FileInfo.class);
         tables.add(MessageInfo.class);

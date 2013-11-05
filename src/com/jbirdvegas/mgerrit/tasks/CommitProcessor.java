@@ -19,6 +19,7 @@ package com.jbirdvegas.mgerrit.tasks;
 
 import android.content.Context;
 
+import com.jbirdvegas.mgerrit.database.ChangedFiles;
 import com.jbirdvegas.mgerrit.database.MessageInfo;
 import com.jbirdvegas.mgerrit.database.Reviewers;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
@@ -38,6 +39,7 @@ class CommitProcessor extends SyncProcessor<JSONCommit> {
         Reviewer[] rs = new Reviewer[commit.getReviewers().size()];
         Reviewers.insertReviewers(getContext(), changeid, commit.getReviewers().toArray(rs));
         MessageInfo.insertMessages(getContext(), changeid, commit.getMessagesList());
+        ChangedFiles.insertChangedFiles(getContext(), changeid, commit.getChangedFiles());
     }
 
     @Override

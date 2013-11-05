@@ -36,14 +36,17 @@ Outstanding
 		(re-)delivered to the activity that was listening to broadcasts matching the actual query
 - Change detail viewpager
 	- Viewpager to swipe through changes in the change detail screen (phone layout only)
+- German translations: 461 users (as of 5 Nov 2013)
+- Italain translations: 261 users (as of 5 Nov 2013)
+
 
 Database
 --------
-    - Change set (details) table
+    - Sync and cache patch set (change) details in database
 
 
 Searching (Requires database), action bar
------------------------------
+-----------------------------------------
 	- General searching:
 		- mimic Gerrit web interface queries
 		- Support searching for a specific commit heading (default). e.g. searching for "commit:[translation]" will show a heading for Commits and list all the commits with "[translation]" in the title.
@@ -100,10 +103,11 @@ More on Auth (privileged actions)
 
 Optional/Lower priority
 -----------------------
-	- Add support for API 7+
-		- Switch to ActionBarComapt/ActionbarScherlock
+	- Theming support
+		- Add 'Dark UI' theme (esp. for AOKP users)
 	- Colour each project in a sperate colour
 	- Add tab for reviewed (verified)
 	    - May be useful for admins or others wishing to cherry pick changes that compile
 	    - Either revied in past PS or reviewed in current patch set - up to server classification
-
+	- Increase minimum API 14 (ICS) - No one is using mGerrit on a pre-Android 4.0 device.
+		- We could even set it to API 15 (minSdkVersion=14) as there is only 1 person using mGerrit on API 14 (as of 5 Nov 2013)

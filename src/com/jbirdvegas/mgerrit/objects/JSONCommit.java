@@ -34,6 +34,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -378,7 +379,7 @@ public class JSONCommit implements Parcelable {
     @SerializedName(JSONCommit.KEY_WEBSITE)
     private String mWebAddress;
 
-    private List<Reviewer> mReviewers;
+    private Reviewer[] mReviewers;
 
     @SerializedName(JSONCommit.KEY_VERIFIED)
     private List<Reviewer> mVerifiedReviewers;
@@ -582,9 +583,13 @@ public class JSONCommit implements Parcelable {
         return mWebAddress;
     }
 
-    public List<Reviewer> getReviewers() { return mReviewers; }
+    public List<Reviewer> getReviewers() {
+        return Arrays.asList(mReviewers);
+    }
 
-    public void setReviewers(List<Reviewer> mReviewers) { this.mReviewers = mReviewers; }
+    public void setReviewers(List<Reviewer> reviewers) {
+        this.mReviewers = reviewers.toArray(new Reviewer[reviewers.size()]);
+    }
 
     public List<Reviewer> getVerifiedReviewers() {
         return mVerifiedReviewers;

@@ -17,9 +17,6 @@ package com.jbirdvegas.mgerrit.helpers;
  *  limitations under the License.
  */
 
-/**
- * Created by Evan on 30/10/13.
- */
 public class ROMHelper {
 
     public static final String CYANOGENMOD = "CyanogenMod";
