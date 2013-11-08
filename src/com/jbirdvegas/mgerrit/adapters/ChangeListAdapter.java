@@ -53,10 +53,9 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         if (view.getTag() == null) {
             viewHolder = new ViewHolder(view);
-            view.setTag(viewHolder);
         }
 
-        // These indicies will not change regardless of the view
+        // These indices will not change regardless of the view
         if (changeid_index == null) {
             changeid_index = cursor.getColumnIndex(UserChanges.C_CHANGE_ID);
         }
@@ -67,44 +66,52 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
             status_index = cursor.getColumnIndex(UserChanges.C_STATUS);
         }
 
-        if (view != null) {
-            View.OnClickListener cardListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(PatchSetViewerFragment.NEW_CHANGE_SELECTED);
+        viewHolder.changeid = cursor.getString(changeid_index);
+        viewHolder.changeStatus = cursor.getString(status_index);
+        viewHolder.webAddress = getWebAddress(cursor.getInt(changenum_index));
+        view.setTag(viewHolder);
 
-                    intent.putExtra(PatchSetViewerFragment.CHANGE_ID, cursor.getString(changeid_index));
-                    intent.putExtra(PatchSetViewerFragment.STATUS, cursor.getString(status_index));
-                    intent.putExtra(PatchSetViewerFragment.EXPAND_TAG, true);
-                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                }
-            };
-
-            if (viewHolder.moarInfo != null) {
-                viewHolder.moarInfo.setOnClickListener(cardListener);
-            } else {
-                view.setOnClickListener(cardListener);
+        View.OnClickListener cardListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ViewHolder vh = (ViewHolder) view.getTag();
+                Intent intent = new Intent(PatchSetViewerFragment.NEW_CHANGE_SELECTED);
+                intent.putExtra(PatchSetViewerFragment.CHANGE_ID, vh.changeid);
+                intent.putExtra(PatchSetViewerFragment.STATUS, vh.changeStatus);
+                intent.putExtra(PatchSetViewerFragment.EXPAND_TAG, true);
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             }
+        };
+
+        if (viewHolder.moarInfo != null) {
+            viewHolder.moarInfo.setTag(viewHolder);
+            viewHolder.moarInfo.setOnClickListener(cardListener);
+        } else {
+            // Root view already has viewHolder tagged
+            view.setOnClickListener(cardListener);
         }
 
-        final String webAddr = getWebAddress(cursor.getInt(changenum_index));
-
+        viewHolder.shareView.setTag(viewHolder);
         viewHolder.shareView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ViewHolder vh = (ViewHolder) view.getTag();
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                 intent.putExtra(Intent.EXTRA_SUBJECT,
                         String.format(mContext.getResources().getString(R.string.commit_shared_from_mgerrit),
-                                cursor.getString(changeid_index)));
-                intent.putExtra(Intent.EXTRA_TEXT, webAddr + " #mGerrit");
+                                vh.changeid));
+                intent.putExtra(Intent.EXTRA_TEXT, vh.webAddress + " #mGerrit");
                 mContext.startActivity(intent);
             }
         });
+
+        viewHolder.browserView.setTag(viewHolder);
         viewHolder.browserView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String webAddr = ((ViewHolder) view.getTag()).webAddress;
                 if (webAddr != null) {
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                             Uri.parse(webAddr));
@@ -129,6 +136,10 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         ImageView browserView;
         ImageView shareView;
         ImageView moarInfo;
+
+        String changeid;
+        String changeStatus;
+        String webAddress;
 
         ViewHolder(View view) {
             browserView = (ImageView) view.findViewById(R.id.commit_card_view_in_browser);

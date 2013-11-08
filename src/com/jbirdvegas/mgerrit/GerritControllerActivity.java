@@ -143,7 +143,7 @@ public class GerritControllerActivity extends FragmentActivity {
         easyTracker.send(MapBuilder
                 .createEvent(AnalyticsConstants.GA_APP_OPEN,     // Event category (required)
                         AnalyticsConstants.GA_ROM_VERSION,  // Event action (required)
-                        ROMHelper.determineRom(System.getProperty("os.version")),   // Event label
+                        ROMHelper.determineRom(this),   // Event label
                         null)            // Event value (long)
                 .build());
         // note this screen as viewed

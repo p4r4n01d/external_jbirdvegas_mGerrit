@@ -73,7 +73,7 @@ public class UserChanges extends DatabaseTable {
     public static final String C_TOPIC = Changes.C_TOPIC;
 
     // The legacy numeric ID of the change (used in the web address)
-    public static final String C_COMMIT_NUMBER = "_change_number";
+    public static final String C_COMMIT_NUMBER = Changes.C_COMMIT_NUMBER;
 
 
     // --- Columns in Users table ---
