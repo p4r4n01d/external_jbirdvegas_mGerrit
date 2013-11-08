@@ -17,23 +17,33 @@ package com.jbirdvegas.mgerrit.helpers;
  *  limitations under the License.
  */
 
-public class ROMHelper {
+import android.content.Context;
+import android.content.res.Resources;
+import android.os.Build;
 
-    public static final String CYANOGENMOD = "CyanogenMod";
-    public static final String AOKP = "AOKP";
+import com.jbirdvegas.mgerrit.R;
+
+public class ROMHelper {
 
     /**
      * Given a build string, determine what ROM the user is running and
      *  ignore things such as the version information.
      */
-    public static String determineRom(String buildVersion) {
-
-        if (buildVersion.contains("cm") || buildVersion.contains("cyanogenmod")) {
-            return CYANOGENMOD;
-        } else if (buildVersion.contains("aokp")) {
-            return AOKP;
+    public static String determineRom(Context context) {
+        String buildVersion = Build.DISPLAY;
+        Resources r = context.getResources();
+        if (buildVersion.startsWith("cm_") || buildVersion.startsWith("Cyanogenmod")) {
+            return r.getString(R.string.cm_rom_name);
+        } else if (buildVersion.startsWith("aokp_")) {
+            return r.getString(R.string.aokp_rom_name);
+        } else if (buildVersion.startsWith("pa_")) {
+            return r.getString(R.string.pa_rom_name);
+        } else if (buildVersion.startsWith("carbon_")) {
+            return r.getString(R.string.carbon_rom_name);
+        } else if (buildVersion.startsWith("MIUI")) {
+            return r.getString(R.string.miui_rom_name);
         }
-        return buildVersion;
+        return context.getResources().getString(R.string.other_rom_name);
     }
 
 }

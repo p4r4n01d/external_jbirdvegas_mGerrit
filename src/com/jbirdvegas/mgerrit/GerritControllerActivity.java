@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -42,6 +43,7 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Logger;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -63,6 +65,7 @@ import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
