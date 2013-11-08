@@ -49,6 +49,7 @@ import com.jbirdvegas.mgerrit.message.StatusSelected;
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
+import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 
 import org.json.JSONArray;
@@ -218,7 +219,8 @@ public class PatchSetViewerFragment extends Fragment {
         this.mSelectedChange = changeID;
         mUrl.setChangeID(mSelectedChange);
         mUrl.requestChangeDetail(true);
-        executeGerritTask(mUrl.toString());
+        //executeGerritTask(mUrl.toString());
+        GerritService.sendRequest(mParent, GerritService.DataType.CommitDetails, mUrl);
     }
 
     /**

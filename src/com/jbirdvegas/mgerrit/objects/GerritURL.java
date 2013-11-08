@@ -109,6 +109,10 @@ public class GerritURL implements Parcelable
             .append(sGerritBase)
             .append(StaticWebAddress.getQuery());
 
+        if (!mRequestChangeDetail) {
+            builder.append("?q=");
+        }
+
         if (!"".equals(mChangeID))
         {
             builder.append(mChangeID);
@@ -149,7 +153,7 @@ public class GerritURL implements Parcelable
         }
 
         if (mRequestChangeDetail) {
-            builder.append(JSONCommit.CURRENT_PATCHSET_ARGS);
+            builder.append("/detail/").append(JSONCommit.CURRENT_PATCHSET_ARGS);
         }
 
         if (mRequestDetailedAccounts) {
@@ -209,22 +213,26 @@ public class GerritURL implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(sGerritBase);
         dest.writeString(sProject);
+        dest.writeString(mChangeID);
         dest.writeString(mStatus);
         dest.writeString(mEmail);
         dest.writeString(mCommitterState);
         dest.writeInt(mListProjects ? 1 : 0);
         dest.writeInt(mRequestDetailedAccounts ? 1 : 0);
         dest.writeString(mSortkey);
+        dest.writeInt(mRequestChangeDetail ? 1 : 0);
     }
 
     public GerritURL(Parcel in) {
         sGerritBase = in.readString();
         sProject = in.readString();
+        mChangeID = in.readString();
         mStatus = in.readString();
         mEmail = in.readString();
         mCommitterState = in.readString();
         mListProjects = in.readInt() == 1;
         mRequestDetailedAccounts = in.readInt() == 1;
         mSortkey = in.readString();
+        mRequestChangeDetail = in.readInt() == 1;
     }
 }
