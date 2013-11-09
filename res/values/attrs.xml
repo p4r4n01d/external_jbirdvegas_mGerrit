@@ -26,4 +26,7 @@
         <attr name="refreshIcon" format="reference"/>
         <attr name="overflowIcon" format="reference"/>
     </declare-styleable>
+    <declare-styleable name="LinearLayout">
+        <attr name="mainBackgroundColor" format="color"/>
+    </declare-styleable>
 </resources>

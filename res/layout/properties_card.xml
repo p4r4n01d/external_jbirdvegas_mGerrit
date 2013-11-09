@@ -43,14 +43,14 @@
                 android:text="@string/commit_committer"/>
 
             <TextView
-                style="@style/CardText.CommitOwnerDetails"
+                style="@style/CardText.CommitOwnerText"
                 android:id="@+id/prop_card_owner"
                 android:layout_alignParentTop="true"
                 android:layout_toRightOf="@+id/commit_owner_text"
                 android:layout_alignLeft="@id/prop_card_committer"/>
 
             <TextView
-                style="@style/CardText.CommitOwnerDetails"
+                style="@style/CardText.CommitOwnerText"
                 android:id="@+id/prop_card_author"
                 android:layout_toRightOf="@+id/commit_author_text"
                 android:layout_alignLeft="@id/prop_card_committer"
@@ -59,7 +59,7 @@
                 android:paddingTop="5dip" />
 
             <TextView
-                style="@style/CardText.CommitOwnerDetails"
+                style="@style/CardText.CommitOwnerText"
                 android:id="@+id/prop_card_committer"
                 android:layout_toRightOf="@+id/commit_committer_text"
                 android:layout_below="@+id/prop_card_author"/>
