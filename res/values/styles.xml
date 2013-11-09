@@ -24,6 +24,10 @@
         <item name="refreshIcon">@drawable/ic_action_refresh</item>
         <item name="overflowIcon">@drawable/ic_action_overflow</item>
         <item name="mainBackgroundColor">@color/main_background</item>
+        <item name="cardTextStyle">@style/CardText.Light</item>
+        <item name="cardTitleStyle">@style/CardTitle.Light</item>
+        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="aboutIcon">@drawable/ic_action_about</item>
     </style>
 
     <style name="Theme.Dark" parent="android:style/Theme.Holo">
@@ -33,6 +37,10 @@
         <item name="refreshIcon">@drawable/ic_action_refresh_dark</item>
         <item name="overflowIcon">@drawable/ic_action_overflow_dark</item>
         <item name="mainBackgroundColor">@color/main_background_dark</item>
+        <item name="cardTextStyle">@style/CardText.Dark</item>
+        <item name="cardTitleStyle">@style/CardTitle.Dark</item>
+        <item name="cardBackgroundColor">@color/card_background_dark</item>
+        <item name="aboutIcon">@drawable/ic_action_about_dark</item>
     </style>
 
     <style name="CardText">
@@ -74,17 +82,16 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">@dimen/card_large_text</item>
-        <item name="android:textColor">@color/card_title_text</item>
         <item name="android:textStyle">italic</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
     </style>
 
-    <style name="CardTitle.Light" parent="style/CardText">
+    <style name="CardTitle.Light" parent="style/CardTitle">
         <item name="android:textColor">@color/card_title_text</item>
     </style>
 
-    <style name="CardTitle.Dark" parent="style/CardText">
+    <style name="CardTitle.Dark" parent="style/CardTitle">
         <item name="android:textColor">@color/card_light_text</item>
     </style>
 
@@ -93,15 +100,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">@dimen/card_large_text</item>
         <item name="android:textColor">@color/card_title_text</item>
-    </style>
-
-    <style name="Item">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">300dp</item>
-    </style>
-
-    <style name="Item.Top">
-        <item name="android:background">@color/background</item>
     </style>
 
     <style name="ActionViewsStyle">

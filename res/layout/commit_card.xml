@@ -25,7 +25,7 @@
         android:id="@+id/commit_card_commit_status"
         android:layout_height="match_parent"
         android:layout_width="6dp"
-        android:background="@android:color/white"
+        android:background="?attr/cardBackgroundColor"
         android:paddingRight="2dp"/>
 
     <LinearLayout
@@ -34,10 +34,10 @@
         android:orientation="vertical"
         android:layout_gravity="center"
         android:gravity="center"
-        android:background="@android:color/white">
+        android:background="?attr/cardBackgroundColor">
 
         <TextView
-            style="@style/CardTitle"
+            style="?attr/cardTitleStyle"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,28 +55,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_project_name"
-            android:textAppearance="@style/CardText"
+            style="?attr/cardTextStyle"
             android:textSize="18sp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_last_updated"
-            android:textAppearance="@style/CardText"/>
+            style="?attr/cardTextStyle" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_message"
             android:paddingTop="10dp"
-            android:textAppearance="@style/CardText"
+            style="?attr/cardTextStyle"
             android:visibility="gone"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_changed_files"
-            android:textAppearance="@style/CardText"
+            style="?attr/cardTextStyle"
             android:visibility="gone"/>
 
         <RelativeLayout
@@ -87,12 +87,12 @@
             android:gravity="end">
             <ImageView
                 android:id="@+id/commit_card_moar_info"
-                android:src="@drawable/ic_action_about"
+                android:src="?attr/aboutIcon"
                 style="@style/ActionViewsStyle"
                 android:layout_alignParentRight="true"
                 android:contentDescription="@string/moar_info"/>
             <ImageView
-                android:src="@drawable/ic_action_share"
+                android:src="@android:drawable/ic_menu_share"
                 android:id="@+id/commit_card_share_info"
                 style="@style/ActionViewsStyle"
                 android:layout_toLeftOf="@+id/commit_card_moar_info"

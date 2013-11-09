@@ -24,6 +24,14 @@
         <item name="android:fontFamily">sans-serif-thin</item>
     </style>
 
+    <style name="CardText.Light">
+        <item name="android:textColor">@color/card_text</item>
+    </style>
+
+    <style name="CardText.Dark">
+        <item name="android:textColor">@color/card_text_dark</item>
+    </style>
+
     <style name="CardText.Committer">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">16sp</item>
