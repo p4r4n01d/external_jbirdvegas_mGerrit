@@ -109,10 +109,6 @@ public class GerritURL implements Parcelable
             .append(sGerritBase)
             .append(StaticWebAddress.getQuery());
 
-        if (!mRequestChangeDetail) {
-            builder.append("?q=");
-        }
-
         if (!"".equals(mChangeID))
         {
             builder.append(mChangeID);
@@ -153,7 +149,7 @@ public class GerritURL implements Parcelable
         }
 
         if (mRequestChangeDetail) {
-            builder.append("/detail/").append(JSONCommit.CURRENT_PATCHSET_ARGS);
+            builder.append(JSONCommit.CURRENT_PATCHSET_ARGS);
         }
 
         if (mRequestDetailedAccounts) {

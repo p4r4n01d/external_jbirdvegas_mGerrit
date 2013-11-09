@@ -20,7 +20,7 @@ package com.jbirdvegas.mgerrit;
 public class StaticWebAddress {
     private static String GERRIT_INSTANCE_WEBSITE = null;
     public static final String HTTP_GERRIT_AOKP_CO = "http://gerrit.aokp.co/";
-    private static final String CHANGES_QUERY = "changes/";
+    private static final String CHANGES_QUERY = "changes/?q=";
     private static String STATUS_QUERY = CHANGES_QUERY + "status:";
 
     public static String getGERRIT_INSTANCE_WEBSITE() {
