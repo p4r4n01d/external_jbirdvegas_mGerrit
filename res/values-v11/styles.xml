@@ -71,7 +71,7 @@
         <item name="android:background">@color/background</item>
     </style>
 
-    <style name="Theme.Custom" parent="android:style/Theme.Holo.Light">
+    <style name="Theme.Light" parent="android:style/Theme.Holo.Light">
         <item name="android:textColorPrimary">@color/actionbar_text</item>
     </style>
 

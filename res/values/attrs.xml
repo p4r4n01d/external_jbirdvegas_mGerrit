@@ -20,4 +20,10 @@
     <declare-styleable name="CardUI">
         <attr name="columnCount" format="integer"/>
     </declare-styleable>
+    <declare-styleable name="item">
+        <attr name="gerritIcon" format="reference"/>
+        <attr name="projectsIcon" format="reference"/>
+        <attr name="refreshIcon" format="reference"/>
+        <attr name="overflowIcon" format="reference"/>
+    </declare-styleable>
 </resources>
