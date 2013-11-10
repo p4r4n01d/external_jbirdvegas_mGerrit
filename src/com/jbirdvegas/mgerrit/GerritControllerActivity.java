@@ -152,6 +152,16 @@ public class GerritControllerActivity extends FragmentActivity {
         easyTracker.send(MapBuilder
                 .createAppView().build());
 
+        // Keep track of what theme is being used
+        easyTracker.send(MapBuilder
+                .createEvent(AnalyticsConstants.GA_APP_OPEN,
+                        AnalyticsConstants.GA_ROM_VERSION,
+                        Prefs.getCurrentTheme(this),
+                        null)
+                .build());
+        // note this screen as viewed
+        easyTracker.send(MapBuilder.createAppView().build());
+
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
 
