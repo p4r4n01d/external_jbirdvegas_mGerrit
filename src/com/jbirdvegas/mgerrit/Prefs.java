@@ -247,9 +247,9 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
                 context.getResources().getString(R.string.theme_light_value));
         Resources res = context.getResources();
         if (themename.equalsIgnoreCase(res.getString(R.string.theme_dark_value))) {
-            return android.R.style.Theme_Holo;
+            return R.style.Theme_Dark;
         } else {
-            return android.R.style.Theme_Holo_Light;
+            return R.style.Theme_Light;
         }
     }
 
@@ -267,7 +267,7 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
 
     private void setThemeSummary(Preference preference) {
         String summary = getReadableThemeName(getCurrentTheme(getActivity()));
-        if (summary != null){
+        if (summary != null) {
             preference.setSummary(summary);
         } else {
             preference.setSummary("");
@@ -277,9 +277,9 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
     private int getInternalTheme(String pref) {
         Resources res = getActivity().getResources();
         if (pref.equalsIgnoreCase(res.getString(R.string.theme_dark_value))) {
-            return android.R.style.Theme_Holo;
+            return R.style.Theme_Dark;
         } else {
-            return android.R.style.Theme_Holo_Light;
+            return R.style.Theme_Light;
         }
     }
 }

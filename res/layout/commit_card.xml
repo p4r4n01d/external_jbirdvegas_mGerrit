@@ -48,35 +48,34 @@
             style="@style/CardText.Committer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/commit_card_commit_owner"
-            android:textStyle="bold"/>
+            android:id="@+id/commit_card_commit_owner"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_project_name"
-            style="?attr/cardTextStyle"
+            style="@style/CardText"
             android:textSize="18sp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_last_updated"
-            style="?attr/cardTextStyle" />
+            style="@style/CardText" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_message"
             android:paddingTop="10dp"
-            style="?attr/cardTextStyle"
+            style="@style/CardText"
             android:visibility="gone"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_changed_files"
-            style="?attr/cardTextStyle"
+            style="@style/CardText"
             android:visibility="gone"/>
 
         <RelativeLayout
