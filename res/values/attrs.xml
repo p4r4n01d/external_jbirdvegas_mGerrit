@@ -36,5 +36,7 @@
     </declare-styleable>
     <declare-styleable name="ImageView">
         <attr name="aboutIcon" format="reference"/>
+        <attr name="shareIcon" format="reference"/>
+        <attr name="viewIcon" format="reference"/>
     </declare-styleable>
 </resources>

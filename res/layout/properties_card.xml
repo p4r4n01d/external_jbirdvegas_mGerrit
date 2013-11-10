@@ -72,12 +72,12 @@
         android:layout_gravity="right"
         android:gravity="right">
         <ImageView
-            android:src="@drawable/ic_menu_view"
+            android:src="?attr/viewIcon"
             android:id="@+id/properties_card_view_in_browser"
             style="@style/ActionViewsStyle"/>
 
         <ImageView
-            android:src="@android:drawable/ic_menu_share"
+            android:src="?attr/shareIcon"
             android:id="@+id/properties_card_share_info"
             style="@style/ActionViewsStyle"/>
     </LinearLayout>
