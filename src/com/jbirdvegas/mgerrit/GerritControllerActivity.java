@@ -155,7 +155,7 @@ public class GerritControllerActivity extends FragmentActivity {
         // Keep track of what theme is being used
         easyTracker.send(MapBuilder
                 .createEvent(AnalyticsConstants.GA_APP_OPEN,
-                        AnalyticsConstants.GA_ROM_VERSION,
+                        AnalyticsConstants.GA_THEME_SET_ON_OPEN,
                         Prefs.getCurrentTheme(this),
                         null)
                 .build());
