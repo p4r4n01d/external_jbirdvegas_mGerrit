@@ -237,9 +237,20 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
         return userid;
     }
 
-    public static String getCurrentTheme(Context context) {
+    private String getCurrentTheme(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getString(APP_THEME,
                 context.getResources().getString(R.string.theme_light_value));
+    }
+
+    public static int getCurrentThemeID(Context context) {
+        String themename = PreferenceManager.getDefaultSharedPreferences(context).getString(APP_THEME,
+                context.getResources().getString(R.string.theme_light_value));
+        Resources res = context.getResources();
+        if (themename.equalsIgnoreCase(res.getString(R.string.theme_dark_value))) {
+            return android.R.style.Theme_Holo;
+        } else {
+            return android.R.style.Theme_Holo_Light;
+        }
     }
 
     private String getReadableThemeName(String pref) {
