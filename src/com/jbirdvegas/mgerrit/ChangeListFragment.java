@@ -137,7 +137,7 @@ public class ChangeListFragment extends Fragment
         } else {
             // If there is no project keyword in the query, it should be cleared
             if (SearchKeyword.findKeyword(tokens, ProjectSearch.class) < 0 &&
-                    !Prefs.getCurrentProject(mParent).equals("")) {
+                    !Prefs.getCurrentProject(mParent).isEmpty()) {
                 Prefs.setCurrentProject(mParent, null);
             }
 

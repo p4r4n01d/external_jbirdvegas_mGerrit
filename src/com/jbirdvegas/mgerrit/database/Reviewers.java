@@ -20,13 +20,10 @@ package com.jbirdvegas.mgerrit.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.util.Log;
 
 import com.jbirdvegas.mgerrit.helpers.DBParams;
-import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.Reviewer;
 
 import java.util.ArrayList;

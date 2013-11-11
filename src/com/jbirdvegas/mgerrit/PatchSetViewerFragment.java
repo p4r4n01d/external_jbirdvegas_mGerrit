@@ -203,7 +203,7 @@ public class PatchSetViewerFragment extends Fragment {
     public void setSelectedChange(String changeID) {
         if (changeID == null || changeID.length() < 0) {
             return; // Invalid changeID
-        } else if (changeID == mSelectedChange) {
+        } else if (changeID.equals(mSelectedChange)) {
             return; // Same change selected, no need to do anything.
         }
 

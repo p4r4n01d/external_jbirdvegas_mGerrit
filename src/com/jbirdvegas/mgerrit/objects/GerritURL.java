@@ -109,13 +109,13 @@ public class GerritURL implements Parcelable
             .append(sGerritBase)
             .append(StaticWebAddress.getQuery());
 
-        if (!"".equals(mChangeID))
+        if (mChangeID != null && !mChangeID.isEmpty())
         {
             builder.append(mChangeID);
             addPlus = true;
         }
 
-        if (!"".equals(mStatus))
+        if (mStatus != null && !mStatus.isEmpty())
         {
             builder.append(JSONCommit.KEY_STATUS)
                     .append(":")
@@ -123,7 +123,7 @@ public class GerritURL implements Parcelable
             addPlus = true;
         }
 
-        if (!"".equals(mCommitterState) && !"".equals(mEmail))
+        if (mCommitterState != null && !mCommitterState.isEmpty() && mEmail != null && !mEmail.isEmpty())
         {
             if (addPlus) builder.append('+');
             builder.append(mCommitterState)
@@ -133,7 +133,7 @@ public class GerritURL implements Parcelable
         }
 
         try {
-            if (!"".equals(sProject))
+            if (sProject != null && !sProject.isEmpty())
             {
                 if (addPlus) builder.append('+');
                 builder.append(JSONCommit.KEY_PROJECT)
@@ -144,7 +144,7 @@ public class GerritURL implements Parcelable
             e.printStackTrace();
         }
 
-        if (!"".equals(mSortkey)) {
+        if (mSortkey != null && !mSortkey.isEmpty()) {
             builder.append("&P=").append(mSortkey);
         }
 

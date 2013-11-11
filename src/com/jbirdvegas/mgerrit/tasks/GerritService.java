@@ -25,8 +25,6 @@ import android.util.Log;
 
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 
-import java.util.Map;
-
 public class GerritService extends IntentService {
 
     public static final String TAG = "GerritService";

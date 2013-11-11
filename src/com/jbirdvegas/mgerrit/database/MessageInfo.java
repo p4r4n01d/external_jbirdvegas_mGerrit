@@ -26,7 +26,6 @@ import android.net.Uri;
 
 import com.jbirdvegas.mgerrit.helpers.DBParams;
 import com.jbirdvegas.mgerrit.objects.CommitComment;
-import com.jbirdvegas.mgerrit.objects.CommitterObject;
 
 import java.util.ArrayList;
 import java.util.List;

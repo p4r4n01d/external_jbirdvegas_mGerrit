@@ -91,9 +91,9 @@ public abstract class SearchKeyword {
 
     /**
      * Build a search keyword given a name and its parameter
-     * @param name
-     * @param param
-     * @return
+     * @param name The name of the keyword (a key of _KEYWORDS)
+     * @param param Arguments for the token - will not be processed
+     * @return A search keyword matching name:param
      */
     private static SearchKeyword buildToken(String name, String param) {
 
@@ -202,7 +202,7 @@ public abstract class SearchKeyword {
             }
         }
 
-        if (!keyword.getParam().equals("")) {
+        if (!keyword.getParam().isEmpty()) {
             tokens.add(keyword);
         }
         return SearchKeyword.getQuery(tokens);

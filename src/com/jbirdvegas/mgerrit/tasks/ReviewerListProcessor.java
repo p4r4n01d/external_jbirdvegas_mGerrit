@@ -19,13 +19,9 @@ package com.jbirdvegas.mgerrit.tasks;
 
 import android.content.Context;
 
-import com.jbirdvegas.mgerrit.database.MessageInfo;
 import com.jbirdvegas.mgerrit.database.Reviewers;
-import com.jbirdvegas.mgerrit.objects.CommitComment;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.Reviewer;
-
-import java.util.Arrays;
 
 class ReviewerListProcessor extends SyncProcessor<Reviewer[]> {
 
