@@ -28,7 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CommitComment implements Parcelable {
-    private static final String KEY_REVISION_NUMBER = "revision_number";
+    private static final String KEY_REVISION_NUMBER = "_revision_number";
     private static final boolean DEBUG = false;
     private static final String TAG = CommitComment.class.getSimpleName();
 
@@ -44,22 +44,11 @@ public class CommitComment implements Parcelable {
     @SerializedName(JSONCommit.KEY_AUTHOR)
     private CommitterObject mAuthorObject;
 
-    @SerializedName("SONCommit.KEY_ID")
+    @SerializedName(JSONCommit.KEY_ID)
     private String mId;
 
-    public CommitComment(JSONObject jsonObject) {
-        new Gson().fromJson(jsonObject.toString(), this.getClass());
-    }
-
     public static CommitComment getInstance(JSONObject jsonObject) {
-        if (DEBUG) {
-            try {
-                Log.d(TAG, "CommitComment RawJSON: " + jsonObject.toString(4));
-            } catch (JSONException e) {
-                Log.e(TAG, "DEBUG FAILED!", e);
-            }
-        }
-        return new CommitComment(jsonObject);
+        return new Gson().fromJson(jsonObject.toString(), CommitComment.class);
     }
 
     public int getRevisionNumber() {
