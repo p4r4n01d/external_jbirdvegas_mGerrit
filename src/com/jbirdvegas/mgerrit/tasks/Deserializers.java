@@ -66,7 +66,7 @@ public final class Deserializers {
                                     JsonDeserializationContext jsonDeserializationContext)
                 throws JsonParseException {
 
-            ArrayList<Reviewer> reviewers = new ArrayList<Reviewer>();
+            ArrayList<Reviewer> reviewers = new ArrayList<>();
 
             JsonObject labels = jsonElement.getAsJsonObject();
             for (Map.Entry<String, JsonElement> labelParent : labels.entrySet()) {

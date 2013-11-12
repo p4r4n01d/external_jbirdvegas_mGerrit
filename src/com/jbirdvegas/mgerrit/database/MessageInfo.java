@@ -99,7 +99,7 @@ public class MessageInfo extends DatabaseTable {
 
     public static int insertMessages(Context context, String changeid, List<CommitComment> comments) {
 
-        List<ContentValues> values = new ArrayList<ContentValues>();
+        List<ContentValues> values = new ArrayList<>();
 
         for (CommitComment comment : comments) {
             if (comment == null) {

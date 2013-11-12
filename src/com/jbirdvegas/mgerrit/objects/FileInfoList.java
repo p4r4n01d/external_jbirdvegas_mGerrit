@@ -54,7 +54,7 @@ public class FileInfoList implements Parcelable {
     }
 
     public static FileInfoList deserialize(JsonObject object) {
-        List<FileInfo> newList = new ArrayList<FileInfo>();
+        List<FileInfo> newList = new ArrayList<>();
         Set<Map.Entry<String, JsonElement>> entries = object.entrySet();
         for (Map.Entry<String, JsonElement> entry : entries) {
             newList.add(FileInfo.deserialise(entry.getKey(), entry.getValue().getAsJsonObject()));
@@ -65,7 +65,7 @@ public class FileInfoList implements Parcelable {
 
     public static FileInfoList setDraftNotice(Context context) {
         String draftNotice = context.getString(R.string.current_revision_is_draft_message);
-        List<FileInfo> list = new ArrayList<FileInfo>();
+        List<FileInfo> list = new ArrayList<>();
         list.add(new FileInfo(draftNotice));
         return new FileInfoList(list);
     }

@@ -374,7 +374,7 @@ public class JSONCommit implements Parcelable {
     }
 
     public List<Reviewer> getVerifiedReviewers() {
-        ArrayList<Reviewer> rs = new ArrayList<Reviewer>();
+        ArrayList<Reviewer> rs = new ArrayList<>();
         for (Reviewer r : mReviewers.getReviewers()) {
             if (KEY_VERIFIED.equals(r.getLabel())) {
                 rs.add(r);
@@ -384,7 +384,7 @@ public class JSONCommit implements Parcelable {
     }
 
     public List<Reviewer> getCodeReviewers() {
-        ArrayList<Reviewer> rs = new ArrayList<Reviewer>();
+        ArrayList<Reviewer> rs = new ArrayList<>();
         for (Reviewer r : mReviewers.getReviewers()) {
             if (KEY_CODE_REVIEW.equals(r.getLabel())) {
                 rs.add(r);

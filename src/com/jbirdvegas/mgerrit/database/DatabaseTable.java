@@ -76,7 +76,7 @@ public abstract class DatabaseTable {
     // Add each DatabaseTable class here, we need to add the virtual tables as well
     public static ArrayList<Class<? extends DatabaseTable>> tables;
     static {
-        tables = new ArrayList<Class<? extends DatabaseTable>>();
+        tables = new ArrayList<>();
         tables.add(Changes.class);
         tables.add(ChangedFiles.class);
         tables.add(CommitMarker.class);
@@ -96,7 +96,7 @@ public abstract class DatabaseTable {
      */
     public static final SparseArray<String> sContentTypeMap;
     static {
-        sContentTypeMap = new SparseArray<String>();
+        sContentTypeMap = new SparseArray<>();
 
         for (Class<? extends DatabaseTable> table : DatabaseTable.tables) {
             try {
@@ -121,7 +121,7 @@ public abstract class DatabaseTable {
      */
     public static final SparseArray<String> sTableMap;
     static {
-        sTableMap = new SparseArray<String>();
+        sTableMap = new SparseArray<>();
 
         for (Class<? extends DatabaseTable> table : DatabaseTable.tables) {
             try {

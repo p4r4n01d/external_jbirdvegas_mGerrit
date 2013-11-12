@@ -44,7 +44,7 @@ public class ReviewerList implements Parcelable {
     }
 
     public ReviewerList(Reviewer[] reviewers) {
-        this.mReviewers = new ArrayList<Reviewer>();
+        this.mReviewers = new ArrayList<>();
         mReviewers.addAll(Arrays.asList(reviewers));
     }
 
@@ -57,7 +57,7 @@ public class ReviewerList implements Parcelable {
     }
 
     public Set<String> getLabels() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         for (Reviewer r : mReviewers) {
             set.add(r.getLabel());
         }

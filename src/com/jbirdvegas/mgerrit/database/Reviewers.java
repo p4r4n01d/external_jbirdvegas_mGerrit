@@ -80,7 +80,7 @@ public class Reviewers extends DatabaseTable {
     /** Insert the list of users into the database **/
     public static int insertReviewers(Context context, String changeid, Reviewer[] reviewers) {
 
-        List<ContentValues> values = new ArrayList<ContentValues>();
+        List<ContentValues> values = new ArrayList<>();
 
         for (Reviewer reviewer : reviewers) {
             if (reviewer == null) {

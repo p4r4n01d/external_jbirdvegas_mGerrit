@@ -39,8 +39,8 @@ public abstract class SearchKeyword {
     private static final Set<Class<? extends SearchKeyword>> _CLASSES;
     private static Map<String, Class<? extends SearchKeyword>> _KEYWORDS;
     static {
-        _KEYWORDS = new HashMap<String, Class<? extends SearchKeyword>>();
-        _CLASSES = new HashSet<Class<? extends SearchKeyword>>();
+        _KEYWORDS = new HashMap<>();
+        _CLASSES = new HashSet<>();
 
         // Add each search keyword here
         _CLASSES.add(ChangeSearch.class);
@@ -126,7 +126,7 @@ public abstract class SearchKeyword {
      *  the database query
      */
     public static Set<SearchKeyword> constructTokens(String query) {
-        Set<SearchKeyword> set = new HashSet<SearchKeyword>();
+        Set<SearchKeyword> set = new HashSet<>();
         String currentToken = "";
 
         for (int i = 0, n = query.length(); i < n; i++) {
