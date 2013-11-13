@@ -121,10 +121,10 @@ public class PatchSetReviewersCard extends RecyclableCard {
         try {
             plusStatus = value;
             if (plusStatus >= 1) {
-                approval.setText('+' + value);
+                approval.setText('+' + value.toString());
                 approval.setTextColor(mGreen);
             } else if (plusStatus <= -1) {
-                approval.setText(value);
+                approval.setText(value.toString());
                 approval.setTextColor(mRed);
             } else {
                 approval.setText(Reviewer.NO_SCORE);
