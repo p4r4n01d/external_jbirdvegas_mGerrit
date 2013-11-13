@@ -24,7 +24,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 import com.jbirdvegas.mgerrit.helpers.DBParams;
-import com.jbirdvegas.mgerrit.objects.ChangedFile;
+import com.jbirdvegas.mgerrit.objects.FileInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,11 +94,11 @@ public class ChangedFiles extends DatabaseTable {
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE + "/#", ITEM_ID);
     }
 
-    public static int insertChangedFiles(Context context, String changeid, List<ChangedFile> diff) {
+    public static int insertChangedFiles(Context context, String changeid, List<com.jbirdvegas.mgerrit.objects.FileInfo> diff) {
 
         List<ContentValues> values = new ArrayList<ContentValues>();
 
-        for (ChangedFile file : diff) {
+        for (FileInfo file : diff) {
             if (file == null) {
                 continue;
             }

@@ -22,11 +22,9 @@ import android.os.Parcelable;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.JsonObject;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-public class ChangedFile implements Parcelable {
+public class FileInfo implements Parcelable {
 
     private String path;
 
@@ -42,13 +40,8 @@ public class ChangedFile implements Parcelable {
     @SerializedName("binary")
     private boolean isBinary = false;
 
-    public ChangedFile(String draft) {
+    public FileInfo(String draft) {
         path = draft;
-    }
-
-    private ChangedFile(String _path, JSONObject object) throws JSONException {
-        path = _path;
-        new Gson().fromJson(object.toString(), this.getClass());
     }
 
     public String getPath() {
@@ -71,15 +64,15 @@ public class ChangedFile implements Parcelable {
 
     public void setBinary(boolean binary) { this.isBinary = binary; }
 
-    public static ChangedFile parseFromJSONObject(String _path,
-                                                  JSONObject object)
-            throws JSONException {
-        return new ChangedFile(_path, object);
+    public static FileInfo deserialise(String _path, JsonObject object){
+        FileInfo file = new Gson().fromJson(object, FileInfo.class);
+        file.path = _path;
+        return file;
     }
 
     @Override
     public String toString() {
-        return "ChangedFile{" +
+        return "FileInfo{" +
                 "path='" + path + '\'' +
                 ", inserted=" + inserted +
                 ", deleted=" + deleted +
@@ -100,20 +93,20 @@ public class ChangedFile implements Parcelable {
         parcel.writeInt(deleted);
     }
 
-    public ChangedFile(Parcel parcel) {
+    public FileInfo(Parcel parcel) {
         path = parcel.readString();
         inserted = parcel.readInt();
         deleted = parcel.readInt();
     }
 
-    public static final Parcelable.Creator<ChangedFile> CREATOR
-            = new Parcelable.Creator<ChangedFile>() {
-        public ChangedFile createFromParcel(Parcel in) {
-            return new ChangedFile(in);
+    public static final Parcelable.Creator<FileInfo> CREATOR
+            = new Parcelable.Creator<FileInfo>() {
+        public FileInfo createFromParcel(Parcel in) {
+            return new FileInfo(in);
         }
 
-        public ChangedFile[] newArray(int size) {
-            return new ChangedFile[size];
+        public FileInfo[] newArray(int size) {
+            return new FileInfo[size];
         }
     };
 }

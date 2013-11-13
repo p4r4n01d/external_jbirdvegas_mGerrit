@@ -26,7 +26,8 @@ public class Reviewer implements Parcelable {
     public static final String NO_SCORE = "No score";
 
     @SerializedName("value")
-    private String mValue;
+    private Integer mValue = 0;
+
     private CommitterObject mCommitter;
 
     @SerializedName("date")
@@ -34,14 +35,14 @@ public class Reviewer implements Parcelable {
 
     private String mLabel;
 
-    public Reviewer(String value, String name, String email) {
+    public Reviewer(Integer value, String name, String email) {
         mValue = value;
         mCommitter = CommitterObject.getInstance(name, email);
         mDate = null;
     }
 
     public Reviewer(Parcel parcel) {
-        mValue = parcel.readString();
+        mValue = parcel.readInt();
         mCommitter = new CommitterObject(parcel);
         mDate = null;
     }
@@ -50,7 +51,7 @@ public class Reviewer implements Parcelable {
         return mCommitter;
     }
 
-    public String getValue() {
+    public Integer getValue() {
         return mValue;
     }
 
@@ -69,9 +70,10 @@ public class Reviewer implements Parcelable {
     @Override
     public String toString() {
         return "Reviewer{" +
-                "value='" + mValue + '\'' +
-                ", name='" + mCommitter.getName() + '\'' +
-                ", email='" + mCommitter.getEmail() + '\'' +
+                "mValue=" + mValue +
+                ", mCommitter=" + mCommitter +
+                ", mDate='" + mDate + '\'' +
+                ", mLabel='" + mLabel + '\'' +
                 '}';
     }
 
@@ -82,7 +84,7 @@ public class Reviewer implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(mValue);
+        parcel.writeInt(mValue);
         mCommitter.writeToParcel(parcel, i);
     }
 

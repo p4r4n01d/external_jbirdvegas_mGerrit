@@ -101,10 +101,18 @@ More on Auth (privileged actions)
             - Could even track these in mGerrit with updates view/tab
 
 
+Errors
+------
+Website down (stacktrace):
+java.io.FileNotFoundException: http://review.cyanogenmod.org/changes/?q=I6710a62a82ed274eb9e8c86cd2a1faf657ae53f1&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=CURRENT_FILES&o=DETAILED_LABELS&o=DETAILED_ACCOUNTS&o=MESSAGES
+            at libcore.net.http.HttpURLConnectionImpl.getInputStream(HttpURLConnectionImpl.java:186)
+            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:92)
+            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:43)
+            ...
+
+
 Optional/Lower priority
 -----------------------
-	- Theming support
-		- Add 'Dark UI' theme (esp. for AOKP users)
 	- Colour each project in a sperate colour
 	- Add tab for reviewed (verified)
 	    - May be useful for admins or others wishing to cherry pick changes that compile

@@ -36,8 +36,7 @@ class CommitProcessor extends SyncProcessor<JSONCommit> {
     void insert(JSONCommit commit) {
         String changeid = commit.getChangeId();
 
-        Reviewer[] rs = new Reviewer[commit.getReviewers().size()];
-        Reviewers.insertReviewers(getContext(), changeid, commit.getReviewers().toArray(rs));
+        Reviewers.insertReviewers(getContext(), changeid, commit.getReviewers());
         MessageInfo.insertMessages(getContext(), changeid, commit.getMessagesList());
         ChangedFiles.insertChangedFiles(getContext(), changeid, commit.getChangedFiles());
     }
