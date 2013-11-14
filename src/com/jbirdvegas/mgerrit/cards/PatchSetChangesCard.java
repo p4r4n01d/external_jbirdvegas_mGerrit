@@ -72,29 +72,48 @@ public class PatchSetChangesCard extends RecyclableCard {
         TextView delText = (TextView)
                 innerRootView.findViewById(R.id.deleted_text);
         String changedFilePath = fileInfo.getPath();
-        int insertedInFile = fileInfo.getInserted();
-        int deletedInFile = fileInfo.getDeleted();
 
         // we always have a path
         if (path != null) {
             path.setText(changedFilePath);
-            // we may not have inserted lines so remove if unneeded
-            if (fileInfo.getInserted() == Integer.MIN_VALUE) {
-                inserted.setVisibility(View.GONE);
-                insText.setVisibility(View.GONE);
-            } else {
-                inserted.setText('+' + String.valueOf(fileInfo.getInserted()));
-                inserted.setTextColor(mGreen);
-            }
-            // we may not have deleted lines so remove if unneeded
-            if (fileInfo.getDeleted() == Integer.MIN_VALUE) {
-                deleted.setVisibility(View.GONE);
-                delText.setVisibility(View.GONE);
-            } else {
-                deleted.setText('-' + String.valueOf(fileInfo.getDeleted()));
-                deleted.setTextColor(mRed);
+
+            FileInfo.Status status = fileInfo.getStatus();
+            if (status == FileInfo.Status.ADDED) {
+                path.setTextColor(mGreen);
+            } else if (status == FileInfo.Status.DELETED) {
+                path.setTextColor(mRed);
             }
         }
+
+        if (fileInfo.isBinary()) {
+            innerRootView.findViewById(R.id.binary_text).setVisibility(View.VISIBLE);
+        }
+
+        int insertedInFile = fileInfo.getInserted();
+        int deletedInFile = fileInfo.getDeleted();
+        // we may not have inserted lines so remove if unneeded
+        if (insertedInFile < 1) {
+            inserted.setVisibility(View.GONE);
+            insText.setVisibility(View.GONE);
+        } else {
+            inserted.setText('+' + String.valueOf(insertedInFile));
+            inserted.setTextColor(mGreen);
+        }
+        // we may not have deleted lines so remove if unneeded
+        if (deletedInFile < 1) {
+            deleted.setVisibility(View.GONE);
+            delText.setVisibility(View.GONE);
+        } else {
+            deleted.setText('-' + String.valueOf(deletedInFile));
+            deleted.setTextColor(mRed);
+        }
+
+        /* If the file is binary don't offer to show the diff or any statistics as
+         *  we cannot get detailed information on binary files */
+        if (fileInfo.isBinary()) {
+            return innerRootView;
+        }
+
         innerRootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {

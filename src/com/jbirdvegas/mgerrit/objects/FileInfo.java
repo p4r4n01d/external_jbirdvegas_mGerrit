@@ -41,7 +41,7 @@ public class FileInfo implements Parcelable {
     private boolean isBinary = false;
 
     // File status
-    enum Status {
+    public enum Status {
         ADDED ("A"),
         DELETED("D"),
         RENAMED("R"),
