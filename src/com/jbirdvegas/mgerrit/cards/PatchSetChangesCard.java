@@ -41,7 +41,6 @@ import java.util.List;
 
 public class PatchSetChangesCard extends RecyclableCard {
     private static final String TAG = PatchSetChangesCard.class.getSimpleName();
-    private static final boolean VERBOSE = false;
     private JSONCommit mCommit;
     private final Activity mActivity;
     private AlertDialog mAlertDialog;
@@ -75,12 +74,7 @@ public class PatchSetChangesCard extends RecyclableCard {
         String changedFilePath = fileInfo.getPath();
         int insertedInFile = fileInfo.getInserted();
         int deletedInFile = fileInfo.getDeleted();
-        if (VERBOSE) {
-            Log.d(TAG, "File change stats Path=" + changedFilePath
-                    + " inserted=" + insertedInFile
-                    + " deleted=" + deletedInFile
-                    + " objectToString()=" + fileInfo.toString());
-        }
+
         // we always have a path
         if (path != null) {
             path.setText(changedFilePath);
@@ -106,7 +100,7 @@ public class PatchSetChangesCard extends RecyclableCard {
             public void onClick(final View view) {
                 AlertDialog.Builder ad = new AlertDialog.Builder(mActivity)
                         .setTitle(R.string.choose_diff_view);
-                // TODO XXX ABANDONED till APIs are stable on Google's side :(
+
                 ad.setPositiveButton(R.string.context_menu_view_diff_dialog, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
