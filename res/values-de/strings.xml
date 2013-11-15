@@ -25,7 +25,6 @@
     <string name="status_explanation_abandoned">"Veränderung wurde von seinem Besitzer oder Administrator aufgegeben."</string>
     <string name="patchset_labels_code_reviewer_title">"Code-Prüfer:"</string>
     <string name="patchset_labels_verified_reviewer_title">"Geprüft"</string>
-    <string name="dash" translatable="false">""</string>
     <string name="inserted">"Eingefügt Linien:"</string>
     <string name="deleted">"Gelöschte Zeilen:"</string>
     <string name="binary_file">"Binary-Datei"</string>
@@ -52,13 +51,9 @@
 
     <string name="open_source_libs">"Open-Source-Bibliotheken"</string>
     <string name="cards_ui">"CardsUI"</string>
-    <string name="cards_ui_website" translatable="false">"https://github.com/Androguide/cardsui-for-android"</string>
     <string name="nine_old_androids">"NineOldAndroids"</string>
-    <string name="nine_old_androids_website" translatable="false">"http://nineoldandroids.com/"</string>
     <string name="listview_animations">"ListViewAnimations"</string>
-    <string name="listview_animations_website" translatable="false">"https://github.com/nhaarman/ListViewAnimations"</string>
     <string name="support_library">"Support Library v4"</string>
-    <string name="support_library_website" translatable="false">"http://developer.android.com/tools/support-library/index.html"</string>
 
     <string name="explain_status_title">"Erklären Zustände"</string>
     <string name="explain_status_summary">"Kurze Erklärung der Status-Tabs Bedeutungen"</string>
@@ -71,7 +66,6 @@
     "</string>
     <string name="comments_card_title">"Kommentare:"</string>
     <string name="unknown">"Unbekannt"</string>
-    <string name="aosp_volley_website" translatable="false">"https://android.googlesource.com/platform/frameworks/volley/"</string>
     <string name="aosp_volley_title">"AOSP ist Volley"</string>
     <string name="developers_role">"Wählen Entwickler-Rolle zu sehen"</string>
     <string name="commit_reviewer">"Commit Bewerter"</string>
@@ -128,7 +122,4 @@
     <string name="change_theme">"Thema auswählen"</string>
     <string name="theme_light">"Helles Thema"</string>
     <string name="theme_dark">"Dunkles Thema"</string>
-    <!-- Seriously, DO NOT Translate these, they are used for reading the shared preferences -->
-    <string name="theme_light_value" translatable="false">""</string>
-    <string name="theme_dark_value" translatable="false">""</string>
 </resources>
