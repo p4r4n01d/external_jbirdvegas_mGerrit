@@ -14,16 +14,17 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
+
 <resources>
     <string name="app_name">"mGerrit"</string>
     <string name="reviewable">"esame"</string>
     <string name="merged">"Mergiato"</string>
     <string name="abandoned">"Abbandonati?"</string>
-    <string name="status_explanation_new">"Il cambiamento Ã¨ ancora in fase di revisione."</string>
-    <string name="status_explanation_submitted">"Modifica Ã¨ stata presentata ed Ã¨ nella coda di unione. Si puÃ² essere in attesa di una o piÃ¹ dipendenze.
+    <string name="status_explanation_new">"Il cambiamento è ancora in fase di revisione."</string>
+    <string name="status_explanation_submitted">"Modifica è stata presentata ed è nella coda di unione. Si può essere in attesa di una o più dipendenze.
     "</string>
-    <string name="status_explanation_merged">"Il cambiamento Ã¨ stato unito al suo ramo."</string>
-    <string name="status_explanation_abandoned">"Change Ã¨ stato abbandonato dal suo proprietario o amministratore."</string>
+    <string name="status_explanation_merged">"Il cambiamento è stato unito al suo ramo."</string>
+    <string name="status_explanation_abandoned">"Change è stato abbandonato dal suo proprietario o amministratore."</string>
     <string name="patchset_labels_code_reviewer_title">"Code-Revisori:"</string>
     <string name="patchset_labels_verified_reviewer_title">"Verificato:"</string>
     <string name="inserted">"Linee inseriti:"</string>
@@ -64,7 +65,7 @@
     <string name="author_gravatar">"Immagine del profilo Gravatar dell'autore"</string>
     <string name="committer_gravatar">"Immagine del profilo Gravatar del commit"</string>
     <string name="menu_refresh">"Aggiorna"</string>
-    <string name="current_revision_is_draft_message">"Versione corrente Ã¨ una bozza. Alcune informazioni non sarÃ  disponibile
+    <string name="current_revision_is_draft_message">"Versione corrente è una bozza. Alcune informazioni non sarà disponibile
     "</string>
     <string name="comments_card_title">"Note:"</string>
     <string name="unknown">"Sconosciuta"</string>
@@ -79,7 +80,7 @@
     <string name="stalker_mode_toast">"Ora lo stalking utente:"</string>
     <string name="share">"raccomandare"</string>
     <string name="view_in_browser">"Visualizza questo cambiamento nel browser predefinito"</string>
-    <string name="moar_info">"Informazioni piÃ¹ dettagliate su questo cambiamento"</string>
+    <string name="moar_info">"Informazioni più dettagliate su questo cambiamento"</string>
     <string formatted="false" name="commit_shared_from_mgerrit">"Impegnarsi %s condivisi da mGerrit!"</string>
     <string formatted="false" name="found_cards_toast">"&lt;! [CDATA [Found %d impegna in %d secondi"</string>
     <string name="cancel">"Annulla"</string>
@@ -89,7 +90,7 @@
     <string name="please_select_update_for_range">"Si prega di selezionare il file da visualizzare changelog"</string>
     <string name="download_rom_zip">"Scarica zip ROM"</string>
     <string name="failed_to_decode_base64">"Impossibile decodificare la risposta Base64."</string>
-    <string name="return_was_null">"Risposta Ã¨ stata nulla ... Si prega di lettura"</string>
+    <string name="return_was_null">"Risposta è stata nulla ... Si prega di lettura"</string>
     <string name="using_gerrit_toast">"Utilizzando Gerrit:"</string>
     <string name="google_now_style_animations_title">"Animare le carte"</string>
     <string name="google_now_style_animations_summary">"Abilitare Google ora animazioni stile mentre si disegna carte"</string>
@@ -108,7 +109,7 @@
     <string name="server_timezone_title">"TimeZone Server"</string>
     <string name="local_timezone_title">"Fuso orario locale"</string>
     <string name="server_timezone_summary">"Fuso orario locale in cui si trova Gerrit server."</string>
-    <string name="local_timezone_summary">"Il fuso orario fornito di default puÃ² essere impreciso. Utilizzare questa opzione per ignorare il fuso orario locale predefinita.
+    <string name="local_timezone_summary">"Il fuso orario fornito di default può essere impreciso. Utilizzare questa opzione per ignorare il fuso orario locale predefinita.
     "</string>
     <string name="patchset_labels_change_diff">"Cambiare Differenze"</string>
     <string name="remove_content">"Rimuovere questo contenuto"</string>
@@ -116,7 +117,7 @@
     <string name="projects_search_hint">"Progetti di ricerca"</string>
     <string name="changes_search_hint">"Cerca cambiamenti"</string>
     <string name="failed_to_find_url">"Impossibile trovare URL del progetto"</string>
-    <string name="change_status_update">"Ãˆ stato selezionato un nuovo cambiamento di stato"</string>
+    <string name="change_status_update">"È stato selezionato un nuovo cambiamento di stato"</string>
     <string name="invalid_gerrit_name">"Il nome del set di Gerrit era valido"</string>
     <string name="invalid_gerrit_url">"L'URL set Gerrit era valido"</string>
     <string name="gerrit_protocol">"https://"</string>
