@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -62,7 +63,6 @@ public class GsonRequest<T> extends Request<T> {
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        return super.getHeaders();
         // super.getHeaders() returns an empty AbstractMap<K, V> which
         // throw UnsupportedOperation during calls to put(K, V)
         HashMap<String, String> map = new HashMap<>(0);
