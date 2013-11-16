@@ -36,8 +36,6 @@ Outstanding
 		(re-)delivered to the activity that was listening to broadcasts matching the actual query
 - Change detail viewpager
 	- Viewpager to swipe through changes in the change detail screen (phone layout only)
-- German translations: 461 users (as of 5 Nov 2013)
-- Italain translations: 261 users (as of 5 Nov 2013)
 
 
 Database
