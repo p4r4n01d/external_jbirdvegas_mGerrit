@@ -128,6 +128,12 @@ public class JSONCommit implements Parcelable {
             public String getExplaination(Context c) {
                 return c.getString(R.string.status_explanation_abandoned);
             }
+        },
+        DRAFT {
+            @Override
+            public String getExplaination(Context c) {
+                return c.getString(R.string.status_explanation_draft);
+            }
         };
 
         /**
@@ -172,14 +178,14 @@ public class JSONCommit implements Parcelable {
         mLastUpdatedDate = updated;
         mStatus = Status.valueOf(status);
 
-        mWebAddress = String.format("%s#/c/%d/", Prefs.getCurrentGerrit(context), mCommitNumber);
+        mWebAddress = String.format("%s%d/", Prefs.getCurrentGerrit(context), mCommitNumber);
     }
 
     public static JSONCommit getInstance(JSONObject object, Context context) {
         JSONCommit thisCommit = gson.fromJson(object.toString(), JSONCommit.class);
         thisCommit.mServerTimeZone = Prefs.getServerTimeZone(context);
         thisCommit.mLocalTimeZone = Prefs.getLocalTimeZone(context);
-        thisCommit.mWebAddress = String.format("%s#/c/%d/",
+        thisCommit.mWebAddress = String.format("%s%d/",
                 Prefs.getCurrentGerrit(context),
                 thisCommit.mCommitNumber);
 
@@ -191,54 +197,73 @@ public class JSONCommit implements Parcelable {
         return thisCommit;
     }
 
+    /** gerritcodereview#change */
     @SerializedName(JSONCommit.KEY_KIND)
     private String mKind;
 
+    /** The ling-form ID of the change */
     @SerializedName(JSONCommit.KEY_ID)
     private String mId;
 
+    /** The name of the project. **/
     @SerializedName(JSONCommit.KEY_PROJECT)
     private String mProject;
 
+    /** The name of the target branch.
+     The refs/heads/ prefix is omitted. **/
     @SerializedName(JSONCommit.KEY_BRANCH)
     private String mBranch;
 
+    /** The topic to which this change belongs. (optional) */
     @SerializedName(JSONCommit.KEY_TOPIC)
     private String mTopic;
 
+    /** The Change-Id of the change. */
     @SerializedName(JSONCommit.KEY_CHANGE_ID)
     private String mChangeId;
 
+    /** The subject of the change (header line of the commit message). */
     @SerializedName(JSONCommit.KEY_SUBJECT)
     private String mSubject;
 
+    /** The status of the change (NEW, SUBMITTED, MERGED, ABANDONED, DRAFT). */
     @SerializedName(JSONCommit.KEY_STATUS)
     private Status mStatus;
 
+    /** The timestamp of when the change was created. */
     @SerializedName(JSONCommit.KEY_CREATED)
     private String mCreatedDate;
 
+    /** The timestamp of when the change was last updated. */
     @SerializedName(JSONCommit.KEY_UPDATED)
     private String mLastUpdatedDate;
 
+    /** Whether the change is mergeable.
+     Not set for merged changes. */
     @SerializedName(JSONCommit.KEY_MERGEABLE)
     private boolean mIsMergeable = false;
 
+    /** The sortkey of the change. Used internally for pagination and syncing*/
     @SerializedName(JSONCommit.KEY_SORT_KEY)
     private String mSortKey;
 
+    /** The legacy numeric ID of the change. */
     @SerializedName(JSONCommit.KEY_COMMIT_NUMBER)
     private int mCommitNumber;
 
+    /**The commit ID of the current patch set of this change. */
     @SerializedName(JSONCommit.KEY_CURRENT_REVISION)
     private String mCurrentRevision;
 
+    /** The owner of the change */
     @SerializedName(JSONCommit.KEY_OWNER)
     private CommitterObject mOwnerObject;
 
+    /** Information about the files in this patch set. */
     @SerializedName(JSONCommit.KEY_CHANGED_FILES)
     private FileInfoList mFileInfos;
 
+    /** Auto-generated field comprising of the Gerrit instance and the commit number */
     @SerializedName(JSONCommit.KEY_WEBSITE)
     private String mWebAddress;
 
@@ -249,6 +274,7 @@ public class JSONCommit implements Parcelable {
 
     private int mPatchSetNumber = -1;
 
+    /** The messages associated with the change */
     @SerializedName(JSONCommit.KEY_MESSAGES)
     private List<CommitComment> mMessagesList;
 
@@ -366,6 +392,7 @@ public class JSONCommit implements Parcelable {
     }
 
     public List<Reviewer> getReviewers() {
+        if (mReviewers == null) return null;
         return mReviewers.getReviewers();
     }
 

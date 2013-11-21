@@ -3,7 +3,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="8dip">
+    android:paddingBottom="8dip"
+    android:background="?attr/cardBackgroundColor">
 
     <TextView
         android:gravity="center"
@@ -32,15 +33,26 @@
                 style="@style/CardText.CommitOwnerText"
                 android:id="@+id/commit_author_text"
                 android:layout_below="@+id/commit_owner_text"
-                android:text="@string/commit_author"
-                android:paddingTop="5dip"
-                android:paddingBottom="5dip"/>
+                android:text="@string/commit_author"/>
 
             <TextView
                 style="@style/CardText.CommitOwnerText"
                 android:id="@+id/commit_committer_text"
                 android:layout_below="@+id/commit_author_text"
                 android:text="@string/commit_committer"/>
+
+            <TextView
+                style="@style/CardText.CommitOwnerText"
+                android:id="@+id/commit_branch_text"
+                android:layout_below="@+id/commit_committer_text"
+                android:text="@string/commit_branch"/>
+
+            <TextView
+                style="@style/CardText.CommitOwnerText"
+                android:id="@+id/commit_topic_text"
+                android:layout_below="@+id/commit_branch_text"
+                android:text="@string/commit_topic"
+                android:visibility="gone"/>
 
             <TextView
                 style="@style/CardText.CommitOwnerDetails"
@@ -54,15 +66,28 @@
                 android:id="@+id/prop_card_author"
                 android:layout_toRightOf="@+id/commit_author_text"
                 android:layout_alignLeft="@id/prop_card_committer"
-                android:layout_below="@+id/prop_card_owner"
-                android:paddingBottom="5dip"
-                android:paddingTop="5dip" />
+                android:layout_below="@+id/prop_card_owner" />
 
             <TextView
                 style="@style/CardText.CommitOwnerDetails"
                 android:id="@+id/prop_card_committer"
                 android:layout_toRightOf="@+id/commit_committer_text"
                 android:layout_below="@+id/prop_card_author"/>
+
+            <TextView
+                style="@style/CardText.CommitOwnerDetails"
+                android:id="@+id/prop_card_branch"
+                android:layout_below="@+id/commit_committer_text"
+                android:layout_toRightOf="@id/commit_branch_text"
+                android:layout_alignLeft="@id/prop_card_committer"/>
+
+            <TextView
+                style="@style/CardText.CommitOwnerDetails"
+                android:id="@+id/prop_card_topic"
+                android:layout_toRightOf="@+id/commit_topic_text"
+                android:layout_below="@+id/prop_card_branch"
+                android:layout_alignLeft="@id/prop_card_committer"
+                android:visibility="gone"/>
         </RelativeLayout>
 
     <LinearLayout

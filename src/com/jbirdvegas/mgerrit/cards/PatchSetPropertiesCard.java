@@ -53,17 +53,22 @@ public class PatchSetPropertiesCard extends RecyclableCard {
 
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
         if (convertView.getTag() == null) {
-            viewHolder = new ViewHolder();
-
-            viewHolder.subject = (TextView) convertView.findViewById(R.id.prop_card_subject);
-            viewHolder.owner = (TextView) convertView.findViewById(R.id.prop_card_owner);
-            viewHolder.author = (TextView) convertView.findViewById(R.id.prop_card_author);
-            viewHolder.committer = (TextView) convertView.findViewById(R.id.prop_card_committer);
+            viewHolder = new ViewHolder(convertView);
             convertView.setTag(viewHolder);
         }
 
         viewHolder.subject.setText(mJSONCommit.getSubject());
         viewHolder.owner.setText(mJSONCommit.getOwnerObject().getName());
+        viewHolder.branch.setText(mJSONCommit.getBranch());
+
+        String topic = mJSONCommit.getTopic();
+        if (topic != null && !topic.isEmpty()) {
+            viewHolder.topic.setText(topic);
+            viewHolder.topic.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.topic.setVisibility(View.GONE);
+        }
+
         // attach owner's gravatar
         GravatarHelper.attachGravatarToTextView(
                 viewHolder.owner,
@@ -155,5 +160,16 @@ public class PatchSetPropertiesCard extends RecyclableCard {
         TextView owner;
         TextView author;
         TextView committer;
+        TextView branch;
+        TextView topic;
+
+        ViewHolder(View view) {
+            subject = (TextView) view.findViewById(R.id.prop_card_subject);
+            owner = (TextView) view.findViewById(R.id.prop_card_owner);
+            author = (TextView) view.findViewById(R.id.prop_card_author);
+            committer = (TextView) view.findViewById(R.id.prop_card_committer);
+            branch = (TextView) view.findViewById(R.id.prop_card_branch);
+            topic = (TextView) view.findViewById(R.id.prop_card_topic);
+        }
     }
 }

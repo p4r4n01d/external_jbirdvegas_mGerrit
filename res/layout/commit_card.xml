@@ -85,16 +85,11 @@
             android:layout_gravity="right"
             android:gravity="end">
             <ImageView
-                android:id="@+id/commit_card_moar_info"
-                android:src="?attr/aboutIcon"
-                style="@style/ActionViewsStyle"
-                android:layout_alignParentRight="true"
-                android:contentDescription="@string/moar_info"/>
-            <ImageView
                 android:src="?attr/shareIcon"
                 android:id="@+id/commit_card_share_info"
                 style="@style/ActionViewsStyle"
                 android:layout_toLeftOf="@+id/commit_card_moar_info"
+                android:layout_alignWithParentIfMissing="true"
                 android:contentDescription="@string/share"/>
             <ImageView
                 android:src="?attr/viewIcon"

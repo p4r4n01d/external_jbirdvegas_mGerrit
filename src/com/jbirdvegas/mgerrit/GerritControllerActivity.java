@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -90,7 +91,7 @@ public class GerritControllerActivity extends FragmentActivity {
     private Menu mMenu;
 
     // Indicates if we are running this in tablet mode.
-    private boolean mTwoPane;
+    private boolean mTwoPane = false;
     private ChangeListFragment mChangeList;
 
     // This will be null if mTwoPane is false (i.e. not tablet mode)
@@ -178,6 +179,7 @@ public class GerritControllerActivity extends FragmentActivity {
             mChangeDetail = (PatchSetViewerFragment) fm.findFragmentById(R.id.change_detail_fragment);
             // TODO: In two-pane mode, list items should be given the 'activated' state when touched.
         }
+        Prefs.setTabletMode(this, mTwoPane);
 
         mChangeList = (ChangeListFragment) fm.findFragmentById(R.id.change_list_fragment);
 
