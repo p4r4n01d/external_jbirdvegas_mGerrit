@@ -25,7 +25,7 @@
         android:id="@+id/commit_card_commit_status"
         android:layout_height="match_parent"
         android:layout_width="6dp"
-        android:background="?attr/cardBackgroundColor"
+        android:background="@android:color/transparent"
         android:paddingRight="2dp"/>
 
     <LinearLayout
@@ -34,7 +34,7 @@
         android:orientation="vertical"
         android:layout_gravity="center"
         android:gravity="center"
-        android:background="?attr/cardBackgroundColor">
+        android:background="?attr/clickableCardBackground">
 
         <TextView
             style="?attr/cardTitleStyle"

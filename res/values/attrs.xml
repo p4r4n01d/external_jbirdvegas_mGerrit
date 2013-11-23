@@ -29,6 +29,8 @@
     <declare-styleable name="LinearLayout">
         <attr name="mainBackgroundColor" format="color"/>
         <attr name="cardBackgroundColor" format="color"/>
+        <attr name="clickableCardBackground" format="reference" />
+        <attr name="isSelected" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="TextView">
         <attr name="cardTextStyle" format="reference" />

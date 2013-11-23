@@ -21,9 +21,7 @@
     <item android:state_pressed="false"
           android:drawable="@color/card_background_dark" />
     <item android:state_pressed="true"
-          android:drawable="@color/card_selected_dark" />
-    <item android:state_selected="true"
-          android:drawable="@color/card_selected_dark" />
+          android:drawable="@color/card_pressed_dark" />
     <item android:state_enabled="false" android:drawable="@color/card_background_dark"/>
     <item android:state_enabled="true" android:drawable="@color/main_background_dark"/>
 </selector>

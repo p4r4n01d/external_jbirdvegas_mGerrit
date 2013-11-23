@@ -83,13 +83,8 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
             }
         };
 
-        if (viewHolder.moarInfo != null) {
-            viewHolder.moarInfo.setTag(viewHolder);
-            viewHolder.moarInfo.setOnClickListener(cardListener);
-        } else {
-            // Root view already has viewHolder tagged
-            view.setOnClickListener(cardListener);
-        }
+        // Root view already has viewHolder tagged
+        view.setOnClickListener(cardListener);
 
         viewHolder.shareView.setTag(viewHolder);
         viewHolder.shareView.setOnClickListener(new View.OnClickListener() {
@@ -135,7 +130,6 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
     private static class ViewHolder {
         ImageView browserView;
         ImageView shareView;
-        ImageView moarInfo;
 
         String changeid;
         String changeStatus;
@@ -144,7 +138,6 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         ViewHolder(View view) {
             browserView = (ImageView) view.findViewById(R.id.commit_card_view_in_browser);
             shareView = (ImageView) view.findViewById(R.id.commit_card_share_info);
-            moarInfo = (ImageView) view.findViewById(R.id.commit_card_moar_info);
         }
     }
 
