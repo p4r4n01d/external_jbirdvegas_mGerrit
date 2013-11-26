@@ -16,10 +16,12 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="horizontal">
+<com.jbirdvegas.mgerrit.cards.CommitCard
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="?attr/clickableCardBackground">
 
     <View
         android:id="@+id/commit_card_commit_status"
@@ -33,8 +35,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center"
-        android:gravity="center"
-        android:background="?attr/clickableCardBackground">
+        android:gravity="center">
 
         <TextView
             style="?attr/cardTitleStyle"
@@ -99,4 +100,4 @@
                 android:contentDescription="@string/view_in_browser"/>
         </RelativeLayout>
     </LinearLayout>
-</LinearLayout>
+</com.jbirdvegas.mgerrit.cards.CommitCard>

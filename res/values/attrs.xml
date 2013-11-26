@@ -30,6 +30,8 @@
         <attr name="mainBackgroundColor" format="color"/>
         <attr name="cardBackgroundColor" format="color"/>
         <attr name="clickableCardBackground" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="CommitCard">
         <attr name="isSelected" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="TextView">
