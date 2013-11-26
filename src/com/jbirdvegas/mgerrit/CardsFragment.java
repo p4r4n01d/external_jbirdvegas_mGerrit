@@ -213,6 +213,10 @@ public abstract class CardsFragment extends Fragment
 
     public void markDirty() { mIsDirty = true; }
 
+    public void markChangeAsSelected(String changeid) {
+        mAdapter.setSelectedChangeId(changeid);
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (args != null) {

@@ -451,6 +451,10 @@ public class GerritControllerActivity extends FragmentActivity {
 
         SelectedChange.setSelectedChange(this, changeID);
 
+        if (mChangeList.getCurrentFragment() != null) {
+            mChangeList.getCurrentFragment().markChangeAsSelected(changeID);
+        }
+
         if (mTwoPane) {
             mChangeDetail.setSelectedChange(changeID);
         } else if (expand) {

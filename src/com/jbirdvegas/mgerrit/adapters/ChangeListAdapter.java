@@ -133,7 +133,31 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         return String.format("%s#/c/%d/", Prefs.getCurrentGerrit(mContext), commitNumber);
     }
 
-    public void setSelectedChangeId(CommitCard card, String selectedChangeId) {
+    /**
+     * Notify the adapter that a new changeid has been selected.
+     *  This will refresh the adapter, forcing each view to refresh
+     *  and ensuring that only the view specified has its change selected state set
+     * @param selectedChangeId The id of the change that was selected
+     */
+    public void setSelectedChangeId(String selectedChangeId) {
+        // Check if there is any work to do here
+        if (this.selectedChangeId.equals(selectedChangeId)) return;
+
+        this.selectedChangeId = selectedChangeId;
+        /* We need to refresh the view that holds the selectedChange.
+         *  Since we cannot get the view and refresh it directly (it may be off-screen) we
+         *  have to refresh all the views in the adapter.
+         * Set the previous selected change view to unselected (even if it was recycled, we
+         *  will still refresh it.
+         */
+        if (selectedChangeView != null) {
+            selectedChangeView.setChangeSelected(false);
+            selectedChangeView = null;
+        }
+        this.notifyDataSetChanged();
+    }
+
+    private void setSelectedChangeId(CommitCard card, String selectedChangeId) {
         //  Only invalidate the view if the changeid matches (i.e. it hasn't already been recycled)
         if (selectedChangeView != null) {
             ViewHolder viewHolder = (ViewHolder) selectedChangeView.getTag();
@@ -160,20 +184,6 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         }
     }
 
-    private static class ViewHolder {
-        ImageView browserView;
-        ImageView shareView;
-
-        String changeid;
-        String changeStatus;
-        String webAddress;
-
-        ViewHolder(View view) {
-            browserView = (ImageView) view.findViewById(R.id.commit_card_view_in_browser);
-            shareView = (ImageView) view.findViewById(R.id.commit_card_share_info);
-        }
-    }
-
     @Override
     public Cursor swapCursor(Cursor c) {
         CommitCardBinder binder = (CommitCardBinder) getViewBinder();
@@ -186,5 +196,19 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         status_index = null;
 
         return super.swapCursor(c);
+    }
+
+    private static class ViewHolder {
+        ImageView browserView;
+        ImageView shareView;
+
+        String changeid;
+        String changeStatus;
+        String webAddress;
+
+        ViewHolder(View view) {
+            browserView = (ImageView) view.findViewById(R.id.commit_card_view_in_browser);
+            shareView = (ImageView) view.findViewById(R.id.commit_card_share_info);
+        }
     }
 }
