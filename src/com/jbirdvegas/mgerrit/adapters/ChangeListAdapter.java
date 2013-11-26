@@ -42,7 +42,9 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
     private Integer changeid_index;
     private Integer changenum_index;
     private Integer status_index;
+
     private String selectedChangeId;
+    private CommitCard selectedChangeView;
 
     public ChangeListAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
         super(context, layout, c, from, to, flags);
@@ -65,7 +67,9 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         view.setTag(viewHolder);
 
         if (viewHolder.changeid.equals(selectedChangeId)) {
-            ((CommitCard) view).setChangeSelected(true);
+            CommitCard commitCard = (CommitCard) view;
+            commitCard.setChangeSelected(true);
+            selectedChangeView = commitCard;
         } else {
             ((CommitCard) view).setChangeSelected(false);
         }
@@ -82,9 +86,6 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
 
                 // Set this view as selected
                 setSelectedChangeId((CommitCard) view, vh.changeid);
-
-                // TODO: Need to save the view that is selected and invalidate it when another is selected.
-                //  Only invalidate the view if the changeid matches (i.e. it hasn't already been recycled)
             }
         };
 
@@ -133,6 +134,15 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
     }
 
     public void setSelectedChangeId(CommitCard card, String selectedChangeId) {
+        //  Only invalidate the view if the changeid matches (i.e. it hasn't already been recycled)
+        if (selectedChangeView != null) {
+            ViewHolder viewHolder = (ViewHolder) selectedChangeView.getTag();
+            if (viewHolder.changeid.equals(this.selectedChangeId)) {
+                selectedChangeView.setChangeSelected(false);
+            }
+        }
+
+        selectedChangeView = card;
         this.selectedChangeId = selectedChangeId;
         card.setChangeSelected(true);
     }
