@@ -49,10 +49,11 @@
         android:title="@string/menu_preferences"
         android:showAsAction="never"/>
 
-<!--    <item
+    <item
         android:id="@+id/menu_changelog"
         android:title="@string/aokp_changelog"
-        android:showAsAction="never"/>-->
+        android:showAsAction="never"
+        android:visible="false"/>
 
     <item
         android:id="@+id/menu_help"
