@@ -247,7 +247,6 @@ public class GerritControllerActivity extends FragmentActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        hideChangelogOption(Prefs.getCurrentGerrit(this));
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -345,7 +344,6 @@ public class GerritControllerActivity extends FragmentActivity {
         Toast.makeText(this,
                 getString(R.string.using_gerrit_toast) + ' ' + newGerrit,
                 Toast.LENGTH_LONG).show();
-        hideChangelogOption(newGerrit);
 
         // Unset the project - we don't track these across Gerrit instances
         Prefs.setCurrentProject(this, null);
@@ -430,10 +428,8 @@ public class GerritControllerActivity extends FragmentActivity {
     // Hide the AOKP Changelog menu option when AOKP's Gerrit is not selected
     private void hideChangelogOption(String gerrit) {
         MenuItem changelog = mMenu.findItem(R.id.menu_changelog);
-        if (gerrit.contains("aokp")) {
-            changelog.setVisible(true);
-        } else {
-            changelog.setVisible(false);
+        if (changelog != null) {
+            changelog.setVisible(gerrit.contains("aokp"));
         }
     }
 
