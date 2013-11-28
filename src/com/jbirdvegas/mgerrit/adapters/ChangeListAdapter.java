@@ -137,13 +137,15 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
      * Notify the adapter that a new changeid has been selected.
      *  This will refresh the adapter, forcing each view to refresh
      *  and ensuring that only the view specified has its change selected state set
-     * @param selectedChangeId The id of the change that was selected
+     * @param change The id of the change that was selected
      */
-    public void setSelectedChangeId(String selectedChangeId) {
+    public void setSelectedChangeId(String change) {
         // Check if there is any work to do here
-        if (this.selectedChangeId.equals(selectedChangeId)) return;
+        if (this.selectedChangeId != null && this.selectedChangeId.equals(change)) {
+            return;
+        }
 
-        this.selectedChangeId = selectedChangeId;
+        this.selectedChangeId = change;
         /* We need to refresh the view that holds the selectedChange.
          *  Since we cannot get the view and refresh it directly (it may be off-screen) we
          *  have to refresh all the views in the adapter.

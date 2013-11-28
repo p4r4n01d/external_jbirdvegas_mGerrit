@@ -201,7 +201,7 @@ public class PatchSetViewerFragment extends Fragment {
     }
 
     /**
-     * Set the change id to load details for
+     * Set the change id to load details for and load the change
      * @param changeID A valid change id
      */
     public void setSelectedChange(String changeID) {
@@ -212,14 +212,6 @@ public class PatchSetViewerFragment extends Fragment {
         }
 
         SelectedChange.setSelectedChange(mContext, changeID);
-        loadChange(changeID);
-    }
-
-    /**
-     * Load the details for a given change id and display it.
-     * @param changeID A valid change id
-     */
-    private void loadChange(String changeID) {
         this.mSelectedChange = changeID;
         mUrl.setChangeID(mSelectedChange);
         mUrl.requestChangeDetail(true);
@@ -227,15 +219,18 @@ public class PatchSetViewerFragment extends Fragment {
 
         /*
          * Requires Gerrit version 2.8
-         * /changes/{change-id}/detail with arguments was introduced in version 2.8
-         * So this will not be able to get the files changed or the full commit message
+         * /changes/{change-id}/detail with arguments was introduced in version 2.8,
+         * so this will not be able to get the files changed or the full commit message
          * in prior Gerrit versions.
          */
         GerritService.sendRequest(mParent, GerritService.DataType.Commit, mUrl);
     }
 
     /**
-     * Determine the changeid to load and call {@link #loadChange(String)}
+     * Determine the changeid to load and send an intent to load the change.
+     *  By sending an intent, the main activity is notified (GerritControllerActivity
+     *  on tablets. This can then tell the change list adapter that we have selected
+     *  a change.
      */
     private void loadChange() {
         if (mStatus == null) {
@@ -259,7 +254,11 @@ public class PatchSetViewerFragment extends Fragment {
             }
         }
 
-        loadChange(changeID);
+        Intent intent = new Intent(PatchSetViewerFragment.NEW_CHANGE_SELECTED);
+        intent.putExtra(PatchSetViewerFragment.CHANGE_ID, changeID);
+        intent.putExtra(PatchSetViewerFragment.STATUS, mStatus);
+        intent.putExtra(PatchSetViewerFragment.EXPAND_TAG, true);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     /**
