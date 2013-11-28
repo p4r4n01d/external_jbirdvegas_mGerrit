@@ -20,6 +20,8 @@ package com.jbirdvegas.mgerrit.helpers;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
@@ -84,6 +86,7 @@ public class Tools {
      * Enables or disables listview animations. This simply toggles the
      *  adapter, initialising a new adapter if necessary.
      * @param enable Whether to enable animations on the listview
+     * @return enable
      */
     public static boolean toggleAnimations(boolean enable, ListView lv,
                                            SingleAnimationAdapter animAdapter,
@@ -98,5 +101,17 @@ public class Tools {
             lv.setAdapter(defaultAdapter);
         }
         return enable;
+    }
+
+    /**
+     * Queries the active network and determine if it has Internet connectivity.
+     * @param context Application or activity context
+     * @return Whether we are connected to the internet, regardless of the network type
+     */
+    public static boolean isConnected(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

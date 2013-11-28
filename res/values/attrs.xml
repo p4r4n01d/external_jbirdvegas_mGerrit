@@ -35,11 +35,11 @@
         <attr name="isSelected" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="TextView">
-        <attr name="cardTextStyle" format="reference" />
-        <attr name="cardTitleStyle" format="reference" />
+        <attr name="cardTextStyle" format="reference"/>
+        <attr name="cardTitleStyle" format="reference"/>
+        <attr name="warningIcon" format="reference"/>
     </declare-styleable>
     <declare-styleable name="ImageView">
-        <attr name="aboutIcon" format="reference"/>
         <attr name="shareIcon" format="reference"/>
         <attr name="viewIcon" format="reference"/>
     </declare-styleable>
