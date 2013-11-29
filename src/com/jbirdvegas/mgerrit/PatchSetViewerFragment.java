@@ -405,8 +405,4 @@ public class PatchSetViewerFragment extends Fragment {
         }
         return isconn;
     }
-
-    public void onRetryClicked(View view) {
-
-    }
 }
