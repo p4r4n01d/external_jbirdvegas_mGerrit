@@ -20,6 +20,9 @@ package com.jbirdvegas.mgerrit.cards;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
+import android.text.style.TextAppearanceSpan;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -58,8 +61,10 @@ public class PatchSetPropertiesCard extends RecyclableCard {
         }
 
         viewHolder.subject.setText(mJSONCommit.getSubject());
-        viewHolder.owner.setText(mJSONCommit.getOwnerObject().getName());
         viewHolder.branch.setText(mJSONCommit.getBranch());
+
+        setImageCaption(viewHolder.owner, R.string.commit_owner, mJSONCommit.getOwnerObject().getName());
+        setImageCaption(viewHolder.committer, R.string.commit_owner, mJSONCommit.getOwnerObject().getName());
 
         String topic = mJSONCommit.getTopic();
         if (topic != null && !topic.isEmpty()) {
@@ -87,14 +92,17 @@ public class PatchSetPropertiesCard extends RecyclableCard {
                 (ImageView) convertView.findViewById(R.id.properties_card_view_in_browser));
         try {
             // set text will throw NPE if we don't have author/committer objects
-            viewHolder.author.setText(mJSONCommit.getAuthorObject().getName());
+            setImageCaption(viewHolder.author, R.string.commit_author,
+                    mJSONCommit.getAuthorObject().getName());
             viewHolder.author.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Prefs.setTrackingUser(mContext, mJSONCommit.getAuthorObject());
                 }
             });
-            viewHolder.committer.setText(mJSONCommit.getCommitterObject().getName());
+
+            setImageCaption(viewHolder.committer, R.string.commit_committer,
+                    mJSONCommit.getCommitterObject().getName());
             viewHolder.committer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -153,6 +161,19 @@ public class PatchSetPropertiesCard extends RecyclableCard {
 
     private void setContextMenu(TextView textView) {
         mPatchSetViewerFragment.registerViewForContextMenu(textView);
+    }
+
+    private void setImageCaption(TextView textView, int resID, String authorName) {
+        String title = mContext.getResources().getString(resID);
+        if (title == null || authorName == null) return;
+
+        SpannableString text = new SpannableString(title + "\n" + authorName);
+        text.setSpan(new TextAppearanceSpan(mContext, R.style.CardText_CommitOwnerText),
+                0, title.length(), 0);
+        text.setSpan(new TextAppearanceSpan(mContext, R.style.CardText_CommitOwnerDetails),
+                title.length()+1, authorName.length(), 0);
+
+        textView.setText(text, TextView.BufferType.SPANNABLE);
     }
 
     private static class ViewHolder {
