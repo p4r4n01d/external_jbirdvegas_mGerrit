@@ -170,8 +170,10 @@ public class PatchSetPropertiesCard extends RecyclableCard {
         SpannableString text = new SpannableString(title + "\n" + authorName);
         text.setSpan(new TextAppearanceSpan(mContext, R.style.CardText_CommitOwnerText),
                 0, title.length(), 0);
+
+        int end = title.length()+1;
         text.setSpan(new TextAppearanceSpan(mContext, R.style.CardText_CommitOwnerDetails),
-                title.length()+1, authorName.length(), 0);
+                end, end+authorName.length(), 0);
 
         textView.setText(text, TextView.BufferType.SPANNABLE);
     }
