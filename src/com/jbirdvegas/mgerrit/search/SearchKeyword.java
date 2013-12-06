@@ -33,7 +33,7 @@ public abstract class SearchKeyword {
 
     private final String mOpName;
     private final String mOpParam;
-    private String mOperator;
+    private String mOperator = "=";
 
     // Initialise the map of search keywords supported
     private static final Set<Class<? extends SearchKeyword>> _CLASSES;
@@ -60,6 +60,10 @@ public abstract class SearchKeyword {
             }
         }
     }
+
+    /** Supported searching operators - these are used directly
+     *  in the SQL query */
+    protected static String[] operators = { "=", "<", ">", "<=", ">=" };
 
     public SearchKeyword(String name, String param) {
         this.mOpName = name;
@@ -216,5 +220,15 @@ public abstract class SearchKeyword {
             else i++;
         }
         return -1;
+    }
+
+    protected static String extractOperator(String param) {
+        String op = "=";
+        for (String operator : operators) {
+            if (param.startsWith(operator)) op = operator;
+        }
+        // '==' also refers to '='
+        if (param.startsWith("==")) op = "=";
+        return op;
     }
 }
