@@ -214,7 +214,7 @@ public abstract class CardsFragment extends Fragment
     public void markDirty() { mIsDirty = true; }
 
     public void markChangeAsSelected(String changeid) {
-        mAdapter.setSelectedChangeId(changeid);
+        if (mAdapter != null) mAdapter.setSelectedChangeId(changeid);
     }
 
     @Override
