@@ -17,63 +17,84 @@ package com.jbirdvegas.mgerrit.search;
  *  limitations under the License.
  */
 
-import android.text.format.Time;
 import android.util.TimeFormatException;
 
 import com.jbirdvegas.mgerrit.database.UserChanges;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.joda.time.Instant;
+import org.joda.time.Period;
+import org.joda.time.format.ISODateTimeFormat;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+
 public class AgeSearch extends SearchKeyword {
 
     public static final String OP_NAME = "age";
 
-    private static final HashMap<String, Integer> unitMap;
+    // We may only need one of these
+    private Period period;
+    private Instant instant;
+
+    private static final HashMap<String, String> replacers;
     static {
-        unitMap = new HashMap<>();
-        unitMap.put("s", Calendar.SECOND);
-        unitMap.put("sec", Calendar.SECOND);
-        unitMap.put("secs", Calendar.SECOND);
-        unitMap.put("second", Calendar.SECOND);
-        unitMap.put("seconds", Calendar.SECOND);
+        replacers = new HashMap<>();
+        replacers.put("s", "seconds");
+        replacers.put("sec", "seconds");
+        replacers.put("secs", "seconds");
+        replacers.put("second", "seconds");
+        replacers.put("seconds", "seconds");
 
-        unitMap.put("m", Calendar.MINUTE);
-        unitMap.put("min", Calendar.MINUTE);
-        unitMap.put("mins", Calendar.MINUTE);
-        unitMap.put("minute", Calendar.MINUTE);
-        unitMap.put("minutes", Calendar.MINUTE);
+        replacers.put("m", "minutes");
+        replacers.put("min", "minutes");
+        replacers.put("mins", "minutes");
+        replacers.put("minute", "minutes");
+        replacers.put("minutes", "minutes");
 
-        unitMap.put("h", Calendar.HOUR);
-        unitMap.put("hr", Calendar.HOUR);
-        unitMap.put("hrs", Calendar.HOUR);
-        unitMap.put("hour", Calendar.HOUR);
-        unitMap.put("hours", Calendar.HOUR);
+        replacers.put("h", "hours");
+        replacers.put("hr", "hours");
+        replacers.put("hrs", "hours");
+        replacers.put("hour", "hours");
+        replacers.put("hours", "hours");
 
-        unitMap.put("d", Calendar.DAY_OF_MONTH);
-        unitMap.put("day", Calendar.DAY_OF_MONTH);
-        unitMap.put("days", Calendar.DAY_OF_MONTH);
+        replacers.put("d", "days");
+        replacers.put("day", "days");
+        replacers.put("days", "days");
 
-        unitMap.put("w", Calendar.WEEK_OF_YEAR);
-        unitMap.put("week", Calendar.WEEK_OF_YEAR);
-        unitMap.put("weeks", Calendar.WEEK_OF_YEAR);
+        replacers.put("w", "weeks");
+        replacers.put("week", "weeks");
+        replacers.put("weeks", "weeks");
 
-        unitMap.put("mon", Calendar.MONTH);
-        unitMap.put("mon", Calendar.MONTH);
-        unitMap.put("mth", Calendar.MONTH);
-        unitMap.put("mths", Calendar.MONTH);
-        unitMap.put("month", Calendar.MONTH);
-        unitMap.put("months", Calendar.MONTH);
+        replacers.put("mon", "months");
+        replacers.put("mon", "months");
+        replacers.put("mth", "months");
+        replacers.put("mths", "months");
+        replacers.put("month", "months");
+        replacers.put("months", "months");
 
-        unitMap.put("y", Calendar.YEAR);
-        unitMap.put("yr", Calendar.YEAR);
-        unitMap.put("yrs", Calendar.YEAR);
-        unitMap.put("year", Calendar.YEAR);
-        unitMap.put("years", Calendar.YEAR);
+        replacers.put("y", "years");
+        replacers.put("yr", "years");
+        replacers.put("yrs", "years");
+        replacers.put("year", "years");
+        replacers.put("years", "years");
     }
+
+    /** A parser corresponding to the format of the output string
+     *  in the standardize method. */
+    PeriodFormatter periodParser = new PeriodFormatterBuilder()
+            .appendSeconds().appendSuffix(" seconds ")
+            .appendMinutes().appendSuffix(" minutes ")
+            .appendHours().appendSuffix(" hours ")
+            .appendDays().appendSuffix(" days ")
+            .appendWeeks().appendSuffix(" weeks ")
+            .appendMonths().appendSuffix(" months ")
+            .appendYears().appendSuffix(" years ")
+            .toFormatter();
+
 
     static {
         registerKeyword(OP_NAME, AgeSearch.class);
@@ -81,6 +102,8 @@ public class AgeSearch extends SearchKeyword {
 
     public AgeSearch(String param, String operator) {
         super(OP_NAME, operator, param);
+
+        parseDate(param);
     }
 
     public AgeSearch(String param) {
@@ -90,69 +113,69 @@ public class AgeSearch extends SearchKeyword {
 
     @Override
     public String buildSearch() {
+        /* Use the operator to determine what to do here -
+         * <, > : we can just match against the instant
+         * = : we have to use the period and extract all the > 0 components
+         */
         return UserChanges.C_UPDATED + " " + getOperator() + " ?";
     }
 
     @Override
     public String[] getEscapeArgument() {
-        String param = getParam();
-        Time time = new Time();
-        try {
-            time.parse(param);
-        } catch (TimeFormatException e) {
-            try {
-                time.parse3339(param);
-            } catch (TimeFormatException e2) {
-                time.set(parseDate(param).getTimeInMillis());
-            }
-        }
-
-        return new String[] { String.valueOf(time.normalize(false)) };
+        return new String[] { String.valueOf(instant.getMillis()) };
     }
 
     private static String extractParameter(String param) {
         return param.replaceFirst("[=<>]+", "");
     }
 
+    private void parseDate(String param) {
+        instant = new Instant();
+        period = new Period();
+
+        try {
+            // TODO find what exception this raises on failure
+            instant = Instant.parse(param, ISODateTimeFormat.localDateOptionalTimeParser());
+            period = new Period(instant, Instant.now());
+        } catch (TimeFormatException e) {
+            period = periodParser.parsePeriod(standardize(param));
+            instant = Instant.now().plus(period.toStandardDuration());
+        }
+    }
+
     /**
-     * Parse a date offset string into an actual date.
-     *  For example "1week 5 days" would return a calendar object with
-     *   the time 1 week and 5 days (12 days) behind the current time.
+     * Standardises the units in dateOffset according to those specified
+     *  in the replacers map. This allows a parser to be able to parse
+     *  strings such as "1day", "1d" and "1 d"
+     *
      * @param dateOffset The parameter without the operator
-     * @return A calendar with an absolute time. Its time will be offset
-     *  from now by the amount specified in the offset. If there is a
-     *  problem parsing a part of the string only the left-most successfully
-     *  parsed portions will be used. The default is the current time.
+     * @return A standardised period string with the same meaning as the
+     *  original.
      */
-    private Calendar parseDate(String dateOffset) {
+    private String standardize(final String dateOffset) {
         String prefix = "(\\d+) *";
         Pattern pattern;
-        Calendar newTime = Calendar.getInstance();
+        String newFormat = dateOffset, newString = "";
 
         if (dateOffset == null || dateOffset.isEmpty())
-            return newTime;
+            return newFormat;
 
-        for (Map.Entry<String, Integer> entry : unitMap.entrySet()) {
+        for (Map.Entry<String, String> entry : replacers.entrySet()) {
             pattern = Pattern.compile(prefix + entry.getKey());
-            Matcher matcher = pattern.matcher(dateOffset);
+            Matcher matcher = pattern.matcher(newFormat);
 
             if (matcher.find()) {
                 String svalue = matcher.toMatchResult().group(1);
-                int unit = Integer.parseInt(svalue);
-                newTime.add(entry.getValue(), unit);
+                newString += svalue + " " + entry.getValue() + " ";
 
-                // Skip ahead in the parameter, we may have more modifiers
-                int startc = matcher.toMatchResult().start(1);
-                int endc = svalue.length();
-                // Set param to after what we have just processed
-                dateOffset = dateOffset.substring(startc + endc);
-                // If it isn't empty we can remove the separator
-                if (!dateOffset.isEmpty()) dateOffset = dateOffset.substring(1);
-
-                continue;
+                // Remove what we have just processed from the input string
+                newFormat = matcher.replaceFirst("");
+                newFormat = newFormat.trim();
+                if (newFormat.isEmpty()) break;
+                else continue;
             }
         }
 
-        return newTime;
+        return newString;
     }
 }
