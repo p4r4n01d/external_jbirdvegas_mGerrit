@@ -17,20 +17,19 @@ package com.jbirdvegas.mgerrit.search;
  *  limitations under the License.
  */
 
-import android.util.TimeFormatException;
-
 import com.jbirdvegas.mgerrit.database.UserChanges;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.joda.time.DurationFieldType;
 import org.joda.time.Instant;
 import org.joda.time.Period;
 import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AgeSearch extends SearchKeyword {
 
@@ -40,59 +39,59 @@ public class AgeSearch extends SearchKeyword {
     private Period period;
     private Instant instant;
 
-    private static final HashMap<String, String> replacers;
+    private static final HashMap<String, DurationFieldType> replacers;
     static {
         replacers = new HashMap<>();
-        replacers.put("s", "seconds");
-        replacers.put("sec", "seconds");
-        replacers.put("secs", "seconds");
-        replacers.put("second", "seconds");
-        replacers.put("seconds", "seconds");
+        replacers.put("s", DurationFieldType.seconds());
+        replacers.put("sec", DurationFieldType.seconds());
+        replacers.put("secs", DurationFieldType.seconds());
+        replacers.put("second", DurationFieldType.seconds());
+        replacers.put("seconds", DurationFieldType.seconds());
 
-        replacers.put("m", "minutes");
-        replacers.put("min", "minutes");
-        replacers.put("mins", "minutes");
-        replacers.put("minute", "minutes");
-        replacers.put("minutes", "minutes");
+        replacers.put("m", DurationFieldType.minutes());
+        replacers.put("min", DurationFieldType.minutes());
+        replacers.put("mins", DurationFieldType.minutes());
+        replacers.put("minute", DurationFieldType.minutes());
+        replacers.put("minutes", DurationFieldType.minutes());
 
-        replacers.put("h", "hours");
-        replacers.put("hr", "hours");
-        replacers.put("hrs", "hours");
-        replacers.put("hour", "hours");
-        replacers.put("hours", "hours");
+        replacers.put("h", DurationFieldType.hours());
+        replacers.put("hr", DurationFieldType.hours());
+        replacers.put("hrs", DurationFieldType.hours());
+        replacers.put("hour", DurationFieldType.hours());
+        replacers.put("hours", DurationFieldType.hours());
 
-        replacers.put("d", "days");
-        replacers.put("day", "days");
-        replacers.put("days", "days");
+        replacers.put("d", DurationFieldType.days());
+        replacers.put("day", DurationFieldType.days());
+        replacers.put("days", DurationFieldType.days());
 
-        replacers.put("w", "weeks");
-        replacers.put("week", "weeks");
-        replacers.put("weeks", "weeks");
+        replacers.put("w", DurationFieldType.weeks());
+        replacers.put("week", DurationFieldType.weeks());
+        replacers.put("weeks", DurationFieldType.weeks());
 
-        replacers.put("mon", "months");
-        replacers.put("mon", "months");
-        replacers.put("mth", "months");
-        replacers.put("mths", "months");
-        replacers.put("month", "months");
-        replacers.put("months", "months");
+        replacers.put("mon", DurationFieldType.months());
+        replacers.put("mon", DurationFieldType.months());
+        replacers.put("mth", DurationFieldType.months());
+        replacers.put("mths", DurationFieldType.months());
+        replacers.put("month", DurationFieldType.months());
+        replacers.put("months", DurationFieldType.months());
 
-        replacers.put("y", "years");
-        replacers.put("yr", "years");
-        replacers.put("yrs", "years");
-        replacers.put("year", "years");
-        replacers.put("years", "years");
+        replacers.put("y", DurationFieldType.years());
+        replacers.put("yr", DurationFieldType.years());
+        replacers.put("yrs", DurationFieldType.years());
+        replacers.put("year", DurationFieldType.years());
+        replacers.put("years", DurationFieldType.years());
     }
 
-    /** A parser corresponding to the format of the output string
-     *  in the standardize method. */
-    PeriodFormatter periodParser = new PeriodFormatterBuilder()
-            .appendSeconds().appendSuffix(" seconds ")
-            .appendMinutes().appendSuffix(" minutes ")
-            .appendHours().appendSuffix(" hours ")
-            .appendDays().appendSuffix(" days ")
-            .appendWeeks().appendSuffix(" weeks ")
-            .appendMonths().appendSuffix(" months ")
+    /** Used for serialising the period into a string and must be output
+     *   in a format that can be re-parsed later */
+    private static PeriodFormatter periodParser = new PeriodFormatterBuilder()
             .appendYears().appendSuffix(" years ")
+            .appendMonths().appendSuffix(" months ")
+            .appendWeeks().appendSuffix(" weeks ")
+            .appendDays().appendSuffix(" days ")
+            .appendHours().appendSuffix(" hours ")
+            .appendMinutes().appendSuffix(" minutes ")
+            .appendSeconds().appendSuffix(" seconds ")
             .toFormatter();
 
 
@@ -113,16 +112,27 @@ public class AgeSearch extends SearchKeyword {
 
     @Override
     public String buildSearch() {
-        /* Use the operator to determine what to do here -
-         * <, > : we can just match against the instant
-         * = : we have to use the period and extract all the > 0 components
-         */
-        return UserChanges.C_UPDATED + " " + getOperator() + " ?";
+        String operator = getOperator();
+        if (operator.equals("=")) {
+            return UserChanges.C_UPDATED + " BETWEEN ? AND ?";
+        } else {
+            return "? " + operator + " " + UserChanges.C_UPDATED;
+        }
     }
 
     @Override
     public String[] getEscapeArgument() {
-        return new String[] { String.valueOf(instant.getMillis()) };
+        String operator = getOperator();
+        if (operator.equals("=")) {
+            Instant earlier = Instant.now().minus(period.toStandardDuration());
+            Instant later = Instant.now().plus(period.toStandardDuration());
+            return new String[] {
+                    String.valueOf(earlier.getMillis()),
+                    String.valueOf(later.getMillis()),
+            };
+        } else {
+            return new String[] { String.valueOf(instant.getMillis()) };
+        }
     }
 
     private static String extractParameter(String param) {
@@ -134,48 +144,48 @@ public class AgeSearch extends SearchKeyword {
         period = new Period();
 
         try {
-            // TODO find what exception this raises on failure
             instant = Instant.parse(param, ISODateTimeFormat.localDateOptionalTimeParser());
             period = new Period(instant, Instant.now());
-        } catch (TimeFormatException e) {
-            period = periodParser.parsePeriod(standardize(param));
-            instant = Instant.now().plus(period.toStandardDuration());
+        } catch (IllegalArgumentException e) {
+            period = toPeriod(param);
+            instant = Instant.now().minus(period.toStandardDuration());
         }
     }
 
+    @Override
+    public String toString() {
+        return OP_NAME + ":\"" + periodParser.print(period) + "\"";
+    }
+
     /**
-     * Standardises the units in dateOffset according to those specified
-     *  in the replacers map. This allows a parser to be able to parse
-     *  strings such as "1day", "1d" and "1 d"
+     * Parses a string into a Period object according to the replacers
+     *  mapping. This allows for duplicate fields (e.g. seconds being
+     *  declared twice as in "2s 3 sec") with the duplicate fields being
+     *  added together (the above example would be the same as "5 seconds").
+     * The order of the fields is not important.
      *
-     * @param dateOffset The parameter without the operator
-     * @return A standardised period string with the same meaning as the
-     *  original.
+     * @param dateOffset The parameter without the operator. If the operator
+     *                   is passed in it will be ignored
+     * @return A period corresponding to the parsed input string
      */
-    private String standardize(final String dateOffset) {
-        String prefix = "(\\d+) *";
-        Pattern pattern;
-        String newFormat = dateOffset, newString = "";
+    private Period toPeriod(final String dateOffset) {
+        String regexp = "(\\d+) *([a-zA-z]+)";
+        Period period = new Period();
 
         if (dateOffset == null || dateOffset.isEmpty())
-            return newFormat;
+            return period;
 
-        for (Map.Entry<String, String> entry : replacers.entrySet()) {
-            pattern = Pattern.compile(prefix + entry.getKey());
-            Matcher matcher = pattern.matcher(newFormat);
-
-            if (matcher.find()) {
-                String svalue = matcher.toMatchResult().group(1);
-                newString += svalue + " " + entry.getValue() + " ";
-
-                // Remove what we have just processed from the input string
-                newFormat = matcher.replaceFirst("");
-                newFormat = newFormat.trim();
-                if (newFormat.isEmpty()) break;
-                else continue;
+        Pattern pattern = Pattern.compile(regexp);
+        Matcher matcher = pattern.matcher(dateOffset);
+        while (matcher.find()) {
+            String svalue = matcher.toMatchResult().group(1);
+            DurationFieldType fieldType = replacers.get(matcher.toMatchResult().group(2));
+            if (fieldType != null) {
+                // Note that both these methods do not modify their objects
+                period = period.withFieldAdded(fieldType, Integer.parseInt(svalue));
             }
         }
 
-        return newString;
+        return period;
     }
 }
