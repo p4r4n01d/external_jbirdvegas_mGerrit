@@ -22,12 +22,12 @@ import com.jbirdvegas.mgerrit.database.UserChanges;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Instant;
 import org.joda.time.Period;
+import org.joda.time.ReadableDuration;
 import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +37,6 @@ public class AgeSearch extends SearchKeyword {
 
     // We may only need one of these
     private Period period;
-    private Instant instant;
 
     private static final HashMap<String, DurationFieldType> replacers;
     static {
@@ -91,7 +90,7 @@ public class AgeSearch extends SearchKeyword {
             .appendDays().appendSuffix(" days ")
             .appendHours().appendSuffix(" hours ")
             .appendMinutes().appendSuffix(" minutes ")
-            .appendSeconds().appendSuffix(" seconds ")
+            .appendSeconds().appendSuffix(" seconds")
             .toFormatter();
 
 
@@ -101,7 +100,6 @@ public class AgeSearch extends SearchKeyword {
 
     public AgeSearch(String param, String operator) {
         super(OP_NAME, operator, param);
-
         parseDate(param);
     }
 
@@ -122,16 +120,25 @@ public class AgeSearch extends SearchKeyword {
 
     @Override
     public String[] getEscapeArgument() {
+        Instant earlier, later;
         String operator = getOperator();
+
+        // Note: toStandardDuration will throw an UnsupportedOperationException if the period
+        // contains years or months. Will probably have to construct a DateTime object for now
+        // and manually do the minusYears and minusMonths from the period onto the DateTime object.
+        // After subtracting the years and months (we only want to go back in time), we can remove
+        // the years and months from the period and the Period.toStandardDuration call will be
+        // safe
         if (operator.equals("=")) {
-            Instant earlier = Instant.now().minus(period.toStandardDuration());
-            Instant later = Instant.now().plus(period.toStandardDuration());
+            earlier = Instant.now().minus(adjust(period, +1).toStandardDuration());
+            later = Instant.now().minus(adjust(period, -1).toStandardDuration());
             return new String[] {
-                    String.valueOf(earlier.getMillis()),
-                    String.valueOf(later.getMillis()),
+                    "datetime('" + earlier.toString() + "')",
+                    "datetime('" + later.toString() + "')",
             };
         } else {
-            return new String[] { String.valueOf(instant.getMillis()) };
+            earlier = Instant.now().minus(period.toStandardDuration());
+            return new String[] { "datetime('" + earlier.toString() + "')" };
         }
     }
 
@@ -140,7 +147,7 @@ public class AgeSearch extends SearchKeyword {
     }
 
     private void parseDate(String param) {
-        instant = new Instant();
+        Instant instant;
         period = new Period();
 
         try {
@@ -148,7 +155,6 @@ public class AgeSearch extends SearchKeyword {
             period = new Period(instant, Instant.now());
         } catch (IllegalArgumentException e) {
             period = toPeriod(param);
-            instant = Instant.now().minus(period.toStandardDuration());
         }
     }
 
@@ -187,5 +193,32 @@ public class AgeSearch extends SearchKeyword {
         }
 
         return period;
+    }
+
+    /**
+     * Adds adjustment to the shortest set time range in period. E.g.
+     *  period("5 days 3 hours", 1) -> "5 days 4 hours". This will fall
+     *  back to adjusting years if no field in the period is set.
+     * @param period The period to be adjusted
+     * @param adjustment The adjustment. Note that positive values will result
+     *                   in larger periods and an earlier time
+     * @return The adjusted period
+     */
+    private Period adjust(final Period period, int adjustment) {
+        if (period.getSeconds() > 0) {
+            return period.withFieldAdded(DurationFieldType.seconds(), adjustment);
+        } else if (period.getMinutes() > 0) {
+            return period.withFieldAdded(DurationFieldType.minutes(), adjustment);
+        } else if (period.getHours() > 0) {
+            return period.withFieldAdded(DurationFieldType.hours(), adjustment);
+        } else if (period.getDays() > 0) {
+            return period.withFieldAdded(DurationFieldType.days(), adjustment);
+        } else if (period.getWeeks() > 0) {
+            return period.withFieldAdded(DurationFieldType.weeks(), adjustment);
+        } else if (period.getMonths() > 0) {
+            return period.withFieldAdded(DurationFieldType.months(), adjustment);
+        } else {
+            return period.withFieldAdded(DurationFieldType.years(), adjustment);
+        }
     }
 }

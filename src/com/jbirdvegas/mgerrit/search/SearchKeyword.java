@@ -61,6 +61,9 @@ public abstract class SearchKeyword {
         }
     }
 
+    // TODO: All keywords are currently getting these operators. Make an overridable method
+    //  to determine whether a keyword supports an operator. Or assume '=' and ignore it
+    //  if it doesn't.
     /** Supported searching operators - these are used directly
      *  in the SQL query */
     protected static String[] operators = { "=", "<", ">", "<=", ">=" };
