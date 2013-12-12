@@ -19,6 +19,8 @@ package com.jbirdvegas.mgerrit.search;
 
 import com.jbirdvegas.mgerrit.database.UserChanges;
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Instant;
 import org.joda.time.Period;
@@ -28,6 +30,8 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +42,11 @@ public class AgeSearch extends SearchKeyword {
     // We may only need one of these
     private Period period;
 
+    /**
+     * An array of supported time units and their corresponding meaning
+     *  as a DurationFieldType. This is used in the parsing of the query
+     *  parameter.
+     */
     private static final HashMap<String, DurationFieldType> replacers;
     static {
         replacers = new HashMap<>();
@@ -112,33 +121,24 @@ public class AgeSearch extends SearchKeyword {
     public String buildSearch() {
         String operator = getOperator();
         if (operator.equals("=")) {
-            return UserChanges.C_UPDATED + " BETWEEN ? AND ?";
+            /* Note that since datetime is an SQLite function it must be included
+             *  directly in the query */
+            return UserChanges.C_UPDATED + " BETWEEN datetime(?) AND datetime(?)";
         } else {
-            return "? " + operator + " " + UserChanges.C_UPDATED;
+            return "datetime(?) " + operator + " " + UserChanges.C_UPDATED;
         }
     }
 
     @Override
     public String[] getEscapeArgument() {
-        Instant earlier, later;
-        String operator = getOperator();
+        DateTime now = new DateTime();
 
-        // Note: toStandardDuration will throw an UnsupportedOperationException if the period
-        // contains years or months. Will probably have to construct a DateTime object for now
-        // and manually do the minusYears and minusMonths from the period onto the DateTime object.
-        // After subtracting the years and months (we only want to go back in time), we can remove
-        // the years and months from the period and the Period.toStandardDuration call will be
-        // safe
-        if (operator.equals("=")) {
-            earlier = Instant.now().minus(adjust(period, +1).toStandardDuration());
-            later = Instant.now().minus(adjust(period, -1).toStandardDuration());
-            return new String[] {
-                    "datetime('" + earlier.toString() + "')",
-                    "datetime('" + later.toString() + "')",
-            };
+        if (getOperator().equals("=")) {
+            DateTime earlier = now.minus(adjust(period, +1));
+            DateTime later = now.minus(adjust(period, -1));
+            return new String[] { earlier.toString(), later.toString() };
         } else {
-            earlier = Instant.now().minus(period.toStandardDuration());
-            return new String[] { "datetime('" + earlier.toString() + "')" };
+            return new String[] { now.minus(period).toString() };
         }
     }
 
@@ -205,20 +205,23 @@ public class AgeSearch extends SearchKeyword {
      * @return The adjusted period
      */
     private Period adjust(final Period period, int adjustment) {
-        if (period.getSeconds() > 0) {
-            return period.withFieldAdded(DurationFieldType.seconds(), adjustment);
-        } else if (period.getMinutes() > 0) {
-            return period.withFieldAdded(DurationFieldType.minutes(), adjustment);
-        } else if (period.getHours() > 0) {
-            return period.withFieldAdded(DurationFieldType.hours(), adjustment);
-        } else if (period.getDays() > 0) {
-            return period.withFieldAdded(DurationFieldType.days(), adjustment);
-        } else if (period.getWeeks() > 0) {
-            return period.withFieldAdded(DurationFieldType.weeks(), adjustment);
-        } else if (period.getMonths() > 0) {
-            return period.withFieldAdded(DurationFieldType.months(), adjustment);
-        } else {
-            return period.withFieldAdded(DurationFieldType.years(), adjustment);
+
+        // Order is VERY important here
+        LinkedHashMap<Integer, DurationFieldType> map = new LinkedHashMap<>();
+        map.put(period.getSeconds(), DurationFieldType.seconds());
+        map.put(period.getMinutes(), DurationFieldType.minutes());
+        map.put(period.getHours(), DurationFieldType.hours());
+        map.put(period.getDays(), DurationFieldType.days());
+        map.put(period.getWeeks(), DurationFieldType.weeks());
+        map.put(period.getMonths(), DurationFieldType.months());
+        map.put(period.getYears(), DurationFieldType.years());
+
+        for (Map.Entry<Integer, DurationFieldType> entry : map.entrySet()) {
+            if (entry.getKey() > 0) {
+                return period.withFieldAdded(entry.getValue(), adjustment);
+            }
         }
+        // Fall back to modifying years
+        return period.withFieldAdded(DurationFieldType.years(), adjustment);
     }
 }

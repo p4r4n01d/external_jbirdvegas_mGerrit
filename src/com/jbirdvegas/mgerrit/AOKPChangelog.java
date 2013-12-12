@@ -46,10 +46,8 @@ public class AOKPChangelog extends Activity {
     private static final String TAG = AOKPChangelog.class.getSimpleName();
     public static final String KEY_CHANGELOG_START = "changelog_start";
     public static final String KEY_CHANGELOG_STOP = "changelog_stop";
-    public static String KEY_CHANGELOG = "changelog_range";
     private RequestQueue mRequestQueue;
     private String query = "http://goo.im/json2&path=/devs/aokp/" + Build.DEVICE + "/nightly";
-    private long mDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,16 +93,10 @@ public class AOKPChangelog extends Activity {
         updatesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mDate = gooAdapter.getGooFilesList().get(i).getModified();
-                Intent changelog = new Intent(AOKPChangelog.this, GerritControllerActivity.class);
-                changelog.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
-                        | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                changelog.putExtra(KEY_CHANGELOG_START, gooAdapter.getGooFilesList().get(i + 1));
-                changelog.putExtra(KEY_CHANGELOG_STOP, gooAdapter.getGooFilesList().get(i));
-                startActivity(changelog);
-                //finish();
+                Prefs.setAOKPChangelogEndpoints(AOKPChangelog.this,
+                        gooAdapter.getGooFilesList().get(i + 1).toString(),
+                        gooAdapter.getGooFilesList().get(i).toString());
+                finish();
             }
         });
         return updatesList;
@@ -131,7 +123,7 @@ public class AOKPChangelog extends Activity {
                 JSONArray result = response.getJSONArray("list");
                 int resultsSize = result.length();
                 List<GooFileObject> filesList = new LinkedList<>();
-                // skip the first result its the nightlies folder
+
                 for (int i = 0; resultsSize > i; i++) {
                     filesList.add(GooFileObject.getInstance(result.getJSONObject(i)));
                 }

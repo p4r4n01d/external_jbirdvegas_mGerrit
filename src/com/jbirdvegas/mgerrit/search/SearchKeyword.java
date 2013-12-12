@@ -33,7 +33,7 @@ public abstract class SearchKeyword {
 
     private final String mOpName;
     private final String mOpParam;
-    private String mOperator = "=";
+    private String mOperator;
 
     // Initialise the map of search keywords supported
     private static final Set<Class<? extends SearchKeyword>> _CLASSES;
