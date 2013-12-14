@@ -96,10 +96,14 @@ public class AOKPChangelog extends Activity {
         updatesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Prefs.setAOKPChangelogEndpoints(AOKPChangelog.this,
-                        gooAdapter.getGooFilesList().get(i + 1).getModified(),
-                        gooAdapter.getGooFilesList().get(i).getModified());
-                finish();
+                Intent changelog = new Intent(AOKPChangelog.this, GerritControllerActivity.class);
+                changelog.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
+                        | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                changelog.putExtra(KEY_CHANGELOG_START, gooAdapter.getGooFilesList().get(i + 1));
+                changelog.putExtra(KEY_CHANGELOG_STOP, gooAdapter.getGooFilesList().get(i));
+                startActivity(changelog);
             }
         });
     }

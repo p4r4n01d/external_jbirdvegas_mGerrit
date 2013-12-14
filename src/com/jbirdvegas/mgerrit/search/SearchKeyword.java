@@ -216,6 +216,15 @@ public abstract class SearchKeyword {
         return SearchKeyword.getQuery(tokens);
     }
 
+    public static String addKeyword(String query, SearchKeyword keyword) {
+        if (keyword != null && !keyword.getParam().isEmpty()) {
+            Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
+            tokens.add(keyword);
+            return SearchKeyword.getQuery(tokens);
+        }
+        return query;
+    }
+
     public static int findKeyword(Set<SearchKeyword> tokens, Class<? extends SearchKeyword> clazz) {
         int i = 0;
         for (SearchKeyword token : tokens) {

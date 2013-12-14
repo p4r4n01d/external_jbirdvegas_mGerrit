@@ -20,11 +20,9 @@ package com.jbirdvegas.mgerrit.search;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Instant;
 import org.joda.time.Period;
-import org.joda.time.ReadableDuration;
 import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
@@ -39,8 +37,10 @@ public class AgeSearch extends SearchKeyword {
 
     public static final String OP_NAME = "age";
 
-    // We may only need one of these
-    private Period period;
+    // Set only if a relative time period was given. Should not be set if mInstant is set
+    private Period mPeriod;
+    // Set only if an absolute time was given. Should not be set if mPeriod is set
+    private Instant mInstant;
 
     /**
      * An array of supported time units and their corresponding meaning
@@ -77,7 +77,7 @@ public class AgeSearch extends SearchKeyword {
         replacers.put("weeks", DurationFieldType.weeks());
 
         replacers.put("mon", DurationFieldType.months());
-        replacers.put("mon", DurationFieldType.months());
+        replacers.put("mons", DurationFieldType.months());
         replacers.put("mth", DurationFieldType.months());
         replacers.put("mths", DurationFieldType.months());
         replacers.put("month", DurationFieldType.months());
@@ -117,6 +117,12 @@ public class AgeSearch extends SearchKeyword {
         this(extractParameter(param), extractOperator(param));
     }
 
+    public AgeSearch(long timestamp, String operator) {
+        super(OP_NAME, operator, String.valueOf(timestamp));
+        mInstant = new Instant(timestamp);
+        mPeriod = null;
+    }
+
     @Override
     public String buildSearch() {
         String operator = getOperator();
@@ -132,12 +138,20 @@ public class AgeSearch extends SearchKeyword {
     @Override
     public String[] getEscapeArgument() {
         DateTime now = new DateTime();
+        Period period = mPeriod;
 
+        // Equals: we need to do some arithmetic to get a range from the period
         if (getOperator().equals("=")) {
+            if (period == null) {
+                period = new Period(mInstant, Instant.now());
+            }
             DateTime earlier = now.minus(adjust(period, +1));
             DateTime later = now.minus(adjust(period, -1));
             return new String[] { earlier.toString(), later.toString() };
         } else {
+            if (period == null) {
+                return new String[] { mInstant.toString() };
+            }
             return new String[] { now.minus(period).toString() };
         }
     }
@@ -147,20 +161,26 @@ public class AgeSearch extends SearchKeyword {
     }
 
     private void parseDate(String param) {
-        Instant instant;
-        period = new Period();
-
         try {
-            instant = Instant.parse(param, ISODateTimeFormat.localDateOptionalTimeParser());
-            period = new Period(instant, Instant.now());
+            mInstant = Instant.parse(param, ISODateTimeFormat.localDateOptionalTimeParser());
+            mPeriod = null;
         } catch (IllegalArgumentException e) {
-            period = toPeriod(param);
+            mPeriod = toPeriod(param);
+            mInstant = null;
         }
     }
 
     @Override
     public String toString() {
-        return OP_NAME + ":\"" + periodParser.print(period) + "\"";
+        /* Use the same format as the one initially provided. I.e. if a
+         *  relative time period was set initially, we want a relative period
+         *  to come back out. Otherwise it is a different search */
+        String string = OP_NAME + ":\"" + getOperator();
+          if (mPeriod != null) {
+            return string + periodParser.print(mPeriod) + '"';
+        } else {
+            return string + mInstant.toString() + '"';
+        }
     }
 
     /**
