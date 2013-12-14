@@ -51,7 +51,7 @@ public class GooFileArrayAdapter extends ArrayAdapter<GooFileObject> {
         if (root == null) {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.goo_files_list_item, null);
+            root = inflater.inflate(mLayoutResourceId, null);
             TextView fileName = (TextView) root.findViewById(R.id.goo_file_name);
             TextView fileUpdate = (TextView) root.findViewById(R.id.goo_file_date);
             ImageView downloadZip = (ImageView) root.findViewById(R.id.goo_download_zip_button);

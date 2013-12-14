@@ -246,6 +246,7 @@ public class GerritControllerActivity extends FragmentActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        hideChangelogOption(Prefs.getCurrentGerrit(this));
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -343,6 +344,7 @@ public class GerritControllerActivity extends FragmentActivity {
         Toast.makeText(this,
                 getString(R.string.using_gerrit_toast) + ' ' + newGerrit,
                 Toast.LENGTH_LONG).show();
+        hideChangelogOption(newGerrit);
 
         // Unset the project - we don't track these across Gerrit instances
         Prefs.setCurrentProject(this, null);

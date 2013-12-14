@@ -25,6 +25,7 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -51,7 +52,11 @@ public class AOKPChangelog extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.setTheme(Prefs.getCurrentThemeID(this));
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setContentView(R.layout.aokp_changelog);
 
         // Action bar Up affordance
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -64,6 +69,8 @@ public class AOKPChangelog extends Activity {
     private void findDates() {
         // use Volley to get our packages list
         Log.d(TAG, "Calling: " + query);
+        setProgressBarIndeterminateVisibility(true);
+
         mRequestQueue.add(
                 new JsonObjectRequest(
                         Request.Method.GET,
@@ -74,18 +81,14 @@ public class AOKPChangelog extends Activity {
                             @Override
                             public void onErrorResponse(VolleyError volleyError) {
                                 Log.e(TAG, "Failed to get recent upload dates from goo.im!", volleyError);
+                                setProgressBarIndeterminateVisibility(false);
                             }
                         }));
         mRequestQueue.start();
     }
 
-    /**
-     * Contact Goo.im to find update dates
-     * @return AlertDialog user can select the start date
-     *         to generate the list of commits within a single date
-     */
-    private ListView getDatesListView(List<GooFileObject> gooFilesList) {
-        ListView updatesList = new ListView(this);
+    private void setupListView(List<GooFileObject> gooFilesList) {
+        ListView updatesList = (ListView) findViewById(R.id.changelog);
         final GooFileArrayAdapter gooAdapter = new GooFileArrayAdapter(this,
                 R.layout.goo_files_list_item,
                 gooFilesList);
@@ -94,12 +97,11 @@ public class AOKPChangelog extends Activity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Prefs.setAOKPChangelogEndpoints(AOKPChangelog.this,
-                        gooAdapter.getGooFilesList().get(i + 1).toString(),
-                        gooAdapter.getGooFilesList().get(i).toString());
+                        gooAdapter.getGooFilesList().get(i + 1).getModified(),
+                        gooAdapter.getGooFilesList().get(i).getModified());
                 finish();
             }
         });
-        return updatesList;
     }
 
     @Override
@@ -116,6 +118,8 @@ public class AOKPChangelog extends Activity {
     class gooImResponseListener implements Response.Listener<JSONObject> {
         @Override
         public void onResponse(JSONObject response) {
+            setProgressBarIndeterminateVisibility(false);
+
             Toast.makeText(AOKPChangelog.this,
                     R.string.please_select_update_for_range,
                     Toast.LENGTH_LONG).show();
@@ -127,7 +131,7 @@ public class AOKPChangelog extends Activity {
                 for (int i = 0; resultsSize > i; i++) {
                     filesList.add(GooFileObject.getInstance(result.getJSONObject(i)));
                 }
-                setContentView(getDatesListView(filesList));
+                setupListView(filesList);
             } catch (Exception e) {
                 Log.e("ErrorListener", e.getLocalizedMessage());
             }

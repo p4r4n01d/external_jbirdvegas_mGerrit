@@ -55,8 +55,6 @@ public abstract class CardsFragment extends Fragment
     public static final String KEY_OWNER = "owner";
     public static final String KEY_REVIEWER = "reviewer";
 
-    private static final boolean DEBUG = true;
-    private static final boolean CHATTY = false;
     public static final String SEARCH_QUERY = "SEARCH";
     protected String TAG = "CardsFragment";
 
@@ -64,7 +62,6 @@ public abstract class CardsFragment extends Fragment
 
     private RequestQueue mRequestQueue;
 
-    private ChangeLogRange mChangelogRange;
     private GerritControllerActivity mParent;
 
     // Indicates that this fragment will need to be refreshed
