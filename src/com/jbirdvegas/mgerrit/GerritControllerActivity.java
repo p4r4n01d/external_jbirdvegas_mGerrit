@@ -215,8 +215,8 @@ public class GerritControllerActivity extends FragmentActivity {
         if (intent != null) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
-                mChangeLogStart = extras.getParcelable(AOKPChangelog.KEY_CHANGELOG_START);
-                mChangeLogStop = extras.getParcelable(AOKPChangelog.KEY_CHANGELOG_STOP);
+                mChangeLogStart = extras.getParcelable(ChangelogFragment.KEY_CHANGELOG_START);
+                mChangeLogStop = extras.getParcelable(ChangelogFragment.KEY_CHANGELOG_STOP);
             }
         }
 

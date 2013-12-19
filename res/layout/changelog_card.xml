@@ -18,28 +18,28 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="vertical"
-              android:layout_width="wrap_content"
+              android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="?attr/mainBackgroundColor">
+              android:background="?attr/cardBackgroundColor"
+              android:orientation="horizontal"
+              android:weightSum="1"
+              android:paddingBottom="4dp">
 
-    <fragment
-        android:layout_width="match_parent"
+    <Spinner
+        android:id="@+id/changelog"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:name="com.jbirdvegas.mgerrit.ChangelogFragment"
-        android:id="@+id/changelog_fragment"
-        tools:layout="@layout/changelog_card"
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"/>
-
-    <fragment
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:name="com.jbirdvegas.mgerrit.MergedTab"
-        android:id="@+id/change_list_fragment"
-        android:layout_gravity="center_horizontal"
-        tools:layout="@layout/commit_list"
+        android:padding="8dp"
+        android:paddingLeft="12dp"
         android:layout_weight="1"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/goo_im_download_rom_ic_padding"
+        android:text="@string/download_update"
+        android:id="@+id/goo_download_zip_button"
+        android:src="?attr/saveIcon"
+        android:contentDescription="@string/download_rom_zip"/>
+
 </LinearLayout>

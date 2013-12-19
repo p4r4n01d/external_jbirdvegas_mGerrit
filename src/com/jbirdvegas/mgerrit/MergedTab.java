@@ -22,7 +22,7 @@ import com.jbirdvegas.mgerrit.objects.JSONCommit;
 
 public class MergedTab extends CardsFragment
 {
-    private static final String TAG = MergedTab.class.getSimpleName();
+    public MergedTab() { }
 
     @Override
     String getQuery() {

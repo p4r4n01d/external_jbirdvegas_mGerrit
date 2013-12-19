@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
@@ -62,7 +63,7 @@ public abstract class CardsFragment extends Fragment
 
     private RequestQueue mRequestQueue;
 
-    private GerritControllerActivity mParent;
+    private FragmentActivity mParent;
 
     // Indicates that this fragment will need to be refreshed
     private boolean mIsDirty = false;
@@ -100,7 +101,7 @@ public abstract class CardsFragment extends Fragment
 
     private void init(Bundle savedInstanceState)
     {
-        mParent = (GerritControllerActivity) this.getActivity();
+        mParent = (FragmentActivity) this.getActivity();
         View mCurrentFragment = this.getView();
         mRequestQueue = Volley.newRequestQueue(mParent);
 
