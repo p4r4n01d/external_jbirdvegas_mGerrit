@@ -97,10 +97,10 @@ public class GerritControllerActivity extends FragmentActivity {
     // This will be null if mTwoPane is false (i.e. not tablet mode)
     private PatchSetViewerFragment mChangeDetail;
 
-    private SearchView searchView;
     // Wrapper around searchView for modifying searchView before it is initialised
     private SearchViewProperties mSearchViewProperties = new SearchViewProperties();
     private int mTheme;
+    private GerritSearchView mSearchView;
 
 
     @Override
@@ -200,6 +200,12 @@ public class GerritControllerActivity extends FragmentActivity {
             }
         };
 
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (GerritSearchView) findViewById(R.id.search);
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
         handleIntent(this.getIntent());
     }
 
@@ -222,6 +228,8 @@ public class GerritControllerActivity extends FragmentActivity {
         mGerritTasks = new HashSet<>();
 
         receivers = new DefaultGerritReceivers(this);
+
+        setupSearchQuery();
     }
 
     // Register to receive messages.
@@ -252,31 +260,6 @@ public class GerritControllerActivity extends FragmentActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.gerrit_instances_menu, menu);
         this.mMenu = menu;
-
-        // Get the SearchView and set the searchable configuration
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
-        // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(true);
-        // Let the change list fragment handle queries directly.
-        searchView.setOnQueryTextListener(mChangeList);
-        searchView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                SearchView view = (SearchView) v;
-                if (view.isIconified()) {
-                    mMenu.findItem(R.id.menu_team_instance).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                    mMenu.findItem(R.id.menu_projects).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                } else {
-                    mMenu.findItem(R.id.menu_team_instance).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                    mMenu.findItem(R.id.menu_projects).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                }
-            }
-        });
-
-        setupSearchQuery();
         return true;
     }
 
@@ -331,6 +314,9 @@ public class GerritControllerActivity extends FragmentActivity {
                 changelog.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(changelog);
                 return true;
+            case R.id.menu_search:
+                // Toggle the visibility of the searchview
+                mSearchView.toggleVisibility();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -514,8 +500,8 @@ public class GerritControllerActivity extends FragmentActivity {
     private void setupSearchQuery() {
 
         String oldQuery = "";
-        if (searchView != null && searchView.getQuery() != null) {
-            oldQuery = searchView.getQuery().toString();
+        if (mSearchView != null && mSearchView.getQuery() != null) {
+            oldQuery = mSearchView.getQuery().toString();
         }
         String query = "";
         if (mSearchViewProperties != null) query = mSearchViewProperties.mQuery;
@@ -532,8 +518,6 @@ public class GerritControllerActivity extends FragmentActivity {
         if (!oldQuery.equals(query)) {
             mSearchViewProperties.setQuery(query, false); // Don't submit (it will be submitted initially)
         }
-
-        searchView.setIconified(query.isEmpty());
     }
 
     // SearchView properties to be set and can be used by setupSearchQuery when the search
@@ -544,14 +528,14 @@ public class GerritControllerActivity extends FragmentActivity {
         void setQuery(String query, boolean submit) {
             if (query == null) query = "";
             mQuery = query;
-            if (searchView != null) {
-                searchView.setQuery(mQuery, submit);
-                searchView.setIconified(query.isEmpty());
+            if (mSearchView != null) {
+                mSearchView.setQuery(mQuery, submit);
             }
         }
+
         String getQuery() {
-            if (searchView != null) {
-                return searchView.getQuery().toString();
+            if (mSearchView != null) {
+                return mSearchView.getQuery().toString();
             } else {
                 return mQuery;
             }

@@ -25,6 +25,7 @@
         <attr name="projectsIcon" format="reference"/>
         <attr name="refreshIcon" format="reference"/>
         <attr name="overflowIcon" format="reference"/>
+        <attr name="searchIcon" format="reference"/>
     </declare-styleable>
     <declare-styleable name="LinearLayout">
         <attr name="mainBackgroundColor" format="color"/>

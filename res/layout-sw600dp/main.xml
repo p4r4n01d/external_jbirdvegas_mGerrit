@@ -16,31 +16,46 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainLayout"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:baselineAligned="false">
+    android:layout_height="match_parent"
+    android:layout_weight="0.5"
+    android:orientation="vertical">
 
-    <fragment
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/change_list_fragment"
+    <com.jbirdvegas.mgerrit.GerritSearchView
+        android:id="@+id/search"
+        style="?attr/android:actionBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.5"
-        android:name="com.jbirdvegas.mgerrit.ChangeListFragment"
-        tools:layout="@layout/change_list" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:queryHint="@string/changes_search_hint" />
 
-    <fragment
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/change_detail_fragment"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:id="@+id/mainLayout"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="0.5"
-        android:name="com.jbirdvegas.mgerrit.PatchSetViewerFragment"
-        tools:layout="@layout/commit_list" />
-</LinearLayout>
+        android:layout_below="@id/search"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <fragment
+            android:id="@+id/change_list_fragment"
+            android:name="com.jbirdvegas.mgerrit.ChangeListFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            tools:layout="@layout/change_list" />
+
+        <fragment
+            android:id="@+id/change_detail_fragment"
+            android:name="com.jbirdvegas.mgerrit.PatchSetViewerFragment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            tools:layout="@layout/commit_list" />
+
+    </LinearLayout>
+</RelativeLayout>
