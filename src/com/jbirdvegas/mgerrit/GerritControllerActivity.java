@@ -69,7 +69,6 @@ import java.util.Set;
 
 public class GerritControllerActivity extends FragmentActivity {
 
-    private static final String TAG = GerritControllerActivity.class.getSimpleName();
     private static final String GERRIT_INSTANCE = "gerrit";
     private String mGerritWebsite;
     private GooFileObject mChangeLogStart;
@@ -210,10 +209,6 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     private void init() {
-        // ensure we are not tracking a project unintentionally
-        if (Prefs.getCurrentProject(this).isEmpty()) {
-            Prefs.setCurrentProject(this, null);
-        }
         mCurrentProject = Prefs.getCurrentProject(this);
 
         Intent intent = getIntent();
@@ -529,7 +524,9 @@ public class GerritControllerActivity extends FragmentActivity {
             if (query == null) query = "";
             mQuery = query;
             if (mSearchView != null) {
-                mSearchView.setQuery(mQuery, submit);
+                if (!mSearchView.getQuery().equals(query) || submit) {
+                    mSearchView.setQuery(mQuery, submit);
+                }
             }
         }
 

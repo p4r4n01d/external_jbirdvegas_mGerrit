@@ -46,7 +46,6 @@ public class GerritSearchView extends SearchView
     public GerritSearchView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        setIconified(false);
         setOnQueryTextListener(this);
         setupCancelButton();
     }
@@ -171,5 +170,6 @@ public class GerritSearchView extends SearchView
         String query = getQuery().toString();
         if (!query.isEmpty() && visibility == GONE) setQuery("", true);
         super.setVisibility(visibility);
+        setIconified(visibility == GONE);
     }
 }
