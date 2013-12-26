@@ -64,8 +64,7 @@ public abstract class SearchKeyword {
     // TODO: All keywords are currently getting these operators. Make an overridable method
     //  to determine whether a keyword supports an operator. Or assume '=' and ignore it
     //  if it doesn't.
-    /** Supported searching operators - these are used directly
-     *  in the SQL query */
+    /** Supported searching operators - these are used directly in the SQL query */
     protected static String[] operators = { "=", "<", ">", "<=", ">=" };
 
     public SearchKeyword(String name, String param) {
@@ -135,33 +134,27 @@ public abstract class SearchKeyword {
      */
     public static Set<SearchKeyword> constructTokens(String query) {
         Set<SearchKeyword> set = new HashSet<>();
-        String currentToken = "";
+        StringBuilder currentToken = new StringBuilder();
 
         for (int i = 0, n = query.length(); i < n; i++) {
             char c = query.charAt(i);
             if (Character.isWhitespace(c)) {
                 if (currentToken.length() > 0) {
-                    addToSetIfNotNull(buildToken(currentToken), set);
-                    currentToken = "";
+                    addToSetIfNotNull(buildToken(currentToken.toString()), set);
+                    currentToken.setLength(0);
                 }
             } else if (c == '"') {
-                int index = query.indexOf('"', i + 1);
-                // We don't want to store the quotation marks
-                currentToken += query.substring(i + 1, index);
-                i = index; // We have processed this many characters
+                i = processTo(query, currentToken, i, '"');
             } else if (c == '{') {
-                int index = query.indexOf('}', i + 1);
-                // We don't want to store these braces
-                currentToken += query.substring(i + 1, index);
-                i = index; // We have processed this many characters
+                i = processTo(query, currentToken, i, '}');
             } else {
-                currentToken += c;
+                currentToken.append(c);
             }
         }
 
         // Have to check if a token was terminated by end of string
         if (currentToken.length() > 0) {
-            addToSetIfNotNull(buildToken(currentToken), set);
+            addToSetIfNotNull(buildToken(currentToken.toString()), set);
         }
         return set;
     }
@@ -242,5 +235,17 @@ public abstract class SearchKeyword {
         // '==' also refers to '='
         if (param.startsWith("==")) op = "=";
         return op;
+    }
+
+    private static int processTo(String query, StringBuilder currentToken, int i, char token) {
+        if (i + 1 >= query.length()) {
+            return i + 1;
+        } else {
+            int index = query.indexOf(token, i + 1);
+            if (index < 0) return i + 1;
+            // We don't want to store these braces
+            currentToken.append(query.substring(i + 1, index));
+            return index;
+        }
     }
 }
