@@ -17,16 +17,29 @@ package com.jbirdvegas.mgerrit;
  *  limitations under the License.
  */
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 
-public class AOKPChangelog extends FragmentActivity {
+import com.jbirdvegas.mgerrit.objects.GooFileObject;
+import com.jbirdvegas.mgerrit.search.AgeSearch;
+import com.jbirdvegas.mgerrit.search.SearchKeyword;
+
+import java.util.HashSet;
+
+public class AOKPChangelog extends FragmentActivity implements ChangelogActivity {
 
     private String mQuery = "http://goo.im/json2&path=/devs/aokp/" + Build.DEVICE + "/nightly";
+
+    private GerritSearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +56,18 @@ public class AOKPChangelog extends FragmentActivity {
         ChangelogFragment frag;
         frag = (ChangelogFragment) getSupportFragmentManager().findFragmentById(R.id.changelog_fragment);
         frag.setQuery(mQuery);
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (GerritSearchView) findViewById(R.id.search);
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.changelog_menu, menu);
+        return true;
     }
 
     @Override
@@ -52,7 +77,23 @@ public class AOKPChangelog extends FragmentActivity {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
+            case R.id.menu_save:
+                Intent intent = new Intent(this, PrefsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                return true;
+            case R.id.menu_search:
+                // Toggle the visibility of the searchview
+                mSearchView.toggleVisibility();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onBuildSelected(GooFileObject earlier, GooFileObject later) {
+        HashSet<SearchKeyword> set = new HashSet<>(2);
+        set.add(new AgeSearch(earlier.getModified(), ">="));
+        set.add(new AgeSearch(later.getModified(), "<="));
+        mSearchView.injectKeywords(set);
     }
 }

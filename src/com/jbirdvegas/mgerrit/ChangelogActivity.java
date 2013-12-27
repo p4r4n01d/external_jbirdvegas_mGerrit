@@ -20,5 +20,5 @@ package com.jbirdvegas.mgerrit;
 import com.jbirdvegas.mgerrit.objects.GooFileObject;
 
 public interface ChangelogActivity {
-    void onBuildSelected(GooFileObject buildObject);
+    void onBuildSelected(GooFileObject earlier, GooFileObject later);
 }

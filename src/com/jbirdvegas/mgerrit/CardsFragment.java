@@ -45,9 +45,11 @@ import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
+import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public abstract class CardsFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -71,7 +73,10 @@ public abstract class CardsFragment extends Fragment
     private BroadcastReceiver mSearchQueryListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            getLoaderManager().restartLoader(0, intent.getExtras(), CardsFragment.this);
+            String to = intent.getStringExtra(GerritSearchView.KEY_TO);
+            if (mParent.getClass().getSimpleName().equals(to)) {
+                getLoaderManager().restartLoader(0, intent.getExtras(), CardsFragment.this);
+            }
         }
     };
 
@@ -100,7 +105,7 @@ public abstract class CardsFragment extends Fragment
 
     private void init(Bundle savedInstanceState)
     {
-        mParent = (FragmentActivity) this.getActivity();
+        mParent = this.getActivity();
         View mCurrentFragment = this.getView();
         mRequestQueue = Volley.newRequestQueue(mParent);
 
@@ -243,4 +248,5 @@ public abstract class CardsFragment extends Fragment
         // Broadcast that we have finished loading changes
         new ChangeLoadingFinished(mParent, getQuery()).sendUpdateMessage();
     }
+
 }

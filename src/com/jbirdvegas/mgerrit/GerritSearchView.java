@@ -43,6 +43,12 @@ public class GerritSearchView extends SearchView
     private static final String TAG = "GerrritSearchView";
     Context mContext;
 
+    public static final String KEY_WHERE = "WHERE";
+    public static final String KEY_BINDARGS = "BIND_ARGS";
+    public static final String KEY_TO = "TO";
+
+    Set<SearchKeyword> mAdditionalKeywords;
+
     public GerritSearchView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
@@ -99,7 +105,7 @@ public class GerritSearchView extends SearchView
      *  the loader to perform the query
      * @param query The search query text
      */
-    public Set<SearchKeyword> constructTokens(String query) {
+    private Set<SearchKeyword> constructTokens(String query) {
         // Clear any previous searches that where made
         if (query == null || query.isEmpty()) {
             return new HashSet<>();
@@ -114,23 +120,28 @@ public class GerritSearchView extends SearchView
         Prefs.clearTrackingUser(mContext);
     }
 
-    public boolean processTokens(Set<SearchKeyword> tokens) {
+    private boolean processTokens(final Set<SearchKeyword> tokens) {
+        Set<SearchKeyword> newTokens = safeMerge(tokens, mAdditionalKeywords);
+
         Bundle bundle = new Bundle();
 
-        if (tokens != null && !tokens.isEmpty()) {
-            String where = SearchKeyword.constructDbSearchQuery(tokens);
+        if (newTokens != null && !newTokens.isEmpty()) {
+            String where = SearchKeyword.constructDbSearchQuery(newTokens);
             if (where != null && !where.isEmpty()) {
                 ArrayList<String> bindArgs = new ArrayList<>();
-                for (SearchKeyword token : tokens) {
+                for (SearchKeyword token : newTokens) {
                     bindArgs.addAll(Arrays.asList(token.getEscapeArgument()));
                 }
 
-                bundle.putString("WHERE", where);
-                bundle.putStringArrayList("BIND_ARGS", bindArgs);
+                bundle.putString(KEY_WHERE, where);
+                bundle.putStringArrayList(KEY_BINDARGS, bindArgs);
+                bundle.putString(KEY_TO, getContext().getClass().getSimpleName());
             } else {
                 return false;
             }
         }
+        // TODO: Cannot send intent to main screen directly - need to add another field indicating who
+        //  owns this SearchView
         Intent intent = new Intent(CardsFragment.SEARCH_QUERY);
         intent.putExtras(bundle);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -171,5 +182,29 @@ public class GerritSearchView extends SearchView
         if (!query.isEmpty() && visibility == GONE) setQuery("", true);
         super.setVisibility(visibility);
         setIconified(visibility == GONE);
+    }
+
+    /**
+     * Modifies future searches for this fragment by appending additional
+     *  keywords to search for that will not be present in the original
+     *  search query. This clears all old keywords that were previously injected.
+     *
+     *  Used for the changelog
+     * @param keywords
+     */
+    public void injectKeywords(Set<SearchKeyword> keywords) {
+        mAdditionalKeywords = new HashSet<>(keywords);
+        this.setQuery(getQuery(), true); // Force search refresh
+    }
+
+    private Set<SearchKeyword> safeMerge(Set<SearchKeyword> oldSet, Set<SearchKeyword> otherSet) {
+        HashSet<SearchKeyword> newSet = new HashSet<>();
+        if (oldSet != null && !oldSet.isEmpty()) {
+            newSet.addAll(oldSet);
+        }
+        if (otherSet != null && !otherSet.isEmpty()) {
+            newSet.addAll(otherSet);
+        }
+        return newSet;
     }
 }

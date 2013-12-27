@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit;
  */
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -25,6 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -82,6 +84,24 @@ public class ChangelogFragment extends Fragment {
                 onSaveClicked(v);
             }
         });
+
+        mUpdatesList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                GooFileObject buildObject = (GooFileObject) parent.getItemAtPosition(position);
+                GooFileObject previousBuild = null;
+                if (position + 1 < parent.getCount()) {
+                    previousBuild = (GooFileObject) parent.getItemAtPosition(position + 1);
+                }
+                ((ChangelogActivity) mParent).onBuildSelected(previousBuild, buildObject);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Not used
+            }
+        });
+
 
         findDates();
     }
@@ -142,18 +162,8 @@ public class ChangelogFragment extends Fragment {
     }
 
     public void onSaveClicked(View view) {
-
-        // TODO: May produce an IndexOutOfBounds exception
-        GooFileObject start = gooAdapter.getObjectAtPostition(mUpdatesList.getSelectedItemPosition() + 1);
-        GooFileObject stop = gooAdapter.getObjectAtPostition(mUpdatesList.getSelectedItemPosition());
-
-        Intent changelog = new Intent(mParent, GerritControllerActivity.class);
-        changelog.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
-                | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        changelog.putExtra(KEY_CHANGELOG_START, start);
-        changelog.putExtra(KEY_CHANGELOG_STOP, stop);
-        startActivity(changelog);
+        GooFileObject build = (GooFileObject) mUpdatesList.getSelectedItem();
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(build.getShortUrl()));
+        startActivity(intent);
     }
 }

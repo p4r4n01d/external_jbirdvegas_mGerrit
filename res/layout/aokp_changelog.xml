@@ -24,6 +24,14 @@
               android:layout_height="match_parent"
               android:background="?attr/mainBackgroundColor">
 
+    <com.jbirdvegas.mgerrit.GerritSearchView
+        android:id="@+id/search"
+        style="?attr/android:actionBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:queryHint="@string/changes_search_hint" />
+
     <fragment
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
