@@ -20,6 +20,7 @@ package com.jbirdvegas.mgerrit.search;
 import android.util.Log;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,16 +69,18 @@ public abstract class SearchKeyword {
     protected static String[] operators = { "=", "<", ">", "<=", ">=" };
 
     public SearchKeyword(String name, String param) {
-        this.mOpName = name;
-        this.mOpParam = param;
+        this(name, null, param);
     }
 
+    // We can allow nulls for the parameter but not the name
     public SearchKeyword(String name, String operator, String param) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException(String.format("The keyword name of %s was not valid", name));
+        }
         mOpName = name;
         mOperator = operator;
         mOpParam = param;
     }
-
 
 
     protected static void registerKeyword(String opName, Class<? extends SearchKeyword> clazz) {
@@ -90,10 +93,17 @@ public abstract class SearchKeyword {
 
     @Override
     public String toString() {
+        // Keywords with empty parameters are ignored
+        if (mOpParam == null || mOpParam.isEmpty()) return "";
+
         StringBuilder builder = new StringBuilder().append(mOpName).append(":\"");
         if (mOperator != null) builder.append(mOperator);
         builder.append(mOpParam).append("\"");
         return builder.toString();
+    }
+
+    protected static boolean isParameterValid(String param) {
+        return param != null && !param.isEmpty();
     }
 
     /**
@@ -203,7 +213,7 @@ public abstract class SearchKeyword {
             }
         }
 
-        if (!keyword.getParam().isEmpty()) {
+        if (isParameterValid(keyword.getParam())) {
             tokens.add(keyword);
         }
         return SearchKeyword.getQuery(tokens);
@@ -214,6 +224,17 @@ public abstract class SearchKeyword {
             Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
             tokens.add(keyword);
             return SearchKeyword.getQuery(tokens);
+        }
+        return query;
+    }
+
+    public static String removeKeyword(String query, Class<? extends SearchKeyword> clazz) {
+        Constructor<? extends SearchKeyword> constructor;
+        try {
+            constructor = clazz.getDeclaredConstructor(String.class);
+            return replaceKeyword(query, constructor.newInstance((Object) null));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return query;
     }

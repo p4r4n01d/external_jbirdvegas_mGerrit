@@ -32,11 +32,10 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Pair;
 import android.widget.Toast;
+
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
 
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.TimeZone;
 
 public class Prefs extends PreferenceFragment implements Preference.OnPreferenceClickListener {

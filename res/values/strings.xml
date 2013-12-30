@@ -146,4 +146,6 @@
 
     <string name="gerrit_help">Gerrit help</string>
     <string name="not_connected">There\'s no network connection right now. Try again later.</string>
+
+    <string name="aokp_changelog_card_title">Recent AOKP Builds</string>
 </resources>

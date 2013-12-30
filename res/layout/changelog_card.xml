@@ -21,25 +21,39 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="?attr/cardBackgroundColor"
-              android:orientation="horizontal"
+              android:orientation="vertical"
               android:weightSum="1"
               android:paddingBottom="4dp">
 
-    <Spinner
-        android:id="@+id/changelog"
-        android:layout_width="0dp"
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:paddingLeft="12dp"
-        android:layout_weight="1"/>
+        android:text="@string/aokp_changelog_card_title"
+        android:id="@+id/textView"
+        style="?attr/cardTitleStyle"
+        android:paddingLeft="12dp"/>
 
-    <ImageView
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/goo_im_download_rom_ic_padding"
-        android:text="@string/download_update"
-        android:id="@+id/goo_download_zip_button"
-        android:src="?attr/saveIcon"
-        android:contentDescription="@string/download_rom_zip"/>
+        android:layout_height="match_parent"
+        android:paddingRight="@dimen/goo_im_download_rom_ic_padding"
+        android:paddingLeft="12dp">
+
+        <Spinner
+            android:id="@+id/changelog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/goo_im_download_rom_ic_padding"
+            android:text="@string/download_update"
+            android:id="@+id/goo_download_zip_button"
+            android:src="?attr/saveIcon"
+            android:contentDescription="@string/download_rom_zip"/>
+    </LinearLayout>
 
 </LinearLayout>

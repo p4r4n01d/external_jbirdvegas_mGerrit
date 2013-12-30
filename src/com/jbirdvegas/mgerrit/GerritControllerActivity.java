@@ -85,8 +85,6 @@ public class GerritControllerActivity extends FragmentActivity {
 
     private DefaultGerritReceivers receivers;
 
-    // This is maintained for checking if the project has changed without looking
-    private String mCurrentProject;
     private Menu mMenu;
 
     // Indicates if we are running this in tablet mode.
@@ -170,10 +168,9 @@ public class GerritControllerActivity extends FragmentActivity {
 
         FragmentManager fm = getSupportFragmentManager();
         if (findViewById(R.id.change_detail_fragment) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-large and
-            // res/values-sw600dp). If this view is present, then the
-            // activity should be in two-pane mode.
+            // The detail container view will be present only in
+            // large-screen layouts(res/values-sw600dp). If this view is present,
+            // then the activity should be in two-pane mode.
             mTwoPane = true;
             mChangeDetail = (PatchSetViewerFragment) fm.findFragmentById(R.id.change_detail_fragment);
         }
@@ -209,8 +206,6 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     private void init() {
-        mCurrentProject = Prefs.getCurrentProject(this);
-
         Intent intent = getIntent();
         if (intent != null) {
             Bundle extras = intent.getExtras();
@@ -304,8 +299,8 @@ public class GerritControllerActivity extends FragmentActivity {
                 startActivity(intent);
                 return true;
             case R.id.menu_changelog:
-                Intent changelog = new Intent(this,
-                        AOKPChangelog.class);
+                // TODO: Send the current search query along too.
+                Intent changelog = new Intent(this, AOKPChangelog.class);
                 changelog.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(changelog);
                 return true;
@@ -331,20 +326,6 @@ public class GerritControllerActivity extends FragmentActivity {
         refreshTabs();
     }
 
-    private void onProjectChanged(String newProject) {
-        String query = getSearchQuery();
-        query = SearchKeyword.replaceKeyword(query, new ProjectSearch(newProject));
-        mSearchViewProperties.setQuery(query, true);
-        mCurrentProject = newProject;
-    }
-
-    private void onUserTrackingChanged(Integer userTracking) {
-        String query = getSearchQuery();
-        String user = userTracking == null ? "" : userTracking.toString();
-        query = SearchKeyword.replaceKeyword(query, new OwnerSearch(user));
-        mSearchViewProperties.setQuery(query, true);
-    }
-
     /* Mark all of the tabs as dirty to trigger a refresh when they are next
      *  resumed. refresh must be called on the current fragment as it is already
      *  resumed.
@@ -366,7 +347,6 @@ public class GerritControllerActivity extends FragmentActivity {
                 }
             }
         }
-
     }
 
     @Override
@@ -376,10 +356,6 @@ public class GerritControllerActivity extends FragmentActivity {
         // Manually check if the Gerrit source changed (from the Preferences)
         String s = Prefs.getCurrentGerrit(this);
         if (!s.equals(mGerritWebsite)) onGerritChanged(s);
-
-        // Manually check if the project changed (e.g. we are resuming from the Projects List)
-        s = Prefs.getCurrentProject(this);
-        if (!s.equals(mCurrentProject)) onProjectChanged(s);
 
         // Apply the theme if it has changed
         int themeId = Prefs.getCurrentThemeID(this);
@@ -445,12 +421,6 @@ public class GerritControllerActivity extends FragmentActivity {
             case Prefs.GERRIT_KEY:
                 onGerritChanged(Prefs.getCurrentGerrit(this));
                 break;
-            case Prefs.CURRENT_PROJECT:
-                onProjectChanged(Prefs.getCurrentProject(this));
-                break;
-            case Prefs.TRACKING_USER:
-                onUserTrackingChanged(Prefs.getTrackingUser(this));
-                break;
             case Prefs.ANIMATION_KEY:
                 mChangeList.getCurrentFragment().toggleAnimations(Prefs.getAnimationPreference(this));
                 break;
@@ -500,15 +470,6 @@ public class GerritControllerActivity extends FragmentActivity {
         }
         String query = "";
         if (mSearchViewProperties != null) query = mSearchViewProperties.mQuery;
-
-        if (!mCurrentProject.isEmpty()) {
-            query = SearchKeyword.replaceKeyword(query, new ProjectSearch(mCurrentProject));
-        }
-
-        Integer user = Prefs.getTrackingUser(this);
-        if (user != null) {
-            query = SearchKeyword.replaceKeyword(query, new OwnerSearch(user.toString()));
-        }
 
         if (!oldQuery.equals(query)) {
             mSearchViewProperties.setQuery(query, false); // Don't submit (it will be submitted initially)

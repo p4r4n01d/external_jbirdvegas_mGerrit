@@ -19,7 +19,9 @@ package com.jbirdvegas.mgerrit;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -38,9 +40,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class GerritSearchView extends SearchView
-        implements SearchView.OnQueryTextListener {
+        implements SearchView.OnQueryTextListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "GerrritSearchView";
+    private final SharedPreferences mPrefs;
     Context mContext;
 
     public static final String KEY_WHERE = "WHERE";
@@ -54,12 +58,24 @@ public class GerritSearchView extends SearchView
         mContext = context;
         setOnQueryTextListener(this);
         setupCancelButton();
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
 
+        Integer user = Prefs.getTrackingUser(mContext);
+        if (user != null) {
+            replaceKeyword(new OwnerSearch(user.toString()), true);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -106,7 +122,7 @@ public class GerritSearchView extends SearchView
      * @param query The search query text
      */
     private Set<SearchKeyword> constructTokens(String query) {
-        // Clear any previous searches that where made
+        // An empty query will result in an empty set
         if (query == null || query.isEmpty()) {
             return new HashSet<>();
         }
@@ -140,14 +156,17 @@ public class GerritSearchView extends SearchView
                 return false;
             }
         }
-        // TODO: Cannot send intent to main screen directly - need to add another field indicating who
-        //  owns this SearchView
+
         Intent intent = new Intent(CardsFragment.SEARCH_QUERY);
         intent.putExtras(bundle);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         return true;
     }
 
+    /**
+     * Always show the cancel button and set its onClick listener. The button
+     *  has private visibility so we need reflection to access it.
+     */
     private void setupCancelButton() {
         try {
             Field searchField = SearchView.class.getDeclaredField("mCloseButton");
@@ -197,6 +216,9 @@ public class GerritSearchView extends SearchView
         this.setQuery(getQuery(), true); // Force search refresh
     }
 
+    /**
+     * Add the elements of otherSet to oldSet and return a new set.
+     */
     private Set<SearchKeyword> safeMerge(Set<SearchKeyword> oldSet, Set<SearchKeyword> otherSet) {
         HashSet<SearchKeyword> newSet = new HashSet<>();
         if (oldSet != null && !oldSet.isEmpty()) {
@@ -206,5 +228,23 @@ public class GerritSearchView extends SearchView
             newSet.addAll(otherSet);
         }
         return newSet;
+    }
+
+    private void replaceKeyword(SearchKeyword keyword, boolean submit) {
+        String currentQuery = getQuery().toString();
+        String query = SearchKeyword.replaceKeyword(currentQuery, keyword);
+        if (!query.equals(currentQuery)) this.setQuery(query, submit);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        switch (key) {
+            case Prefs.CURRENT_PROJECT:
+                replaceKeyword(new ProjectSearch(Prefs.getCurrentProject(mContext)), true);
+                break;
+            case Prefs.TRACKING_USER:
+                replaceKeyword(new OwnerSearch(Prefs.getTrackingUser(mContext)), true);
+                break;
+        }
     }
 }
