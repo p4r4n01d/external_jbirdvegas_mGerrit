@@ -71,8 +71,6 @@ public class GerritControllerActivity extends FragmentActivity {
 
     private static final String GERRIT_INSTANCE = "gerrit";
     private String mGerritWebsite;
-    private GooFileObject mChangeLogStart;
-    private GooFileObject mChangeLogStop;
 
     /**
      * Keep track of all the GerritTask instances so the dialog can be dismissed
@@ -206,19 +204,8 @@ public class GerritControllerActivity extends FragmentActivity {
     }
 
     private void init() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                mChangeLogStart = extras.getParcelable(ChangelogFragment.KEY_CHANGELOG_START);
-                mChangeLogStop = extras.getParcelable(ChangelogFragment.KEY_CHANGELOG_STOP);
-            }
-        }
-
         mGerritTasks = new HashSet<>();
-
         receivers = new DefaultGerritReceivers(this);
-
         setupSearchQuery();
     }
 

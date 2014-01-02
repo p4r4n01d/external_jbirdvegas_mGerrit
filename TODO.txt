@@ -108,6 +108,25 @@ java.io.FileNotFoundException: http://review.cyanogenmod.org/changes/?q=I6710a62
             at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:43)
             ...
 
+Timeout connecting to server
+01-02 13:59:27.552  16414-16414/com.jbirdvegas.mgerrit E/GravatarHelper: http Volley request failed!
+    com.android.volley.TimeoutError
+            at com.android.volley.toolbox.BasicNetwork.performRequest(BasicNetwork.java:114)
+            at com.android.volley.NetworkDispatcher.run(NetworkDispatcher.java:105)
+01-02 14:00:37.930  16414-16566/com.jbirdvegas.mgerrit E/GerritTask: Gathering data threw IO
+    java.net.ConnectException: failed to connect to gerrit.aokp.co/91.194.90.122 (port 80): connect failed: ETIMEDOUT (Connection timed out)
+            at libcore.io.IoBridge.connect(IoBridge.java:114)
+            ...
+            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:84)
+            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:43)
+            ...
+     Caused by: libcore.io.ErrnoException: connect failed: ETIMEDOUT (Connection timed out)
+            at libcore.io.Posix.connect(Native Method)
+            ...
+            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:84)
+            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:43)
+            at android.os.AsyncTask$2.call(AsyncTask.java:288)
+            ...
 
 Optional/Lower priority
 -----------------------

@@ -64,14 +64,16 @@ public class TheApplication extends Application
         if (key.equals(Prefs.GERRIT_KEY)) onGerritChanged(Prefs.getCurrentGerrit(this));
         if (key.equals(Prefs.APP_THEME)) {
             this.setTheme(Prefs.getCurrentThemeID(this));
+            return;
         }
         sendPreferenceChangedMessage(key);
     }
 
     private void sendPreferenceChangedMessage(String key) {
+        // Should only be used to notify of a change in gerrit instance
         Intent intent = new Intent(PREF_CHANGE_TYPE);
         intent.putExtra(PREF_CHANGE_KEY, key);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        //startActivity(intent);
     }
 }
