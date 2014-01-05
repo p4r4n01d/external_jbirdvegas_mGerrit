@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
@@ -32,8 +33,7 @@ public class TheApplication extends Application
     public static final String PACKAGE_NAME = "com.jbirdvegas.mgerrit";
 
     // This corresponds to an intent-filter action in the manifest
-    public static final String PREF_CHANGE_TYPE = PACKAGE_NAME + ".PREFERENCE_CHANGED";
-    public static final String PREF_CHANGE_KEY = "Preference Key";
+    public static final String GERRIT_CHANGED = PACKAGE_NAME + ".GERRIT_CHANGED";
 
     @Override
     public void onCreate() {
@@ -57,6 +57,13 @@ public class TheApplication extends Application
     {
         GerritURL.setGerrit(newGerrit);
         DatabaseFactory.changeGerrit(this, newGerrit);
+
+        // Unset the project - we don't track these across Gerrit instances
+        Prefs.setCurrentProject(this, null);
+        Prefs.clearTrackingUser(this);
+
+        Intent intent = new Intent(GERRIT_CHANGED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     @Override
@@ -66,14 +73,5 @@ public class TheApplication extends Application
             this.setTheme(Prefs.getCurrentThemeID(this));
             return;
         }
-        sendPreferenceChangedMessage(key);
-    }
-
-    private void sendPreferenceChangedMessage(String key) {
-        // Should only be used to notify of a change in gerrit instance
-        Intent intent = new Intent(PREF_CHANGE_TYPE);
-        intent.putExtra(PREF_CHANGE_KEY, key);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        //startActivity(intent);
     }
 }

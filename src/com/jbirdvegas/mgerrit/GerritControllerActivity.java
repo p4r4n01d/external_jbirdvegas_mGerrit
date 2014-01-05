@@ -37,7 +37,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -57,10 +56,6 @@ import com.jbirdvegas.mgerrit.message.HandshakeError;
 import com.jbirdvegas.mgerrit.message.InitializingDataTransfer;
 import com.jbirdvegas.mgerrit.message.ProgressUpdate;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
-import com.jbirdvegas.mgerrit.objects.GooFileObject;
-import com.jbirdvegas.mgerrit.search.OwnerSearch;
-import com.jbirdvegas.mgerrit.search.ProjectSearch;
-import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 
 import java.util.HashSet;
@@ -80,6 +75,8 @@ public class GerritControllerActivity extends FragmentActivity {
 
     // Listener for changes to which commit is selected
     private BroadcastReceiver mChangeListener;
+    // Listener for whenever the Gerrit changes
+    private BroadcastReceiver mGerritListener;
 
     private DefaultGerritReceivers receivers;
 
@@ -96,7 +93,6 @@ public class GerritControllerActivity extends FragmentActivity {
     private SearchViewProperties mSearchViewProperties = new SearchViewProperties();
     private int mTheme;
     private GerritSearchView mSearchView;
-
 
     @Override
     protected void onStart() {
@@ -194,6 +190,12 @@ public class GerritControllerActivity extends FragmentActivity {
             }
         };
 
+        mGerritListener = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onGerritChanged(Prefs.getCurrentGerrit(GerritControllerActivity.this));
+            }
+        };
 
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -224,6 +226,9 @@ public class GerritControllerActivity extends FragmentActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mChangeListener,
                 new IntentFilter(PatchSetViewerFragment.NEW_CHANGE_SELECTED));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mGerritListener,
+                new IntentFilter(TheApplication.GERRIT_CHANGED));
     }
 
     @Override
@@ -249,9 +254,7 @@ public class GerritControllerActivity extends FragmentActivity {
     private void handleIntent(Intent intent)
     {
         String action = intent.getAction();
-        if (TheApplication.PREF_CHANGE_TYPE.equals(action)) {
-            onPreferenceChanged(intent.getStringExtra(TheApplication.PREF_CHANGE_KEY));
-        } else if (!Intent.ACTION_SEARCH.equals(action)) {
+        if (!Intent.ACTION_SEARCH.equals(action)) {
             // Searching is already handled when the query text changes.
             init();
         }
@@ -305,11 +308,6 @@ public class GerritControllerActivity extends FragmentActivity {
                 getString(R.string.using_gerrit_toast) + ' ' + newGerrit,
                 Toast.LENGTH_LONG).show();
         hideChangelogOption(newGerrit);
-
-        // Unset the project - we don't track these across Gerrit instances
-        Prefs.setCurrentProject(this, null);
-        Prefs.clearTrackingUser(this);
-
         refreshTabs();
     }
 
@@ -407,9 +405,6 @@ public class GerritControllerActivity extends FragmentActivity {
         switch (key) {
             case Prefs.GERRIT_KEY:
                 onGerritChanged(Prefs.getCurrentGerrit(this));
-                break;
-            case Prefs.ANIMATION_KEY:
-                mChangeList.getCurrentFragment().toggleAnimations(Prefs.getAnimationPreference(this));
                 break;
         }
     }
