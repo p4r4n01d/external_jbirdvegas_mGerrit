@@ -81,9 +81,7 @@ public class GerritSearchView extends SearchView
     @Override
     public boolean onQueryTextSubmit(String query) {
         Set<SearchKeyword> tokens = constructTokens(query);
-        if (tokens == null) {
-            Log.w(TAG, "Could not process query: " + query);
-        } else {
+        if (tokens != null) {
             // If there is no project keyword in the query, it should be cleared
             if (SearchKeyword.findKeyword(tokens, ProjectSearch.class) < 0 &&
                     !Prefs.getCurrentProject(mContext).isEmpty()) {
@@ -95,11 +93,10 @@ public class GerritSearchView extends SearchView
                     Prefs.getTrackingUser(mContext) != null) {
                 Prefs.clearTrackingUser(mContext);
             }
-
-            // Pass this on to the current CardsFragment instance
-            if (!processTokens(tokens)) {
-                Log.w(TAG, "Could not process query: " + query);
-            }
+        }
+        // Pass this on to the current CardsFragment instance
+        if (!processTokens(tokens)) {
+            Log.w(TAG, "Could not process query: " + query);
         }
 
         return false;
@@ -109,9 +106,7 @@ public class GerritSearchView extends SearchView
     public boolean onQueryTextChange(String newText) {
         // Handled when the search is submitted instead.
         if (newText.isEmpty()) {
-            onSearchQueryCleared();
-            // This should be called last and should always be processable
-            processTokens(null);
+            onQueryTextSubmit(null);
         } else setVisibility(VISIBLE);
         return false;
     }
@@ -130,32 +125,27 @@ public class GerritSearchView extends SearchView
         return SearchKeyword.constructTokens(query);
     }
 
-    // Additional logic to be run when the search query is empty
-    private void onSearchQueryCleared() {
-        Prefs.setCurrentProject(mContext, null);
-        Prefs.clearTrackingUser(mContext);
-    }
-
     private boolean processTokens(final Set<SearchKeyword> tokens) {
         Set<SearchKeyword> newTokens = safeMerge(tokens, mAdditionalKeywords);
 
         Bundle bundle = new Bundle();
+        String where = "";
+        ArrayList<String> bindArgs = new ArrayList<>();
 
         if (newTokens != null && !newTokens.isEmpty()) {
-            String where = SearchKeyword.constructDbSearchQuery(newTokens);
+            where = SearchKeyword.constructDbSearchQuery(newTokens);
             if (where != null && !where.isEmpty()) {
-                ArrayList<String> bindArgs = new ArrayList<>();
                 for (SearchKeyword token : newTokens) {
                     bindArgs.addAll(Arrays.asList(token.getEscapeArgument()));
                 }
-
-                bundle.putString(KEY_WHERE, where);
-                bundle.putStringArrayList(KEY_BINDARGS, bindArgs);
-                bundle.putString(KEY_TO, getContext().getClass().getSimpleName());
             } else {
                 return false;
             }
         }
+
+        bundle.putString(KEY_WHERE, where);
+        bundle.putStringArrayList(KEY_BINDARGS, bindArgs);
+        bundle.putString(KEY_TO, getContext().getClass().getSimpleName());
 
         Intent intent = new Intent(CardsFragment.SEARCH_QUERY);
         intent.putExtras(bundle);
