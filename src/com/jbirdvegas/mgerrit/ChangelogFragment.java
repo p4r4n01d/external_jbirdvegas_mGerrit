@@ -30,6 +30,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -51,14 +52,12 @@ public class ChangelogFragment extends Fragment {
     private static final String TAG = "ChangelogFragment";
     private FragmentActivity mParent;
     private RequestQueue mRequestQueue;
-
-    public static final String KEY_CHANGELOG_START = "changelog_start";
-    public static final String KEY_CHANGELOG_STOP = "changelog_stop";
     private String mQuery;
 
     Spinner mUpdatesList;
     private GooFileArrayAdapter gooAdapter;
     private ImageView mSaveBtn;
+    private ViewSwitcher mViewSwitcher;
 
     public ChangelogFragment() { }
 
@@ -75,6 +74,9 @@ public class ChangelogFragment extends Fragment {
 
         mParent = this.getActivity();
         mRequestQueue = Volley.newRequestQueue(mParent);
+
+        mViewSwitcher = (ViewSwitcher) mParent.findViewById(R.id.vs_changelog_card);
+        if (mViewSwitcher.getDisplayedChild() != 0) mViewSwitcher.showPrevious();
 
         mUpdatesList = (Spinner) mParent.findViewById(R.id.changelog);
         mSaveBtn = (ImageView) mParent.findViewById(R.id.goo_download_zip_button);
@@ -109,7 +111,6 @@ public class ChangelogFragment extends Fragment {
     private void findDates() {
         // use Volley to get our packages list
         Log.d(TAG, "Calling: " + mQuery);
-        mParent.setProgressBarIndeterminateVisibility(true);
 
         mRequestQueue.add(
                 new JsonObjectRequest(
@@ -141,7 +142,7 @@ public class ChangelogFragment extends Fragment {
     class gooImResponseListener implements Response.Listener<JSONObject> {
         @Override
         public void onResponse(JSONObject response) {
-            mParent.setProgressBarIndeterminateVisibility(false);
+            mViewSwitcher.showNext();
 
             Toast.makeText(mParent,
                     R.string.please_select_update_for_range,

@@ -33,27 +33,58 @@
         style="?attr/cardTitleStyle"
         android:paddingLeft="12dp"/>
 
-    <LinearLayout
-        android:orientation="horizontal"
+    <ViewSwitcher
+        android:id="@+id/vs_changelog_card"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:paddingRight="@dimen/goo_im_download_rom_ic_padding"
-        android:paddingLeft="12dp">
+        android:layout_height="wrap_content">
 
-        <Spinner
-            android:id="@+id/changelog"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/goo_im_download_rom_ic_padding"
+            android:paddingLeft="12dp"
+            android:weightSum="1">
 
-        <ImageView
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textSize="18sp"
+                android:text="@string/changelog_loading"
+                style="@style/CardText"
+                android:id="@+id/textView2"
+                android:layout_weight="1.00"
+                android:gravity="center_vertical"/>
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar"
+                android:indeterminate="true"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/goo_im_download_rom_ic_padding"
-            android:text="@string/download_update"
-            android:id="@+id/goo_download_zip_button"
-            android:src="?attr/saveIcon"
-            android:contentDescription="@string/download_rom_zip"/>
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/goo_im_download_rom_ic_padding"
+            android:paddingLeft="12dp">
+
+            <Spinner
+                android:id="@+id/changelog"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/goo_im_download_rom_ic_padding"
+                android:text="@string/download_update"
+                android:id="@+id/goo_download_zip_button"
+                android:src="?attr/saveIcon"
+                android:contentDescription="@string/download_rom_zip"/>
+        </LinearLayout>
+    </ViewSwitcher>
 
 </LinearLayout>

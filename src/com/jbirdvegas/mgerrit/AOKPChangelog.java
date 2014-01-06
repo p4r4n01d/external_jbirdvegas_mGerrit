@@ -46,7 +46,6 @@ public class AOKPChangelog extends FragmentActivity implements ChangelogActivity
         this.setTheme(Prefs.getCurrentThemeID(this));
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.aokp_changelog);
 
         // Action bar Up affordance
