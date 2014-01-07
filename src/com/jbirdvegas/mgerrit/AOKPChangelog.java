@@ -91,8 +91,8 @@ public class AOKPChangelog extends FragmentActivity implements ChangelogActivity
 
     public void onBuildSelected(GooFileObject earlier, GooFileObject later) {
         HashSet<SearchKeyword> set = new HashSet<>(2);
-        set.add(new AgeSearch(earlier.getModified(), ">="));
-        set.add(new AgeSearch(later.getModified(), "<="));
+        set.add(new AgeSearch(earlier.getModified(), "<="));
+        set.add(new AgeSearch(later.getModified(), ">="));
         mSearchView.injectKeywords(set);
     }
 }

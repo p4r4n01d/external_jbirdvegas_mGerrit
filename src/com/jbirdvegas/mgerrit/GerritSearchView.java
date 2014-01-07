@@ -203,7 +203,7 @@ public class GerritSearchView extends SearchView
      */
     public void injectKeywords(Set<SearchKeyword> keywords) {
         mAdditionalKeywords = new HashSet<>(keywords);
-        this.setQuery(getQuery(), true); // Force search refresh
+        onQueryTextSubmit(getQuery().toString()); // Force search refresh
     }
 
     /**
