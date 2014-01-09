@@ -45,11 +45,9 @@ import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
-import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public abstract class CardsFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -189,12 +187,9 @@ public abstract class CardsFragment extends Fragment
         // TODO find root cause
         // symptom several rotations causes crash
         if (this.isDetached()) {
-            EasyTracker easyTracker = EasyTracker.getInstance(getActivity());
-            easyTracker.send(MapBuilder.createEvent(AnalyticsConstants.GA_LOG_FAIL,
-                    AnalyticsConstants.GA_FAIL_UI,
-                    "CardsFragment was not attached to an Activity",
-                    null)
-                .build());
+            AnalyticsHelper.sendAnalyticsEvent(mParent, AnalyticsHelper.GA_LOG_FAIL,
+                    AnalyticsHelper.GA_FAIL_UI,
+                    "CardsFragment was not attached to an Activity", null);
         } else {
             getLoaderManager().restartLoader(0, null, this);
         }

@@ -136,26 +136,12 @@ public class GerritControllerActivity extends FragmentActivity {
                 .createAppView().build());
 
         // keep a log of what ROM our users run
-        EasyTracker easyTracker = EasyTracker.getInstance(this);
-        easyTracker.send(MapBuilder
-                .createEvent(AnalyticsConstants.GA_APP_OPEN,     // Event category (required)
-                        AnalyticsConstants.GA_ROM_VERSION,  // Event action (required)
-                        ROMHelper.determineRom(this),   // Event label
-                        null)            // Event value (long)
-                .build());
-        // note this screen as viewed
-        easyTracker.send(MapBuilder
-                .createAppView().build());
+        AnalyticsHelper.sendAnalyticsEvent(this, AnalyticsHelper.GA_APP_OPEN,
+                AnalyticsHelper.GA_ROM_VERSION, ROMHelper.determineRom(this), null);
 
         // Keep track of what theme is being used
-        easyTracker.send(MapBuilder
-                .createEvent(AnalyticsConstants.GA_APP_OPEN,
-                        AnalyticsConstants.GA_THEME_SET_ON_OPEN,
-                        Prefs.getCurrentTheme(this),
-                        null)
-                .build());
-        // note this screen as viewed
-        easyTracker.send(MapBuilder.createAppView().build());
+        AnalyticsHelper.sendAnalyticsEvent(this, AnalyticsHelper.GA_APP_OPEN,
+                AnalyticsHelper.GA_THEME_SET_ON_OPEN, Prefs.getCurrentTheme(this), null);
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);

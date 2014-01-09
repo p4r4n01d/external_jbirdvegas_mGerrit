@@ -163,10 +163,10 @@ public class PatchSetViewerFragment extends Fragment {
                                     mContext));
                     EasyTracker.getInstance(mParent).send(
                             MapBuilder.createTiming(
-                                    AnalyticsConstants.GA_PERFORMANCE,
+                                    AnalyticsHelper.GA_PERFORMANCE,
                                     System.currentTimeMillis() - start,
-                                    AnalyticsConstants.GA_TIME_TO_LOAD,
-                                    AnalyticsConstants.GA_CARDS_LOAD_TIME)
+                                    AnalyticsHelper.GA_TIME_TO_LOAD,
+                                    AnalyticsHelper.GA_CARDS_LOAD_TIME)
                              .build()
                     );
                 } catch (JSONException e) {
@@ -261,13 +261,8 @@ public class PatchSetViewerFragment extends Fragment {
             changeID = Changes.getMostRecentChange(mParent, mStatus);
             if (changeID == null || changeID.isEmpty()) {
                 // No changes to load data from
-                EasyTracker.getInstance(mParent).send(
-                        MapBuilder.createEvent(
-                                "PatchSetViewerFragment",
-                                "load_change",
-                                "null_changeID",
-                                null)
-                        .build());
+                AnalyticsHelper.sendAnalyticsEvent(mParent, "PatchSetViewerFragment",
+                        "load_change", "null_changeID", null);
                 return;
             }
         }
