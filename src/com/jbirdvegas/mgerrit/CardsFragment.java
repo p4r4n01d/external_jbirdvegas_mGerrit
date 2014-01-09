@@ -84,7 +84,7 @@ public abstract class CardsFragment extends Fragment
     // Adapter that binds data to the listview
     private ChangeListAdapter mAdapter;
     // Wrapper for mAdapter, enabling animations
-    private SingleAnimationAdapter mAnimAdapter;
+    private SingleAnimationAdapter mAnimAdapter = null;
     // Whether animations have been enabled
     private boolean mAnimationsEnabled;
 
@@ -118,7 +118,8 @@ public abstract class CardsFragment extends Fragment
                 UserChanges.C_PROJECT, UserChanges.C_UPDATED, UserChanges.C_STATUS };
 
         mListView = (ListView) mCurrentFragment.findViewById(R.id.commit_cards);
-        mAdapter = new ChangeListAdapter(mParent, R.layout.commit_card, null, from, to, 0);
+        mAdapter = new ChangeListAdapter(mParent, R.layout.commit_card, null, from, to, 0,
+                getQuery());
         mAdapter.setViewBinder(new CommitCardBinder(mParent, mRequestQueue));
 
         /* If animations have been enabled, setup and use an animation adapter, otherwise use
