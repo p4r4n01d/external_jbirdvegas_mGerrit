@@ -207,12 +207,7 @@ public abstract class SearchKeyword {
 
     public static String replaceKeyword(String query, SearchKeyword keyword) {
         Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
-        for (SearchKeyword token : tokens) {
-            if (token instanceof ProjectSearch) {
-                tokens.remove(token);
-            }
-        }
-
+        tokens = removeKeyword(tokens, keyword.getClass());
         if (isParameterValid(keyword.getParam())) {
             tokens.add(keyword);
         }
@@ -220,7 +215,7 @@ public abstract class SearchKeyword {
     }
 
     public static String addKeyword(String query, SearchKeyword keyword) {
-        if (keyword != null && !keyword.getParam().isEmpty()) {
+        if (keyword != null && isParameterValid(keyword.getParam())) {
             Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
             tokens.add(keyword);
             return SearchKeyword.getQuery(tokens);
@@ -228,15 +223,16 @@ public abstract class SearchKeyword {
         return query;
     }
 
-    public static String removeKeyword(String query, Class<? extends SearchKeyword> clazz) {
-        Constructor<? extends SearchKeyword> constructor;
-        try {
-            constructor = clazz.getDeclaredConstructor(String.class);
-            return replaceKeyword(query, constructor.newInstance((Object) null));
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static Set<SearchKeyword> removeKeyword(Set<SearchKeyword> tokens,
+                                                   Class<? extends SearchKeyword> clazz) {
+        Iterator<SearchKeyword> it = tokens.iterator();
+        while (it.hasNext()) {
+            SearchKeyword token = it.next();
+            if (token.getClass().equals(clazz)) {
+                it.remove();
+            }
         }
-        return query;
+        return tokens;
     }
 
     public static int findKeyword(Set<SearchKeyword> tokens, Class<? extends SearchKeyword> clazz) {

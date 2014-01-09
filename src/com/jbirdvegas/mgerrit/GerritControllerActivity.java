@@ -89,8 +89,6 @@ public class GerritControllerActivity extends FragmentActivity {
     // This will be null if mTwoPane is false (i.e. not tablet mode)
     private PatchSetViewerFragment mChangeDetail;
 
-    // Wrapper around searchView for modifying searchView before it is initialised
-    private SearchViewProperties mSearchViewProperties = new SearchViewProperties();
     private int mTheme;
     private GerritSearchView mSearchView;
 
@@ -194,7 +192,6 @@ public class GerritControllerActivity extends FragmentActivity {
     private void init() {
         mGerritTasks = new HashSet<>();
         receivers = new DefaultGerritReceivers(this);
-        setupSearchQuery();
     }
 
     // Register to receive messages.
@@ -387,18 +384,6 @@ public class GerritControllerActivity extends FragmentActivity {
         }
     }
 
-    private void onPreferenceChanged(String key) {
-        switch (key) {
-            case Prefs.GERRIT_KEY:
-                onGerritChanged(Prefs.getCurrentGerrit(this));
-                break;
-        }
-    }
-
-    public String getSearchQuery() {
-        return mSearchViewProperties.getQuery();
-    }
-
     public ChangeListFragment getChangeList() {
         return mChangeList;
     }
@@ -427,44 +412,5 @@ public class GerritControllerActivity extends FragmentActivity {
         });
         builder.create();
         builder.show();
-    }
-
-    // Call this ONLY after the searchView has been initialised
-    private void setupSearchQuery() {
-
-        String oldQuery = "";
-        if (mSearchView != null && mSearchView.getQuery() != null) {
-            oldQuery = mSearchView.getQuery().toString();
-        }
-        String query = "";
-        if (mSearchViewProperties != null) query = mSearchViewProperties.mQuery;
-
-        if (!oldQuery.equals(query)) {
-            mSearchViewProperties.setQuery(query, false); // Don't submit (it will be submitted initially)
-        }
-    }
-
-    // SearchView properties to be set and can be used by setupSearchQuery when the search
-    //  view is visible
-    class SearchViewProperties {
-        String mQuery = "";
-
-        void setQuery(String query, boolean submit) {
-            if (query == null) query = "";
-            mQuery = query;
-            if (mSearchView != null) {
-                if (!mSearchView.getQuery().equals(query) || submit) {
-                    mSearchView.setQuery(mQuery, submit);
-                }
-            }
-        }
-
-        String getQuery() {
-            if (mSearchView != null) {
-                return mSearchView.getQuery().toString();
-            } else {
-                return mQuery;
-            }
-        }
     }
 }
