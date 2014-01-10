@@ -17,7 +17,6 @@ package com.jbirdvegas.mgerrit.cards;
  *  limitations under the License.
  */
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;

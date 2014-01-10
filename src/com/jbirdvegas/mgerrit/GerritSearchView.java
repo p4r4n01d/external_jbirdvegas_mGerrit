@@ -169,9 +169,7 @@ public class GerritSearchView extends SearchView
                     toggleVisibility();
                 }
             });
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
+        } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
     }

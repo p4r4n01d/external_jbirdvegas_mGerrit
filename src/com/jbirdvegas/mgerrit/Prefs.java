@@ -30,7 +30,6 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.util.Pair;
 import android.widget.Toast;
 
 import com.jbirdvegas.mgerrit.objects.CommitterObject;
@@ -47,8 +46,6 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
     public static final String TRACKING_USER = "committer_being_tracked";
     public static final String APP_THEME = "app_theme";
     private static final String TABLET_MODE = "tablet_layout_mode";
-    private static final String AOKP_CHANGELOG_START = "aokp_changelog_start";
-    private static final String AOKP_CHANGELOG_END = "aokp_changelog_end";
 
     private Preference mGerritSwitcher;
 
@@ -304,20 +301,5 @@ public class Prefs extends PreferenceFragment implements Preference.OnPreference
     public static void setTabletMode(Context context, boolean tabletMode) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putBoolean(TABLET_MODE, tabletMode).commit();
-    }
-
-    public static Pair<String, String> getAOKPChangelogEndpoints(Context context) {
-        String start = PreferenceManager.getDefaultSharedPreferences(context).
-                getString(AOKP_CHANGELOG_START, null);
-        String end = PreferenceManager.getDefaultSharedPreferences(context).
-                getString(AOKP_CHANGELOG_END, null);
-        return new Pair<>(start, end);
-    }
-
-    public static void setAOKPChangelogEndpoints(Context context, String start, String end) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putString(AOKP_CHANGELOG_START, start).commit();
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putString(AOKP_CHANGELOG_END, end).commit();
     }
 }

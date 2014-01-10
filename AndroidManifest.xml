@@ -40,10 +40,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <action android:name="android.intent.action.SEARCH" />
-                <!-- We cannot put an intent filter whenever the preferences change as this
-                   will force the GerritControllerActivity to start
-                <action android:name="com.jbirdvegas.mgerrit.PREFERENCE_CHANGED" />
-                <category android:name="android.intent.category.DEFAULT" /> -->
+
             </intent-filter>
             <meta-data android:name="android.app.searchable"
                        android:resource="@xml/changes_searchable"/>
