@@ -17,6 +17,7 @@ package com.jbirdvegas.mgerrit;
  *  limitations under the License.
  */
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -71,8 +72,8 @@ public abstract class CardsFragment extends Fragment
         @Override
         public void onReceive(Context context, Intent intent) {
             String to = intent.getStringExtra(GerritSearchView.KEY_TO);
-            if (mParent.getClass().getSimpleName().equals(to)) {
-                getLoaderManager().restartLoader(0, intent.getExtras(), CardsFragment.this);
+            if (isAdded() && mParent.getClass().getSimpleName().equals(to)) {
+                getLoaderManager().restartLoader(0, null, CardsFragment.this);
             }
         }
     };
@@ -84,6 +85,7 @@ public abstract class CardsFragment extends Fragment
     private SingleAnimationAdapter mAnimAdapter = null;
     // Whether animations have been enabled
     private boolean mAnimationsEnabled;
+    private GerritSearchView mSearchView;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState)
@@ -129,6 +131,8 @@ public abstract class CardsFragment extends Fragment
         // Need the account id of the owner here to maintain FK db constraint
         mUrl.setRequestDetailedAccounts(true);
         mUrl.setStatus(getQuery());
+
+        mSearchView = (GerritSearchView) mParent.findViewById(R.id.search);
     }
 
     private void setup()
@@ -176,20 +180,20 @@ public abstract class CardsFragment extends Fragment
         mParent.startService(it);
     }
 
+    /**
+     * Refresh this fragment if it was marked as dirty by restarting the loader
+     * @param forceUpdate If set, forces an update of the data from the server.
+     *                    This can be independent of refreshing, so this method
+     *                    can be used to force an update.
+     */
     protected void refresh(boolean forceUpdate)
     {
-        if (!mIsDirty) return;
-
-        mIsDirty = false;
-        // if the Fragment has not yet attached to the Activity
-        // note this case and avoid crashing
-        // TODO find root cause
-        // symptom several rotations causes crash
-        if (this.isDetached()) {
-            AnalyticsHelper.sendAnalyticsEvent(mParent, AnalyticsHelper.GA_LOG_FAIL,
-                    AnalyticsHelper.GA_FAIL_UI,
-                    "CardsFragment was not attached to an Activity", null);
-        } else {
+        /* If the fragment has been attached to an activity, refresh it.
+         *  Otherwise it will be refreshed when it is attached by checking
+         *  whether it is marked as dirty.
+         */
+        if (this.isAdded() && mIsDirty) {
+            mIsDirty = false;
             getLoaderManager().restartLoader(0, null, this);
         }
 
@@ -197,6 +201,17 @@ public abstract class CardsFragment extends Fragment
             SyncTime.clear(mParent);
             sendRequest();
         }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        /* Refresh if necessary. As the fragment has just been attached,
+         *  we can assume it is added here */
+        if (!mIsDirty) return;
+        mIsDirty = false;
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     /**
@@ -216,6 +231,13 @@ public abstract class CardsFragment extends Fragment
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (args == null) {
+            args = mSearchView.getLastProcessedQuery();
+            String to = args.getString(GerritSearchView.KEY_TO);
+            if (!mParent.getClass().getSimpleName().equals(to))
+                args = null;
+        }
+
         if (args != null) {
             String databaseQuery = args.getString("WHERE");
             if (databaseQuery != null && !databaseQuery.isEmpty()) {
