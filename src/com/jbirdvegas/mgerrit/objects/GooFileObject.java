@@ -97,7 +97,11 @@ public class GooFileObject implements Parcelable {
     private String mGappsMd5;
 
     public static GooFileObject getInstance(JSONObject jsonObject) throws JSONException {
-        return new Gson().fromJson(jsonObject.toString(), GooFileObject.class);
+        GooFileObject object = new Gson().fromJson(jsonObject.toString(), GooFileObject.class);
+        if (object.mShortUrl == null || object.mShortUrl.isEmpty()) {
+            object.mShortUrl = "http://goo.im" + object.mPath;
+        }
+        return object;
     }
 
     @Override
