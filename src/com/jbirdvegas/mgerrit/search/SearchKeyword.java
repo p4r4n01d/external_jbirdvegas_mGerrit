@@ -19,6 +19,10 @@ package com.jbirdvegas.mgerrit.search;
 
 import android.util.Log;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,6 +105,7 @@ public abstract class SearchKeyword {
         return builder.toString();
     }
 
+    @Contract("null -> false")
     protected static boolean isParameterValid(String param) {
         return param != null && !param.isEmpty();
     }
@@ -111,7 +116,7 @@ public abstract class SearchKeyword {
      * @param param Arguments for the token - will not be processed
      * @return A search keyword matching name:param
      */
-    private static SearchKeyword buildToken(String name, String param) {
+    private static SearchKeyword buildToken(@NotNull String name, String param) {
 
         for (Entry<String, Class<? extends SearchKeyword>> entry : _KEYWORDS.entrySet()) {
             if (name.equalsIgnoreCase(entry.getKey())) {
@@ -127,7 +132,8 @@ public abstract class SearchKeyword {
         return null;
     }
 
-    private static SearchKeyword buildToken(String tokenStr) {
+    @Nullable
+    private static SearchKeyword buildToken(@NotNull String tokenStr) {
         String[] s = tokenStr.split(":", 2);
         if (s.length == 2) return buildToken(s[0], s[1]);
         else return null;
@@ -177,9 +183,7 @@ public abstract class SearchKeyword {
     }
 
     private static void addToSetIfNotNull(SearchKeyword token, Set<SearchKeyword> set) {
-        if (token != null) {
-            set.add(token);
-        }
+        if (token != null)  set.add(token);
     }
 
     public static String constructDbSearchQuery(Set<SearchKeyword> tokens) {

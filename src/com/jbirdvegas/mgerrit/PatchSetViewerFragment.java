@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ViewSwitcher;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.fima.cardsui.views.CardUI;
@@ -54,7 +53,7 @@ import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
-
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -295,6 +294,7 @@ public class PatchSetViewerFragment extends Fragment {
      *  return null.
      * @return The selected status in the change list fragment, or null if not available
      */
+    @Nullable
     private String getStatus() {
         if (mParent instanceof GerritControllerActivity) {
             GerritControllerActivity controllerActivity = (GerritControllerActivity) mParent;
