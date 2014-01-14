@@ -205,7 +205,7 @@ public abstract class CardsFragment extends Fragment
         }
 
         mNeedsForceUpdate = forceUpdate;
-        if (this.isAdded()) sendRequest();
+        if (this.isAdded() && forceUpdate) sendRequest();
     }
 
     @Override
