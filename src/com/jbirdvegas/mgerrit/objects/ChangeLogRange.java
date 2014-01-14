@@ -55,12 +55,7 @@ public class ChangeLogRange implements Parcelable {
             Log.d(TAG, String.format("min: %s max: %s finding: %s",
                     startDate, stopDate, commitDate));
         }
-        if (startDate.before(commitDate)
-                && commitDate.before(stopDate)) {
-            return true;
-        } else {
-            return false;
-        }
+        return startDate.before(commitDate) && commitDate.before(stopDate);
     }
 
     @Override

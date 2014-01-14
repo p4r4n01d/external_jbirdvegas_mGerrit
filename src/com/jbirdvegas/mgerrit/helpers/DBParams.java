@@ -62,9 +62,9 @@ public class DBParams {
     public static Integer getConflictParameter(@NotNull Uri uri) {
         String conflictAlgorithm = uri.getQueryParameter(TAG_CONFLICT);
         if (conflictAlgorithm == null) return null;
-        else if (conflictAlgorithm.equals("REPLACE")) {
+        else if ("REPLACE".equals(conflictAlgorithm)) {
             return SQLiteDatabase.CONFLICT_REPLACE;
-        } else if (conflictAlgorithm.equals("IGNORE")) {
+        } else if ("IGNORE".equals(conflictAlgorithm)) {
             return SQLiteDatabase.CONFLICT_IGNORE;
         } else {
             Log.w(DBParams.class.getSimpleName(),
@@ -92,7 +92,7 @@ public class DBParams {
 
     public static boolean updateOnDuplicateInsertion(Uri uri) {
         String dup = uri.getQueryParameter("duplicate");
-        return dup != null && dup.equals("UPDATE");
+        return dup != null && "UPDATE".equals(dup);
     }
 
     public static Uri groupBy(Uri uri, String condition) {

@@ -64,7 +64,7 @@ public class FileInfo implements Parcelable {
             for (Status s : values())
                 if(value.equalsIgnoreCase(s.getStatusCode())) return s;
             return MODIFIED;
-        };
+        }
     }
 
     public FileInfo(String draft) {
