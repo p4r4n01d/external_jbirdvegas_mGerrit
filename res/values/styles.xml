@@ -37,7 +37,7 @@
     </style>
 
     <style name="CardText">
-        <item name="android:textSize">@dimen/card_small_text</item>
+        <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
     </style>
@@ -58,15 +58,15 @@
     <style name="CardText.CommitOwnerText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">8dip</item>
+        <item name="android:padding">@dimen/prop_label_padding_left</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="CardText.CommitOwnerDetails">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingLeft">8dip</item>
-        <item name="android:paddingRight">8dip</item>
+        <item name="android:paddingLeft">@dimen/standard_padding</item>
+        <item name="android:paddingRight">@dimen/standard_padding</item>
         <item name="android:paddingTop">5dip</item>
         <item name="android:paddingBottom">5dip</item>
     </style>
@@ -74,10 +74,10 @@
     <style name="CardTitle" parent="style/CardText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">@dimen/card_large_text</item>
+        <item name="android:textSize">@dimen/text_size_x_large</item>
         <item name="android:textStyle">italic</item>
-        <item name="android:paddingLeft">8dp</item>
-        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingLeft">@dimen/standard_padding</item>
+        <item name="android:paddingRight">@dimen/standard_padding</item>
     </style>
 
     <style name="CardTitle.Light" parent="style/CardTitle">

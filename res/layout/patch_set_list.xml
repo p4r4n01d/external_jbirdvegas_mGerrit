@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textErrorMessage"
-            android:textSize="18sp"
+            android:textSize="@dimen/text_size_large"
             android:text="@string/not_connected"
             android:layout_marginLeft="4sp"
             android:drawableLeft="?attr/warningIcon" />
