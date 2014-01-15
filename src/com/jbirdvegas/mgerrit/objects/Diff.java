@@ -23,24 +23,30 @@ import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import com.jbirdvegas.mgerrit.R;
+import com.jbirdvegas.mgerrit.views.DiffTextView;
+
 import org.jetbrains.annotations.Contract;
 
 import java.util.LinkedList;
 
 public class Diff {
     private static final String TAG = Diff.class.getSimpleName();
-    private final Resources mResources;
+
     private String mFileDiff;
     private String mPath;
     private SpannableString mColorizedSpan;
     private Context mContext;
 
-    public Diff(Context context, String fileDiff) {
+    private final DiffTextView mTextView;
+
+    public Diff(Context context, String fileDiff, DiffTextView textView) {
         mContext = context;
-        mResources = context.getResources();
+        mTextView = textView;
+
         String path = fileDiff.split(" ")[0].trim();
         if ('a' == path.charAt(0)) {
             mPath = path.substring(2, path.length());
@@ -55,10 +61,6 @@ public class Diff {
         } catch (NullPointerException npe) {
             Log.e(TAG, "Diff was null!");
         }
-    }
-
-    public String getFileDiff() {
-        return mFileDiff;
     }
 
     public String getPath() {
@@ -81,21 +83,23 @@ public class Diff {
 
     @Contract("null -> null")
     private SpannableString spanColoredText(String incoming) {
-        if (incoming == null)
-            return null;
+        if (incoming == null) return null;
+
         String[] split = incoming.split("\n");
         SpannableString spannableString = new SpannableString(incoming);
         int charCounter = 0;
         int lineTracker = 0;
-        Resources resources = mContext.getResources();
         // colorize added/removed lines
-        colorizeDiffs(split, spannableString, charCounter, lineTracker, resources);
+        colorizeDiffs(split, spannableString, charCounter, lineTracker);
+
         // highlight tabs in red
+        Resources resources = mContext.getResources();
         highlightUnwantedChars(spannableString, resources);
         return spannableString;
     }
 
-    private void colorizeDiffs(String[] split, SpannableString spannableString, int charCounter, int lineTracker, Resources resources) {
+    private void colorizeDiffs(String[] split, SpannableString spannableString,
+                               int charCounter, int lineTracker) {
         int end = 0;
         for (String string : split) {
             charCounter += 1;
@@ -104,69 +108,47 @@ public class Diff {
                     ? spannableString.length()
                     : charCounter + string.length();
             String trimmed = string.trim();
-            if (trimmed.startsWith("+") && !trimmed.startsWith("+++")) {
-                spannableString.setSpan(new ForegroundColorSpan(resources.getColor(R.color.text_green)),
-                        charCounter - 1,
-                        end,
-                        0);
-                // highlight removed code with red background
-                // do not highlight file diffs
-            } else if (trimmed.startsWith("-") && !trimmed.startsWith("---")) {
-                spannableString.setSpan(new BackgroundColorSpan(resources.getColor(R.color.text_red)),
-                        charCounter - 1,
-                        end,
-                        0);
-            } else if (trimmed.startsWith("@@")) {
-                spannableString.setSpan(new ForegroundColorSpan(resources.getColor(android.R.color.holo_purple)),
-                        charCounter - 1,
-                        end,
-                        0);
-            } else if (trimmed.startsWith("---")) {
-                spannableString.setSpan(new ForegroundColorSpan(resources.getColor(R.color.text_brown)),
-                        charCounter - 1,
-                        end,
-                        0);
-            } else if (trimmed.startsWith("+++")) {
-                spannableString.setSpan(new ForegroundColorSpan(Color.BLUE),
-                        charCounter - 1,
-                        end,
-                        0);
-            } else if (trimmed.startsWith("a/")) {
-                spannableString.setSpan(new ForegroundColorSpan(resources.getColor(R.color.text_orange)),
-                        charCounter - 1,
-                        end,
-                        0);
+
+            CharacterStyle style = mTextView.setColor(trimmed);
+            if (style != null) {
+                spannableString.setSpan(style, charCounter - 1, end, 0);
             }
 
             // highlight trailing whitespace
-            if (string.endsWith(" ")) {
-                // count backwards and highlight the trailing whitespace
-                int lineLength = string.length();
-                int startWhitespace = -1;
-                for (int i = lineLength - 1; 0 <= i; i--) {
-                    if (string.charAt(i) == ' ') {
-                        startWhitespace = i;
-                    } else {
-                        break;
-                    }
-                }
-                if (startWhitespace > 0) {
-                    Log.d(TAG, String.format("Trailing whitespace at line: %d index: %d through %d in diff view of file %s",
-                            lineTracker,
-                            startWhitespace,
-                            string.length(),
-                            mPath));
-                    spannableString.setSpan(new BackgroundColorSpan(resources.getColor(R.color.text_red)),
-                            charCounter + startWhitespace - 1,
-                            end,
-                            0);
-                }
+            int startWhitespace = findLastNonSpace(string);
+
+            if (startWhitespace > 0) {
+                Log.d(TAG, String.format("Trailing whitespace at line: %d index: %d through %d in diff view of file %s",
+                        lineTracker,
+                        startWhitespace,
+                        string.length(),
+                        mPath));
+                spannableString.setSpan(mTextView.getTrailingSpaceColor(),
+                        charCounter + startWhitespace - 1, end, 0);
+            }
 // test line with trailing whitespaces ->        
 // Here are 3 tabs ->	-	-	<- this line ends with four whitespaces ->    
-            }
+
             charCounter += string.length();
         }
     }
+
+    private int findLastNonSpace(String s) {
+        int startWhitespace = -1;
+        if (s.endsWith(" ")) {
+            // count backwards and highlight the trailing whitespace
+            int lineLength = s.length();
+            for (int i = lineLength - 1; 0 <= i; i--) {
+                if (s.charAt(i) == ' ') {
+                    startWhitespace = i;
+                } else {
+                    break;
+                }
+            }
+        }
+        return startWhitespace;
+    }
+
 
     private void highlightUnwantedChars(SpannableString spannableString, Resources resources) {
         for (Integer ints : tabs) {
@@ -186,11 +168,10 @@ public class Diff {
     LinkedList<Integer> tabs = new LinkedList<>();
 
     private String unescape(String s) {
-        int i = 0, len = s.length(), realCounter = 0;
+        int i = 0, len = s.length();
         char c;
         StringBuffer sb = new StringBuffer(len);
         while (i < len) {
-            realCounter++;
             c = s.charAt(i++);
             if (c == '\\') {
                 if (i < len) {

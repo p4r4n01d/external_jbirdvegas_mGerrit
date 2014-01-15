@@ -34,6 +34,7 @@
         <item name="warningIcon">@drawable/ic_action_warning</item>
         <item name="saveIcon">@drawable/ic_action_save</item>
         <item name="searchIcon">@drawable/ic_action_search</item>
+        <item name="diffStyle">@style/Diff.Light</item>
     </style>
 
     <style name="Theme.Dark" parent="android:style/Theme.Holo">
@@ -53,6 +54,7 @@
         <item name="warningIcon">@drawable/ic_action_warning_dark</item>
         <item name="saveIcon">@drawable/ic_action_save_dark</item>
         <item name="searchIcon">@drawable/ic_action_search_dark</item>
+        <item name="diffStyle">@style/Diff.Dark</item>
     </style>
 
     <style name="ActionBar" parent="android:Widget.Holo.ActionBar" />
@@ -125,6 +127,23 @@
         <item name="android:paddingRight">4dp</item>
         <item name="android:layout_marginRight">4dp</item>
         <item name="android:layout_marginLeft">4dp</item>
+    </style>
+
+    <style name="Diff">
+        <item name="added">@color/text_green</item>
+        <item name="pathInfo">@color/text_orange</item>
+    </style>
+    <style name="Diff.Light">
+        <item name="removed">@color/text_light_red</item>
+        <item name="rangeInfo">@color/text_purple</item>
+        <item name="origHeader">@color/text_brown</item>
+        <item name="newHeader">@color/text_blue</item>
+    </style>
+    <style name="Diff.Dark">
+        <item name="removed">@color/text_red</item>
+        <item name="rangeInfo">@color/text_purple_light</item>
+        <item name="origHeader">@color/text_brown_light</item>
+        <item name="newHeader">@color/text_blue_light</item>
     </style>
 
 </resources>
