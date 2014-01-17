@@ -57,6 +57,17 @@ abstract class SyncProcessor<T> {
         gson = gsonBuilder.create();
     }
 
+    /**
+     * Alternate constructor where the url is not dynamic and can be determined from the
+     *  current Gerrit instance.
+     *
+     *  Note: subclasses using this constructor MUST override fetchData
+     * @param context Contect for network access
+     */
+    SyncProcessor(Context context) {
+        this.mContext = context;
+    }
+
     SyncProcessor(Context context, GerritURL url) {
         this.mContext = context;
         this.mCurrentUrl = url;
@@ -69,7 +80,7 @@ abstract class SyncProcessor<T> {
 
     // Helper method to extract the relevant query portion of the URL
     protected String getQuery() {
-        return mCurrentUrl.getQuery();
+        return getUrl().getQuery();
     }
 
     /**
@@ -126,6 +137,8 @@ abstract class SyncProcessor<T> {
         mResponseHandler.interrupt();
         mResponseHandler = null;
     }
+
+    protected Response.Listener<T> getListener() { return listener;  }
 
     class ResponseHandler extends Thread {
         private final T mData;

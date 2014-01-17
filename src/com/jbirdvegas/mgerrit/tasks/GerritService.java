@@ -34,7 +34,7 @@ public class GerritService extends IntentService {
     public static final String URL_KEY = "Url";
     public static final String DATA_TYPE_KEY = "Type";
 
-    public static enum DataType { Project, Commit, CommitDetails }
+    public static enum DataType { Project, Commit, CommitDetails, GetVersion }
 
     private GerritURL mCurrentUrl;
 
@@ -54,6 +54,8 @@ public class GerritService extends IntentService {
             processor = new ChangeListProcessor(this, mCurrentUrl);
         } else if (dataType == DataType.CommitDetails) {
             processor = new CommitProcessor(this, mCurrentUrl);
+        } else if (dataType == DataType.GetVersion) {
+            processor = new VersionProcessor(this);
         } else {
             Log.w(TAG, "Don't know how to handle synchronization of type " + DATA_TYPE_KEY);
             return;

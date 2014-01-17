@@ -65,6 +65,7 @@ public abstract class DatabaseTable {
         ChangesList, ChangesID,
         ChangedFilesList, ChangedFilesID,
         CommitMarkerList, CommitMarkerID,
+        ConfigList, ConfigID,
         FileInfoList, FileInfoID,
         MessageInfoList, MessageInfoID,
         ProjectsList, ProjectsID,
@@ -82,6 +83,7 @@ public abstract class DatabaseTable {
         tables.add(Changes.class);
         tables.add(ChangedFiles.class);
         tables.add(CommitMarker.class);
+        tables.add(Config.class);
         tables.add(FileInfo.class);
         tables.add(MessageInfo.class);
         tables.add(ProjectsTable.class);
