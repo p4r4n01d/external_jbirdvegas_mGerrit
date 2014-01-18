@@ -18,7 +18,6 @@ package com.jbirdvegas.mgerrit.views;
  */
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.text.style.BackgroundColorSpan;
@@ -29,9 +28,10 @@ import android.widget.TextView;
 
 import com.jbirdvegas.mgerrit.R;
 
+import org.jetbrains.annotations.NotNull;
+
 public class DiffTextView extends TextView {
 
-    private Resources mResources;
     private int mLineAdded_color;
     private int mLineRemoved_color;
     private final int mRangeInfo_color;
@@ -56,22 +56,28 @@ public class DiffTextView extends TextView {
         mNewHeader_color = a.getColor(R.styleable.DiffTextView_newHeader, Color.BLUE);
         mPathInfo_color = a.getColor(R.styleable.DiffTextView_pathInfo, R.color.text_orange);
 
-        mResources = getResources();
-
         a.recycle();
     }
 
-    public CharacterStyle setColor(String str) {
-        if (str.startsWith("+++")) return new ForegroundColorSpan(mNewHeader_color);
-        else if (str.startsWith("---")) return new ForegroundColorSpan(mOrigHeader_color);
-        else if (str.startsWith("+") && !str.startsWith("+++")) return new ForegroundColorSpan(mLineAdded_color);
-        else if (str.startsWith("-")) return new BackgroundColorSpan(mLineRemoved_color);
-        else if (str.startsWith("@@")) return new ForegroundColorSpan(mRangeInfo_color);
-        else if (str.startsWith("a/")) return new ForegroundColorSpan(mPathInfo_color);
+    /**
+     * Given a line from a diff, determine which color in which to highlight it.
+     * @param line A line from a diff comparison
+     * @return A CharacterStyle containing a color in which to highlight the text
+     */
+    public CharacterStyle setColor(@NotNull String line) {
+        if (line.startsWith("+++")) return new ForegroundColorSpan(mNewHeader_color);
+        else if (line.startsWith("---")) return new ForegroundColorSpan(mOrigHeader_color);
+        else if (line.startsWith("+") && !line.startsWith("+++")) return new ForegroundColorSpan(mLineAdded_color);
+        else if (line.startsWith("-")) return new ForegroundColorSpan(mLineRemoved_color);
+        else if (line.startsWith("@@")) return new ForegroundColorSpan(mRangeInfo_color);
+        else if (line.startsWith("a/")) return new ForegroundColorSpan(mPathInfo_color);
         return null;
     }
 
+    /**
+     * @return The CharacterStyle containing what color to highlight trailing spaces
+     */
     public CharacterStyle getTrailingSpaceColor() {
-        return new BackgroundColorSpan(mResources.getColor(R.color.text_red));
+        return new BackgroundColorSpan(getResources().getColor(R.color.text_red));
     }
 }

@@ -16,6 +16,8 @@
             android:layout_height="match_parent"
             android:id="@+id/diff_view_diff"
             android:layout_gravity="left"
+            android:textSize="@dimen/text_size_large"
+            android:text="@string/loading"
             style="?attr/diffStyle"/>
     </HorizontalScrollView>
 </ScrollView>

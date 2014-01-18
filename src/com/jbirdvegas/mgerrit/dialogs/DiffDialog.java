@@ -66,8 +66,6 @@ public class DiffDialog extends AlertDialog.Builder {
         View rootView = inflater.inflate(R.layout.diff_dialog, null);
         setView(rootView);
         mDiffTextView = (DiffTextView) rootView.findViewById(R.id.diff_view_diff);
-        mDiffTextView.setText(R.string.loading);
-        mDiffTextView.setTextSize(18f);
 
         if (DIFF_DEBUG) {
             Log.d(TAG, "Calling url: " + website);
@@ -144,13 +142,10 @@ public class DiffDialog extends AlertDialog.Builder {
         Diff currentDiff = null;
         for (String change : filesChanged) {
             String concat;
-            try {
-                concat = change.substring(2, change.lastIndexOf(mFileInfo.getPath())).trim();
-                concat = concat.split(" ")[0];
-            } catch (StringIndexOutOfBoundsException notFound) {
-                Log.d(TAG, notFound.getMessage());
-                continue;
-            }
+            int index = change.lastIndexOf(mFileInfo.getPath());
+            if (index < 0) continue;
+
+            concat = change.substring(2, index).trim().split(" ", 2)[0];
             if (concat.equals(mFileInfo.getPath())) {
                 builder.append(DIFF);
                 change.replaceAll("\n", mLineSplit);

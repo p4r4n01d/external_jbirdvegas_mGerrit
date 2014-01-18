@@ -37,7 +37,7 @@ public class Diff {
     private static final String TAG = Diff.class.getSimpleName();
 
     private String mFileDiff;
-    private String mPath;
+    private final String mPath;
     private SpannableString mColorizedSpan;
     private Context mContext;
 
@@ -100,7 +100,7 @@ public class Diff {
 
     private void colorizeDiffs(String[] split, SpannableString spannableString,
                                int charCounter, int lineTracker) {
-        int end = 0;
+        int end;
         for (String string : split) {
             charCounter += 1;
             lineTracker += 1;
@@ -133,6 +133,7 @@ public class Diff {
         }
     }
 
+    @Contract("null -> fail")
     private int findLastNonSpace(String s) {
         int startWhitespace = -1;
         if (s.endsWith(" ")) {
@@ -165,12 +166,12 @@ public class Diff {
     }
 
     // used to track index of tab chars
-    LinkedList<Integer> tabs = new LinkedList<>();
+    private LinkedList<Integer> tabs = new LinkedList<>();
 
     private String unescape(String s) {
         int i = 0, len = s.length();
         char c;
-        StringBuffer sb = new StringBuffer(len);
+        StringBuilder sb = new StringBuilder(len);
         while (i < len) {
             c = s.charAt(i++);
             if (c == '\\') {
@@ -178,6 +179,7 @@ public class Diff {
                     c = s.charAt(i++);
                     if (c == 'u') {
                         // TODO: check that 4 more chars exist and are all hex digits
+                        //noinspection MagicNumber
                         c = (char) Integer.parseInt(s.substring(i, i + 4), 16);
                         i += 4;
                     } else if (c == 't') {
