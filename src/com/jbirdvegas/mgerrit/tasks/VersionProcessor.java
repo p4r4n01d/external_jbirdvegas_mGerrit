@@ -73,9 +73,11 @@ public class VersionProcessor extends SyncProcessor<String> {
                 getListener(), new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                // TODO: Need to make sure this is a 404 error
-                // Pretend we got a response
-                getListener().onResponse(Config.VERSION_DEFAULT);
+                // Need to make sure this is a 404 error
+                if (volleyError.networkResponse.statusCode == 404) {
+                    // Pretend we got a response
+                    getListener().onResponse(Config.VERSION_DEFAULT);
+                }
             }
         });
         queue.add(request);

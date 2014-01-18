@@ -239,7 +239,7 @@ public class PatchSetViewerFragment extends Fragment {
          * so this will not be able to get the files changed or the full commit message
          * in prior Gerrit versions.
          */
-        GerritService.sendRequest(mParent, GerritService.DataType.Commit, mUrl);
+        GerritService.sendRequest(mParent, GerritService.DataType.CommitDetails, mUrl);
     }
 
     /**
