@@ -12,8 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:paddingLeft="8dip"
-        android:paddingRight="8dip"
+        android:paddingLeft="@dimen/standard_padding"
+        android:paddingRight="@dimen/standard_padding"
         android:id="@+id/prop_card_subject"
         style="?attr/cardTitleStyle"
         tools:text="Commit Subject"/>
