@@ -106,21 +106,14 @@ public class GerritURL implements Parcelable
             return sGerritBase + "projects/?d";
         }
 
-        StringBuilder builder = new StringBuilder(0).append(sGerritBase);
+        StringBuilder builder = new StringBuilder(0)
+            .append(sGerritBase)
+            .append(StaticWebAddress.getQuery());
 
-        if (mRequestChangeDetail) {
-            if (mChangeID != null && !mChangeID.isEmpty()) {
-                builder.append("/changes/").append(mChangeID).append("/detail")
-                        .append(JSONCommit.CURRENT_PATCHSET_ARGS);
-            }
-            // Cannot request change detail without a change id.
-            else return "";
-        } else {
-            builder.append(StaticWebAddress.getQuery());
-            if (mChangeID != null && !mChangeID.isEmpty()) {
-                builder.append(mChangeID);
-                addPlus = true;
-            }
+        if (mChangeID != null && !mChangeID.isEmpty())
+        {
+            builder.append(mChangeID);
+            addPlus = true;
         }
 
         if (mStatus != null && !mStatus.isEmpty())
@@ -154,6 +147,10 @@ public class GerritURL implements Parcelable
 
         if (mSortkey != null && !mSortkey.isEmpty()) {
             builder.append("&P=").append(mSortkey);
+        }
+
+        if (mRequestChangeDetail) {
+            builder.append(JSONCommit.CURRENT_PATCHSET_ARGS);
         }
 
         if (mRequestDetailedAccounts) {
