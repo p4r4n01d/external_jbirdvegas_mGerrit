@@ -23,7 +23,6 @@ public class GerritURL implements Parcelable
     private String mEmail = "";
     private String mCommitterState = "";
     private boolean mRequestDetailedAccounts = false;
-    private boolean mListProjects = false;
     private String mSortkey = "";
     private boolean mRequestChangeDetail = false;
     private String mChangeID = "";
@@ -70,11 +69,6 @@ public class GerritURL implements Parcelable
         mRequestDetailedAccounts = requestDetailedAccounts;
     }
 
-    // Setting this will ignore all change related parts of the query URL
-    public void listProjects() {
-        mListProjects = true;
-    }
-
     public void requestChangeDetail(boolean request) {
         mRequestChangeDetail = request;
         if (request) {
@@ -100,10 +94,6 @@ public class GerritURL implements Parcelable
         // Sanity checking, this value REALLY should be set.
         if (sGerritBase == null) {
             throw new NullPointerException("Base Gerrit URL is null, did you forget to set one?");
-        }
-
-        if (mListProjects) {
-            return sGerritBase + "projects/?d";
         }
 
         StringBuilder builder = new StringBuilder(0)
@@ -215,7 +205,6 @@ public class GerritURL implements Parcelable
         dest.writeString(mStatus);
         dest.writeString(mEmail);
         dest.writeString(mCommitterState);
-        dest.writeInt(mListProjects ? 1 : 0);
         dest.writeInt(mRequestDetailedAccounts ? 1 : 0);
         dest.writeString(mSortkey);
         dest.writeInt(mRequestChangeDetail ? 1 : 0);
@@ -228,7 +217,6 @@ public class GerritURL implements Parcelable
         mStatus = in.readString();
         mEmail = in.readString();
         mCommitterState = in.readString();
-        mListProjects = in.readInt() == 1;
         mRequestDetailedAccounts = in.readInt() == 1;
         mSortkey = in.readString();
         mRequestChangeDetail = in.readInt() == 1;

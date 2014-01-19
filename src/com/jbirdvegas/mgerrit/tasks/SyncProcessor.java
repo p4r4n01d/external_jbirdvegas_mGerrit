@@ -107,14 +107,22 @@ abstract class SyncProcessor<T> {
         // Default to doing nothing - subclasses can override this
     }
 
+    /**
+     * Sends a request to the Gerrit server for the url set in the constructor
+     *  SyncProcessor(Context, GerritURL). The default simply calls
+     *  fetchData(String).
+     */
     protected void fetchData() {
+        fetchData(getUrl().toString());
+    }
+
+    protected void fetchData(final String url) {
 
         // Won't be able to actually get JSON response back as it
         //  is improperly formed (junk at start), but requesting raw text and
         //  trimming it should be fine.
 
         RequestQueue queue = Volley.newRequestQueue(mContext);
-        final String url = getUrl().toString();
         new StartingRequest(mContext, url).sendUpdateMessage();
 
         GsonRequest request = new GsonRequest<>(url, gson, getType(), 5,

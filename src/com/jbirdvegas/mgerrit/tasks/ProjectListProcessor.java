@@ -35,8 +35,8 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
 
     private final String mUrl;
 
-    ProjectListProcessor(Context context, GerritURL url) {
-        super(context, url);
+    ProjectListProcessor(Context context) {
+        super(context);
         String gerrit = Prefs.getCurrentGerrit(context);
         mUrl = gerrit + "projects/?d";
     }
@@ -69,5 +69,10 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
     void doPostProcess(Projects data) {
         SyncTime.setValue(mContext, SyncTime.PROJECTS_LIST_SYNC_TIME,
                 System.currentTimeMillis(), mUrl);
+    }
+
+    @Override
+    protected void fetchData() {
+        super.fetchData(mUrl);
     }
 }
