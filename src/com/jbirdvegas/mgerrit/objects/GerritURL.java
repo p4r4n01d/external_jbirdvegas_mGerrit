@@ -26,6 +26,7 @@ public class GerritURL implements Parcelable
     private String mSortkey = "";
     private boolean mRequestChangeDetail = false;
     private String mChangeID = "";
+    private int mChangeNo = 0;
 
     // Default constructor to facilitate instantiation
     public GerritURL() {
@@ -76,6 +77,10 @@ public class GerritURL implements Parcelable
         }
     }
 
+    public void setChangeNumber(int changeNumber) {
+        mChangeNo = changeNumber;
+    }
+
     /**
      * Use the sortKey to resume a query from a given change. This is only valid
      *  for requesting change lists.
@@ -96,14 +101,21 @@ public class GerritURL implements Parcelable
             throw new NullPointerException("Base Gerrit URL is null, did you forget to set one?");
         }
 
-        StringBuilder builder = new StringBuilder(0)
-            .append(sGerritBase)
-            .append(StaticWebAddress.getQuery());
+        StringBuilder builder = new StringBuilder(0).append(sGerritBase);
 
-        if (mChangeID != null && !mChangeID.isEmpty())
-        {
-            builder.append(mChangeID);
-            addPlus = true;
+        if (mRequestChangeDetail) {
+            if (mChangeNo > 0) {
+                builder.append("/changes/").append(mChangeNo).append("/detail")
+                        .append(JSONCommit.CURRENT_PATCHSET_ARGS);
+            }
+            // Cannot request change detail without a change id.
+            else return "";
+        } else {
+            builder.append(StaticWebAddress.getQuery());
+            if (mChangeID != null && !mChangeID.isEmpty()) {
+                builder.append(mChangeID);
+                addPlus = true;
+            }
         }
 
         if (mStatus != null && !mStatus.isEmpty())
@@ -137,10 +149,6 @@ public class GerritURL implements Parcelable
 
         if (mSortkey != null && !mSortkey.isEmpty()) {
             builder.append("&P=").append(mSortkey);
-        }
-
-        if (mRequestChangeDetail) {
-            builder.append(JSONCommit.CURRENT_PATCHSET_ARGS);
         }
 
         if (mRequestDetailedAccounts) {
@@ -202,6 +210,7 @@ public class GerritURL implements Parcelable
         dest.writeString(sGerritBase);
         dest.writeString(sProject);
         dest.writeString(mChangeID);
+        dest.writeInt(mChangeNo);
         dest.writeString(mStatus);
         dest.writeString(mEmail);
         dest.writeString(mCommitterState);
@@ -214,6 +223,7 @@ public class GerritURL implements Parcelable
         sGerritBase = in.readString();
         sProject = in.readString();
         mChangeID = in.readString();
+        mChangeNo = in.readInt();
         mStatus = in.readString();
         mEmail = in.readString();
         mCommitterState = in.readString();

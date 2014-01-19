@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -79,6 +80,7 @@ public class PatchSetViewerFragment extends Fragment {
     public static final String NEW_CHANGE_SELECTED = "Change Selected";
     public static final String EXPAND_TAG = "expand";
     public static final String CHANGE_ID = "changeID";
+    public static final String CHANGE_NO = "changeNo";
     public static final String STATUS = "queryStatus";
 
     private final BroadcastReceiver mStatusReceiver = new BroadcastReceiver() {
@@ -227,11 +229,12 @@ public class PatchSetViewerFragment extends Fragment {
             return; // Same change selected, no need to do anything.
         }
 
-        SelectedChange.setSelectedChange(mContext, changeID);
+        int changeNo = SelectedChange.setSelectedChange(mContext, changeID);
         this.mSelectedChange = changeID;
         mUrl.setChangeID(mSelectedChange);
+        mUrl.setChangeNumber(changeNo);
         mUrl.requestChangeDetail(true);
-        executeGerritTask(mUrl.toString());
+        //executeGerritTask(mUrl.toString());
 
         /*
          * Requires Gerrit version 2.8
@@ -255,7 +258,10 @@ public class PatchSetViewerFragment extends Fragment {
             return;
         }
 
-        String changeID = SelectedChange.getSelectedChange(mContext, mStatus);
+
+        Pair<String, Integer> change = SelectedChange.getSelectedChange(mContext, mStatus);
+        String changeID = change.first;
+        int changeNumber = change.second;
         if (changeID == null || changeID.isEmpty()) {
             changeID = Changes.getMostRecentChange(mParent, mStatus);
             if (changeID == null || changeID.isEmpty()) {
@@ -270,6 +276,7 @@ public class PatchSetViewerFragment extends Fragment {
         else {
             Intent intent = new Intent(PatchSetViewerFragment.NEW_CHANGE_SELECTED);
             intent.putExtra(PatchSetViewerFragment.CHANGE_ID, changeID);
+            intent.putExtra(PatchSetViewerFragment.CHANGE_NO, changeNumber);
             intent.putExtra(PatchSetViewerFragment.STATUS, mStatus);
             intent.putExtra(PatchSetViewerFragment.EXPAND_TAG, true);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
