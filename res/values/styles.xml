@@ -98,6 +98,13 @@
         <item name="android:layout_marginLeft">4dp</item>
     </style>
 
+    <style name="GerritUrl">
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:textColor">@color/card_text</item>
+        <item name="android:textSize">@dimen/text_size_micro</item>
+        <item name="android:focusable">false</item>
+    </style>
+
     <style name="Diff">
         <item name="added">@color/text_green</item>
         <item name="pathInfo">@color/text_orange</item>

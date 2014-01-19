@@ -21,10 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtGerritName"
-        android:layout_marginLeft="10sp"
-        android:textColor="@color/card_text"
-        android:textSize="@dimen/text_size_micro"
-        android:focusable="false"
+        style="GerritUrl"
         tools:text="https://gerrit.aokp.co"/>
 
     <RadioButton

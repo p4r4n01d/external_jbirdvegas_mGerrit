@@ -30,6 +30,7 @@
     <dimen name="card_stroke_width">6dp</dimen>
     <dimen name="commit_card_stroke_padding">2dp</dimen>
     <dimen name="prop_label_padding_left">8dip</dimen>
+    <dimen name="project_row_padding">2dp</dimen>
 
     <!-- Text sizes -->
     <dimen name="text_size_extra_micro">10.0sp</dimen>
