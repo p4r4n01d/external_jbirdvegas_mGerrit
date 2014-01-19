@@ -19,6 +19,7 @@ package com.jbirdvegas.mgerrit.tasks;
 
 import android.content.Context;
 
+import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.database.DatabaseTable;
 import com.jbirdvegas.mgerrit.database.ProjectsTable;
@@ -36,7 +37,8 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
 
     ProjectListProcessor(Context context, GerritURL url) {
         super(context, url);
-        mUrl = url.toString();
+        String gerrit = Prefs.getCurrentGerrit(context);
+        mUrl = gerrit + "projects/?d";
     }
 
     @Override
@@ -50,7 +52,7 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
     boolean isSyncRequired() {
         Context context = getContext();
         long syncInterval = context.getResources().getInteger(R.integer.projects_sync_interval);
-        long lastSync = SyncTime.getValueForQuery(context, SyncTime.CHANGES_LIST_SYNC_TIME, mUrl);
+        long lastSync = SyncTime.getValueForQuery(context, SyncTime.PROJECTS_LIST_SYNC_TIME, mUrl);
         boolean sync = isInSyncInterval(syncInterval, lastSync);
         if (sync) return true;
 

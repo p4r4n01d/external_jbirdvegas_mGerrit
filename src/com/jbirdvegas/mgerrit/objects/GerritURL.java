@@ -28,7 +28,7 @@ public class GerritURL implements Parcelable
     private boolean mRequestChangeDetail = false;
     private String mChangeID = "";
 
-    // Default constructor to facilitate instanciation
+    // Default constructor to facilitate instantiation
     public GerritURL() {
         super();
     }
