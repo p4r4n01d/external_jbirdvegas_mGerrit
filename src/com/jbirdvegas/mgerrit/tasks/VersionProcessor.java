@@ -62,6 +62,22 @@ public class VersionProcessor extends SyncProcessor<String> {
     @Override
     protected void fetchData() {
 
+        Response.Listener<String> listener = getListener(mUrl);
+
+        StringRequest request = new StringRequest(mUrl,
+                getListener(mUrl), new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                // Need to make sure this is a 404 error
+                if (volleyError.networkResponse.statusCode == 404) {
+                    // Pretend we got a response
+                    getListener(mUrl).onResponse(Config.VERSION_DEFAULT);
+                }
+            }
+        });
+
+        this.fetchData(mUrl, request);
+
         // Won't be able to actually get JSON response back as it
         //  is improperly formed (junk at start), but requesting raw text and
         //  trimming it should be fine.
@@ -69,17 +85,7 @@ public class VersionProcessor extends SyncProcessor<String> {
         RequestQueue queue = Volley.newRequestQueue(mContext);
         new StartingRequest(mContext, mUrl).sendUpdateMessage();
 
-        StringRequest request = new StringRequest(mUrl,
-                getListener(), new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                // Need to make sure this is a 404 error
-                if (volleyError.networkResponse.statusCode == 404) {
-                    // Pretend we got a response
-                    getListener().onResponse(Config.VERSION_DEFAULT);
-                }
-            }
-        });
+
         queue.add(request);
     }
 }

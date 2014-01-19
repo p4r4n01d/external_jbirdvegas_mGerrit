@@ -19,6 +19,7 @@ package com.jbirdvegas.mgerrit.tasks;
 
 import android.content.Context;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -39,16 +40,6 @@ abstract class SyncProcessor<T> {
     protected final Context mContext;
     private GerritURL mCurrentUrl;
     private ResponseHandler mResponseHandler;
-
-    private final Response.Listener<T> listener = new Response.Listener<T>() {
-        @Override
-        public void onResponse(T data) {
-            /* Offload all the work to a seperate thread so database activity is not
-             * done on the main thread. */
-            mResponseHandler = new ResponseHandler(data);
-            mResponseHandler.start();
-        }
-    };
 
     private static Gson gson;
     static {
@@ -117,6 +108,18 @@ abstract class SyncProcessor<T> {
     }
 
     protected void fetchData(final String url) {
+        GsonRequest request = new GsonRequest<>(url, gson, getType(), 5,
+                getListener(url), new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                new ErrorDuringConnection(mContext, volleyError, url);
+            }
+        });
+
+        fetchData(url, request);
+    }
+
+    protected void fetchData(final String url, Request<T> request) {
 
         // Won't be able to actually get JSON response back as it
         //  is improperly formed (junk at start), but requesting raw text and
@@ -124,16 +127,9 @@ abstract class SyncProcessor<T> {
 
         RequestQueue queue = Volley.newRequestQueue(mContext);
         new StartingRequest(mContext, url).sendUpdateMessage();
-
-        GsonRequest request = new GsonRequest<>(url, gson, getType(), 5,
-               listener, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                new ErrorDuringConnection(mContext, volleyError, url);
-            }
-        });
         queue.add(request);
     }
+
 
     protected boolean isInSyncInterval(long syncInterval, long lastSync) {
         long timeNow = System.currentTimeMillis();
@@ -146,20 +142,31 @@ abstract class SyncProcessor<T> {
         mResponseHandler = null;
     }
 
-    protected Response.Listener<T> getListener() { return listener;  }
+    protected Response.Listener<T> getListener(final String url) {
+        return new Response.Listener<T>() {
+            @Override
+            public void onResponse(T data) {
+            /* Offload all the work to a seperate thread so database activity is not
+             * done on the main thread. */
+                mResponseHandler = new ResponseHandler(data, url);
+                mResponseHandler.start();
+            }
+        };
+    }
 
     class ResponseHandler extends Thread {
         private final T mData;
+        private final String mUrl;
 
-        ResponseHandler(T data) {
+        ResponseHandler(T data, String url) {
             this.mData = data;
+            this.mUrl = url;
         }
 
         @Override
         public void run() {
-            String url = getUrl().toString();
             insert(mData);
-            new Finished(mContext, null, url).sendUpdateMessage();
+            new Finished(mContext, null, mUrl).sendUpdateMessage();
             doPostProcess(mData);
             // This thread has finished so the parent activity should no longer need it
             mResponseHandler = null;
