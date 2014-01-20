@@ -105,7 +105,7 @@ public class GerritURL implements Parcelable
 
         if (mRequestChangeDetail) {
             if (mChangeNo > 0) {
-                builder.append("/changes/").append(mChangeNo).append("/detail")
+                builder.append("/changes/").append(mChangeNo).append("/detail/")
                         .append(JSONCommit.CURRENT_PATCHSET_ARGS);
             }
             // Cannot request change detail without a change id.

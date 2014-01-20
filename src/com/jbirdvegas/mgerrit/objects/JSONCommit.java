@@ -46,7 +46,7 @@ public class JSONCommit implements Parcelable {
     public static final String DETAILED_ACCOUNTS_ARG = "&o=DETAILED_ACCOUNTS";
     // used to query commit message
     public static final String CURRENT_PATCHSET_ARGS = new StringBuilder(0)
-            .append("&o=CURRENT_REVISION")
+    .append("?o=CURRENT_REVISION")
             .append("&o=CURRENT_COMMIT")
             .append("&o=CURRENT_FILES")
             .append("&o=DETAILED_LABELS")
