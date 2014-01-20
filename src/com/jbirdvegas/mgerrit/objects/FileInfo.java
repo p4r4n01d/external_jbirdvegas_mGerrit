@@ -28,6 +28,9 @@ public class FileInfo implements Parcelable {
 
     private String path;
 
+    @SerializedName("old_path")
+    private String oldPath;
+
     @SerializedName(JSONCommit.KEY_INSERTED)
     private int inserted = -1;
 
@@ -75,6 +78,8 @@ public class FileInfo implements Parcelable {
         return this.path;
     }
 
+    public String getOldPath() { return oldPath; }
+
     public int getInserted() {
         return this.inserted;
     }
@@ -88,8 +93,6 @@ public class FileInfo implements Parcelable {
     public void setStatus(Status status) { this.status = status; }
 
     public boolean isBinary() { return isBinary; }
-
-    public void setBinary(boolean binary) { this.isBinary = binary; }
 
     public static FileInfo deserialise(String _path, JsonObject object){
         FileInfo file = new Gson().fromJson(object, FileInfo.class);
@@ -108,9 +111,10 @@ public class FileInfo implements Parcelable {
     public String toString() {
         return "FileInfo{" +
                 "path='" + path + '\'' +
+                ", oldPath='" + oldPath + '\'' +
                 ", inserted=" + inserted +
                 ", deleted=" + deleted +
-                ", status='" + status + '\'' +
+                ", status=" + status +
                 ", isBinary=" + isBinary +
                 '}';
     }
@@ -123,12 +127,14 @@ public class FileInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(path);
+        parcel.writeString(oldPath);
         parcel.writeInt(inserted);
         parcel.writeInt(deleted);
     }
 
     public FileInfo(Parcel parcel) {
         path = parcel.readString();
+        oldPath = parcel.readString();
         inserted = parcel.readInt();
         deleted = parcel.readInt();
     }

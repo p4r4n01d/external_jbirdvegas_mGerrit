@@ -20,10 +20,10 @@ package com.jbirdvegas.mgerrit.tasks;
 import android.content.Context;
 
 import com.jbirdvegas.mgerrit.R;
-import com.jbirdvegas.mgerrit.database.ChangedFiles;
 import com.jbirdvegas.mgerrit.database.Changes;
 import com.jbirdvegas.mgerrit.database.CommitMarker;
 import com.jbirdvegas.mgerrit.database.DatabaseTable;
+import com.jbirdvegas.mgerrit.database.FileInfoTable;
 import com.jbirdvegas.mgerrit.database.MessageInfo;
 import com.jbirdvegas.mgerrit.database.Reviewers;
 import com.jbirdvegas.mgerrit.database.SyncTime;
@@ -59,7 +59,7 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
             Reviewers.insertReviewers(getContext(), changeid, reviewers);
 
             MessageInfo.insertMessages(getContext(), changeid, commit.getMessagesList());
-            ChangedFiles.insertChangedFiles(getContext(), changeid, commit.getChangedFiles());
+            FileInfoTable.insertChangedFiles(getContext(), changeid, commit.getChangedFiles());
         }
     }
 

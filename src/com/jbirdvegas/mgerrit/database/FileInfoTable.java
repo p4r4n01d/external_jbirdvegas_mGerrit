@@ -25,39 +25,41 @@ import android.net.Uri;
 
 import com.jbirdvegas.mgerrit.helpers.DBParams;
 import com.jbirdvegas.mgerrit.objects.FileInfo;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChangedFiles extends DatabaseTable {
+public class FileInfoTable extends DatabaseTable {
 
     // Table name
-    public static final String TABLE = "ChangedFiles";
+    public static final String TABLE = "FileInfo";
 
     // --- Columns ---
-    // The Change-Id of the change where these files were modified
+    // The Change-Id of the change.
     public static final String C_CHANGE_ID = "change_id";
 
-    // The full pathname of the file that was changed
-    public static final String C_FILENAME = "path";
+    public static final String C_FILE_NAME = "filename";
 
-    // The number of lines inserted
-    public static final String C_INSERTED = "lines_inserted";
+    /* The status of the file ("A"=Added, "D"=Deleted, "R"=Renamed, "C"=Copied, "W"=Rewritten).
+     * Not set if the file was Modified ("M"). optional. */
+    public static final String C_STATUS = "status";
 
-    // The number of lines deleted
-    public static final String C_DELETED = "lines_deleted";
+    // Whether the file is binary.
+    public static final String C_ISBINARY = "binary";
 
-    // The status of this file
-    public static final String C_FILE_STATUS = "status";
+    // The old file path. Only set if the file was renamed or copied.
+    public static final String C_OLDPATH = "old_path";
 
-    // The whehter the file is binary or text
-    public static final String C_BINARY = "is_binary";
+    // Number of inserted lines. Not set for binary files or if no lines were inserted.
+    public static final String C_LINES_INSERTED = "lines_inserted";
 
-    public static final String[] PRIMARY_KEY = { C_CHANGE_ID, C_FILENAME };
+    // Number of deleted lines. Not set for binary files or if no lines were deleted.
+    public static final String C_LINES_DELETED = "lines_deleted";
 
-    public static final int ITEM_LIST = UriType.ChangedFilesList.ordinal();
-    public static final int ITEM_ID = UriType.ChangedFilesID.ordinal();
+    public static final String[] PRIMARY_KEY = { C_CHANGE_ID, C_FILE_NAME };
+
+    public static final int ITEM_LIST = UriType.FileInfoList.ordinal();
+    public static final int ITEM_ID = UriType.FileInfoID.ordinal();
 
     public static final Uri CONTENT_URI = Uri.parse(DatabaseFactory.BASE_URI + TABLE);
 
@@ -65,13 +67,12 @@ public class ChangedFiles extends DatabaseTable {
     public static final String CONTENT_ITEM_TYPE = DatabaseFactory.BASE_MIME_ITEM + TABLE;
 
     // Sort by condition for querying results.
-    public static final String SORT_BY = ChangedFiles.C_FILENAME + " ASC";
+    public static final String SORT_BY = C_FILE_NAME + " ASC";
 
-    @Nullable
-    private static ChangedFiles mInstance = null;
+    private static FileInfoTable mInstance = null;
 
-    public static ChangedFiles getInstance() {
-        if (mInstance == null) mInstance = new ChangedFiles();
+    public static FileInfoTable getInstance() {
+        if (mInstance == null) mInstance = new FileInfoTable();
         return mInstance;
     }
 
@@ -80,37 +81,42 @@ public class ChangedFiles extends DatabaseTable {
         // Specify a conflict algorithm here so we don't have to worry about it later
         db.execSQL("create table " + TABLE + " ("
                 + C_CHANGE_ID + " text NOT NULL, "
-                + C_FILENAME + " text NOT NULL, "
-                + C_INSERTED + " INTEGER, "
-                + C_DELETED + " INTEGER, "
-                + C_FILE_STATUS + " TEXT NOT NULL, "
-                + C_BINARY + " INTEGER NOT NULL DEFAULT 0, "
-                + "PRIMARY KEY (" + C_CHANGE_ID + ", " + C_FILENAME + ") ON CONFLICT REPLACE, "
+                + C_FILE_NAME + " text NOT NULL, "
+                + C_ISBINARY + " INTEGER DEFAULT 0 NOT NULL, "
+                + C_OLDPATH + " text, "
+                + C_LINES_INSERTED + " INTEGER, "
+                + C_LINES_DELETED + " INTEGER, "
+                + C_STATUS + " text NOT NULL, "
+                + "PRIMARY KEY (" + C_CHANGE_ID + ", " + C_FILE_NAME + ") ON CONFLICT REPLACE, "
                 + "FOREIGN KEY (" + C_CHANGE_ID + ") REFERENCES "
                 + Changes.TABLE + "(" + Changes.C_CHANGE_ID + "))");
     }
 
-    public static void addURIMatches(UriMatcher _urim)
-    {
+    public static void addURIMatches(UriMatcher _urim) {
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE, ITEM_LIST);
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE + "/#", ITEM_ID);
     }
 
-    public static int insertChangedFiles(Context context, String changeid, List<com.jbirdvegas.mgerrit.objects.FileInfo> diff) {
+    public static int insertChangedFiles(Context context, String changeid,
+                                         List<FileInfo> diff) {
 
         List<ContentValues> values = new ArrayList<>();
 
-        for (FileInfo file : diff) {
+        for (com.jbirdvegas.mgerrit.objects.FileInfo file : diff) {
             if (file == null) {
                 continue;
             }
             ContentValues row = new ContentValues(6);
             row.put(C_CHANGE_ID, changeid);
-            row.put(C_FILENAME, file.getPath());
-            row.put(C_INSERTED, file.getInserted());
-            row.put(C_DELETED, file.getDeleted());
-            row.put(C_FILE_STATUS, String.valueOf(file.getStatus()));
-            row.put(C_BINARY, file.isBinary());
+            row.put(C_FILE_NAME, file.getPath());
+
+            String oldPath = file.getOldPath();
+            if (oldPath != null && !oldPath.isEmpty()) row.put(C_OLDPATH, oldPath);
+
+            row.put(C_LINES_INSERTED, file.getInserted());
+            row.put(C_LINES_DELETED, file.getDeleted());
+            row.put(C_STATUS, String.valueOf(file.getStatus()));
+            row.put(C_ISBINARY, file.isBinary());
             values.add(row);
         }
 
