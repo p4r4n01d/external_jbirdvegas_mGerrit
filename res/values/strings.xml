@@ -152,4 +152,9 @@
     <string name="aokp_changelog_card_title">Recent AOKP Builds</string>
     <string name="changelog_loading">Searching for recent builds&#8230;</string>
     <string name="retry_label">Retry</string>
+    <string name="header_properties">Properties</string>
+    <string name="header_commit_message">Commit Message</string>
+    <string name="header_changed_files">Changed Files</string>
+    <string name="header_reviewers">Reviewers</string>
+    <string name="header_comments">Comments</string>
 </resources>

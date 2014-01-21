@@ -71,7 +71,8 @@ public abstract class DatabaseTable {
         ReviewersList, ReviewersID,
         SelectedChangeList, SelectedChangeID,
         SyncTimeList, SyncTimeID,
-        UsersChangesList, UsersChangesID,
+        UserChangesList, UserChangesID,
+        UserMessageList, UserMessageID,
         UsersList, UsersID,
     }
 
