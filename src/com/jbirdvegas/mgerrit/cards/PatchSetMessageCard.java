@@ -18,41 +18,72 @@ package com.jbirdvegas.mgerrit.cards;
  */
 
 import android.content.Context;
+import android.database.Cursor;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.fima.cardsui.objects.RecyclableCard;
 import com.jbirdvegas.mgerrit.R;
+import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.EmoticonSupportHelper;
-import com.jbirdvegas.mgerrit.objects.JSONCommit;
 
-public class PatchSetMessageCard extends RecyclableCard {
-    private final JSONCommit mJSONCommit;
-    private static final String TAG = PatchSetMessageCard.class.getSimpleName();
+import org.jetbrains.annotations.NotNull;
 
-    public PatchSetMessageCard(JSONCommit commit) {
-        this.mJSONCommit = commit;
+public class PatchSetMessageCard implements CardBinder {
+
+    private final Context mContext;
+    private final LayoutInflater mInflater;
+    private Integer mLastUpdated_index;
+    private Integer mMessage_index;
+
+    public PatchSetMessageCard(Context context) {
+        mContext = context;
+        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
-    protected void applyTo(View convertView) {
-        Context context = convertView.getContext();
-        // display latest update date
-        ((TextView) convertView.findViewById(R.id.message_card_last_update))
-                .setText(mJSONCommit.getLastUpdatedDate(context));
-        // display message if available (only not available if patch set is a draft)
-        TextView commitMessageTextView = (TextView) convertView.findViewById(R.id.message_card_message);
-        String message = mJSONCommit.getMessage();
-        if (message != null && !message.isEmpty()) {
-            // apply emoticons to patchset messages if present
-            commitMessageTextView.setText(EmoticonSupportHelper.getSmiledText(context, message));
+    public View setViewValue(Cursor cursor, View convertView, ViewGroup parent) {
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.patchset_message_card, null);
+        }
+
+        ViewHolder viewHolder = (ViewHolder) convertView.getTag();
+        if (convertView.getTag() == null) {
+            viewHolder = new ViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        }
+
+        viewHolder.lastUpdate.setText(cursor.getString(mLastUpdated_index));
+
+        String message = cursor.getString(mMessage_index);
+        if (message == null || message.isEmpty()) {
+            viewHolder.commitMessageTextView.setText(
+                    EmoticonSupportHelper.getSmiledText(mContext, message));
         } else {
-            commitMessageTextView.setText(context.getString(R.string.current_revision_is_draft_message));
+            viewHolder.commitMessageTextView.setText(
+                    mContext.getString(R.string.current_revision_is_draft_message));
+        }
+        return convertView;
+    }
+
+    private void setIndicies(@NotNull Cursor cursor) {
+        if (mLastUpdated_index == null) {
+            mLastUpdated_index = cursor.getColumnIndex(UserChanges.C_UPDATED);
+        }
+        if (mMessage_index == null) {
+            mMessage_index = cursor.getColumnIndex(UserChanges.C_MESSAGE);
         }
     }
 
-    @Override
-    protected int getCardLayoutId() {
-        return R.layout.patchset_message_card;
+
+    private static class ViewHolder {
+        TextView lastUpdate;
+        TextView commitMessageTextView;
+
+        ViewHolder(View view) {
+            lastUpdate = (TextView) view.findViewById(R.id.message_card_last_update);
+            commitMessageTextView = (TextView) view.findViewById(R.id.message_card_message);
+        }
     }
 }
