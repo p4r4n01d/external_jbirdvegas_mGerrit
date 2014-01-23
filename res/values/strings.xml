@@ -157,4 +157,5 @@
     <string name="header_changed_files">Changed Files</string>
     <string name="header_reviewers">Reviewers</string>
     <string name="header_comments">Comments</string>
+    <string name="commit_updated">Updated:</string>
 </resources>

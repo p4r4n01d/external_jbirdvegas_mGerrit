@@ -17,22 +17,12 @@ package com.jbirdvegas.mgerrit.database;
  *  limitations under the License.
  */
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.CursorLoader;
-
-import com.jbirdvegas.mgerrit.helpers.DBParams;
-import com.jbirdvegas.mgerrit.objects.CommitterObject;
-import com.jbirdvegas.mgerrit.objects.JSONCommit;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /*
  * Virtual table combining both Users and Changes tables for join queries.

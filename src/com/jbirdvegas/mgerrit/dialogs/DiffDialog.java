@@ -47,30 +47,25 @@ public class DiffDialog extends AlertDialog.Builder {
     private static final String TAG = DiffDialog.class.getSimpleName();
     private static final String DIFF = "\n\nDIFF\n\n";
     private static final boolean DIFF_DEBUG = false;
-    private final FileInfo mFileInfo;
     private String mLineSplit = System.getProperty("line.separator");
     private DiffTextView mDiffTextView;
     private DiffFailCallback mDiffFailCallback;
+
+    private final String mFilePath;
 
     public interface DiffFailCallback {
         public void killDialogAndErrorOut(Exception e);
     }
 
-    public DiffDialog(Context context, String website, FileInfo fileInfo) {
+    public DiffDialog(Context context, String website, String filePath) {
         super(context);
-
         context.setTheme(Prefs.getCurrentThemeID(context));
-
-        mFileInfo = fileInfo;
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.diff_dialog, null);
         setView(rootView);
-        mDiffTextView = (DiffTextView) rootView.findViewById(R.id.diff_view_diff);
 
-        if (DIFF_DEBUG) {
-            Log.d(TAG, "Calling url: " + website);
-            debugRestDiffApi(context, website, mFileInfo);
-        }
+        mFilePath = filePath;
+        mDiffTextView = (DiffTextView) rootView.findViewById(R.id.diff_view_diff);
 
         /* we can use volley here because we return does not contain the magic number on the
          * first line. return is just the Base64 formatted return */
@@ -142,11 +137,11 @@ public class DiffDialog extends AlertDialog.Builder {
         Diff currentDiff = null;
         for (String change : filesChanged) {
             String concat;
-            int index = change.lastIndexOf(mFileInfo.getPath());
+            int index = change.lastIndexOf(mFilePath);
             if (index < 0) continue;
 
             concat = change.substring(2, index).trim().split(" ", 2)[0];
-            if (concat.equals(mFileInfo.getPath())) {
+            if (concat.equals(mFilePath)) {
                 builder.append(DIFF);
                 change.replaceAll("\n", mLineSplit);
 

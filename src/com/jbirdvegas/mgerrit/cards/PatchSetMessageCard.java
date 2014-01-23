@@ -25,17 +25,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.jbirdvegas.mgerrit.R;
-import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.EmoticonSupportHelper;
-
-import org.jetbrains.annotations.NotNull;
 
 public class PatchSetMessageCard implements CardBinder {
 
     private final Context mContext;
     private final LayoutInflater mInflater;
-    private Integer mLastUpdated_index;
-    private Integer mMessage_index;
 
     public PatchSetMessageCard(Context context) {
         mContext = context;
@@ -54,10 +49,9 @@ public class PatchSetMessageCard implements CardBinder {
             convertView.setTag(viewHolder);
         }
 
-        viewHolder.lastUpdate.setText(cursor.getString(mLastUpdated_index));
-
-        String message = cursor.getString(mMessage_index);
-        if (message == null || message.isEmpty()) {
+        // We are only getting one item from the cursor, so just get the first one
+        String message = cursor.getString(0);
+        if (message != null && !message.isEmpty()) {
             viewHolder.commitMessageTextView.setText(
                     EmoticonSupportHelper.getSmiledText(mContext, message));
         } else {
@@ -67,22 +61,11 @@ public class PatchSetMessageCard implements CardBinder {
         return convertView;
     }
 
-    private void setIndicies(@NotNull Cursor cursor) {
-        if (mLastUpdated_index == null) {
-            mLastUpdated_index = cursor.getColumnIndex(UserChanges.C_UPDATED);
-        }
-        if (mMessage_index == null) {
-            mMessage_index = cursor.getColumnIndex(UserChanges.C_MESSAGE);
-        }
-    }
-
 
     private static class ViewHolder {
-        TextView lastUpdate;
         TextView commitMessageTextView;
 
         ViewHolder(View view) {
-            lastUpdate = (TextView) view.findViewById(R.id.message_card_last_update);
             commitMessageTextView = (TextView) view.findViewById(R.id.message_card_message);
         }
     }

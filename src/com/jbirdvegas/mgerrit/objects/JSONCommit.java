@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 public class JSONCommit implements Parcelable {
-    private static final String TAG = JSONCommit.class.getSimpleName();
 
     // public
     public static final String KEY_STATUS_OPEN = "open";
@@ -58,17 +57,14 @@ public class JSONCommit implements Parcelable {
     public static final String KEY_STATUS = "status";
     public static final String KEY_ID = "id";
     public static final String KEY_WEBSITE = "website";
-    public static final String KEY_AUTHOR = "author";
     public static final String KEY_ACCOUNT_ID = "_account_id";
     public static final String KEY_EMAIL = "email";
     public static final String KEY_DATE = "date";
-    public static final String KEY_MESSAGE = "message";
     public static final String KEY_NAME = "name";
     public static final String KEY_KIND = "kind";
     public static final String KEY_PROJECT = "project";
     private static final String KEY_TOPIC = "topic";
     private static final String KEY_OWNER = "owner";
-    public static final String KEY_COMMITTER = "committer";
 
     // internal
     private static final String KEY_BRANCH = "branch";
@@ -81,12 +77,10 @@ public class JSONCommit implements Parcelable {
     public static final String KEY_COMMIT_NUMBER = "_number";
     private static final String KEY_MESSAGES = "messages";
     private static final String KEY_CURRENT_REVISION = "current_revision";
-    public static final String KEY_CHANGED_FILES = "files";
     private static final String KEY_LABELS = "labels";
     private static final String KEY_VERIFIED = "Verified";
     private static final String KEY_CODE_REVIEW = "Code-Review";
     public static final String KEY_REVISIONS = "revisions";
-    public static final String KEY_COMMIT = "commit";
     private static final String KEY_TIMEZONE = "tz";
 
     private TimeZone mServerTimeZone;
@@ -186,9 +180,6 @@ public class JSONCommit implements Parcelable {
 
         // Set draft notices if these fields are empty
         thisCommit.mPatchSet.setMessage(context);
-        if (thisCommit.mFileInfos == null) {
-            thisCommit.mFileInfos = FileInfoList.setDraftNotice(context);
-        }
         return thisCommit;
     }
 
@@ -253,10 +244,6 @@ public class JSONCommit implements Parcelable {
     /** The owner of the change */
     @SerializedName(JSONCommit.KEY_OWNER)
     private CommitterObject mOwnerObject;
-
-    /** Information about the files in this patch set. */
-    @SerializedName(JSONCommit.KEY_CHANGED_FILES)
-    private FileInfoList mFileInfos;
 
     /** Auto-generated field comprising of the Gerrit instance and the commit number */
     @SerializedName(JSONCommit.KEY_WEBSITE)
@@ -351,16 +338,8 @@ public class JSONCommit implements Parcelable {
         return mCurrentRevision;
     }
 
-    public CommitterObject getCommitterObject() {
-        return mPatchSet.getCommitterObject();
-    }
-
     public String getMessage() {
         return mPatchSet.getMessage();
-    }
-
-    public List<FileInfo> getChangedFiles() {
-        return mFileInfos.getFiles();
     }
 
     public String getWebAddress() {
@@ -397,16 +376,8 @@ public class JSONCommit implements Parcelable {
         return rs;
     }
 
-    public CommitterObject getAuthorObject() {
-        return mPatchSet.getAuthorObject();
-    }
-
     public CommitterObject getOwnerObject() {
         return mOwnerObject;
-    }
-
-    public int getPatchSetNumber() {
-        return mPatchSetNumber;
     }
 
     public String getTopic() {
@@ -423,14 +394,6 @@ public class JSONCommit implements Parcelable {
 
     public void setPatchSet(CommitInfo patchSet) {
         this.mPatchSet = patchSet;
-    }
-
-    public void setChangedFiles(FileInfoList fileInfos) {
-        this.mFileInfos = fileInfos;
-    }
-
-    public void setPatchSetNumber(int patchSetNumber) {
-        this.mPatchSetNumber = patchSetNumber;
     }
 
     // Parcelable implementation
@@ -450,7 +413,6 @@ public class JSONCommit implements Parcelable {
         mCurrentRevision = parcel.readString();
         mOwnerObject = parcel.readParcelable(CommitterObject.class.getClassLoader());
         mPatchSet = parcel.readParcelable(CommitInfo.class.getClassLoader());
-        mFileInfos = parcel.readParcelable(FileInfoList.class.getClassLoader());
         mWebAddress = parcel.readString();
         mReviewers = parcel.readParcelable(ReviewerList.class.getClassLoader());
         mPatchSetNumber = parcel.readInt();
@@ -479,7 +441,6 @@ public class JSONCommit implements Parcelable {
         parcel.writeString(mCurrentRevision);
         parcel.writeParcelable(mOwnerObject, 0);
         parcel.writeParcelable(mPatchSet, 0);
-        parcel.writeParcelable(mFileInfos, 0);
         parcel.writeString(mWebAddress);
         parcel.writeParcelable(mReviewers, 0);
         parcel.writeInt(mPatchSetNumber);
@@ -506,7 +467,6 @@ public class JSONCommit implements Parcelable {
                 ", mCommitNumber=" + mCommitNumber +
                 ", mCurrentRevision='" + mCurrentRevision + '\'' +
                 ", mOwnerObject=" + mOwnerObject +
-                ", mFileInfos=" + mFileInfos +
                 ", mWebAddress='" + mWebAddress + '\'' +
                 ", mReviewers=" + mReviewers +
                 ", mPatchSet=" + mPatchSet +

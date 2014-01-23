@@ -20,6 +20,11 @@
 
     <TextView
         style="@style/CardText.CommitOwnerText"
+        android:id="@+id/prop_card_last_update"
+        tools:text="@string/commit_updated"/>
+
+    <TextView
+        style="@style/CardText.CommitOwnerText"
         android:id="@+id/prop_card_owner"
         tools:text="@string/commit_owner"/>
 

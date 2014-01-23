@@ -76,7 +76,7 @@ public class PatchSetCommentsCard implements CardBinder {
         TextView author = viewHolder.authorTextView;
         Integer authorNumber = cursor.getInt(authorId_index);
         author.setTag(authorNumber);
-        //author.setText(authorNumber.getName());
+        author.setText(cursor.getString(authorName_index));
         author.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -65,10 +65,12 @@ public abstract class DatabaseTable {
         ChangesList, ChangesID,
         CommitMarkerList, CommitMarkerID,
         ConfigList, ConfigID,
+        FileChangesList, FileChangesID,
         FileInfoList, FileInfoID,
         MessageInfoList, MessageInfoID,
         ProjectsList, ProjectsID,
         ReviewersList, ReviewersID,
+        RevisionList, RevisionID,
         SelectedChangeList, SelectedChangeID,
         SyncTimeList, SyncTimeID,
         UserChangesList, UserChangesID,
@@ -83,13 +85,16 @@ public abstract class DatabaseTable {
         tables.add(Changes.class);
         tables.add(CommitMarker.class);
         tables.add(Config.class);
+        tables.add(FileChanges.class);
         tables.add(FileInfoTable.class);
         tables.add(MessageInfo.class);
         tables.add(ProjectsTable.class);
         tables.add(Reviewers.class);
+        tables.add(Revisions.class);
         tables.add(SelectedChange.class);
         tables.add(SyncTime.class);
         tables.add(UserChanges.class);
+        tables.add(UserMessage.class);
         tables.add(Users.class);
     }
 

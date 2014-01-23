@@ -29,6 +29,9 @@ import com.jbirdvegas.mgerrit.objects.FileInfo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains information about a file in a patch set (revision)
+ */
 public class FileInfoTable extends DatabaseTable {
 
     // Table name
@@ -37,6 +40,9 @@ public class FileInfoTable extends DatabaseTable {
     // --- Columns ---
     // The Change-Id of the change.
     public static final String C_CHANGE_ID = "change_id";
+
+    // The patch set number.
+    public static final String C_PATCH_SET_NUMBER = "psNumber";
 
     public static final String C_FILE_NAME = "filename";
 
@@ -81,15 +87,18 @@ public class FileInfoTable extends DatabaseTable {
         // Specify a conflict algorithm here so we don't have to worry about it later
         db.execSQL("create table " + TABLE + " ("
                 + C_CHANGE_ID + " text NOT NULL, "
+                + C_PATCH_SET_NUMBER + " INTEGER NOT NULL, "
                 + C_FILE_NAME + " text NOT NULL, "
                 + C_ISBINARY + " INTEGER DEFAULT 0 NOT NULL, "
                 + C_OLDPATH + " text, "
-                + C_LINES_INSERTED + " INTEGER, "
-                + C_LINES_DELETED + " INTEGER, "
+                + C_LINES_INSERTED + " INTEGER DEFAULT 0, "
+                + C_LINES_DELETED + " INTEGER DEFAULT 0, "
                 + C_STATUS + " text NOT NULL, "
                 + "PRIMARY KEY (" + C_CHANGE_ID + ", " + C_FILE_NAME + ") ON CONFLICT REPLACE, "
                 + "FOREIGN KEY (" + C_CHANGE_ID + ") REFERENCES "
-                + Changes.TABLE + "(" + Changes.C_CHANGE_ID + "))");
+                + Changes.TABLE + "(" + Changes.C_CHANGE_ID + "), "
+                + "FOREIGN KEY (" + C_PATCH_SET_NUMBER + ") REFERENCES "
+                + Revisions.TABLE + "(" + Revisions.C_PATCH_SET_NUMBER + "))");
     }
 
     public static void addURIMatches(UriMatcher _urim) {
