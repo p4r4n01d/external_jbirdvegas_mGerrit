@@ -38,22 +38,22 @@ public class UserMessage extends DatabaseTable {
 
     // --- Columns in MessageInfo table---
     // The Change-Id of the change.
-    public static final String C_CHANGE_ID = "change_id";
+    public static final String C_CHANGE_ID = MessageInfo.C_CHANGE_ID;
 
     // The ID of the message.
-    public static final String C_MESSAGE_ID = "message_id";
+    public static final String C_MESSAGE_ID = MessageInfo.C_MESSAGE_ID;
 
     /* Author of the message as an AccountInfo entity. References Users table*/
-    public static final String C_AUTHOR = "author";
+    public static final String C_AUTHOR = MessageInfo.C_AUTHOR;
 
     /* The timestamp this message was posted. */
-    public static final String C_TIMESTAMP = "timestamp";
+    public static final String C_TIMESTAMP = MessageInfo.C_TIMESTAMP;
 
     /* The text left by the user. */
-    public static final String C_MESSAGE = "message";
+    public static final String C_MESSAGE = MessageInfo.C_MESSAGE;
 
     /* Which patchset (if any) generated this message. */
-    public static final String C_REVISION_NUMBER = "_revision_number";
+    public static final String C_REVISION_NUMBER = MessageInfo.C_REVISION_NUMBER;
 
 
     // --- Columns in Users table ---
@@ -112,7 +112,9 @@ public class UserMessage extends DatabaseTable {
      */
     public static CursorLoader getMessagesForChange(Context context, String changeid) {
         return new CursorLoader(context, CONTENT_URI, PROJECTION,
-                C_CHANGE_ID + " = ?", new String[] { changeid }, SORT_BY);
+                C_CHANGE_ID + " = ? AND " + MessageInfo.TABLE + "." + C_AUTHOR
+                        + " = " + Users.TABLE + "." + Users.C_ACCOUNT_ID,
+                new String[] { changeid }, SORT_BY);
     }
 
     @Override

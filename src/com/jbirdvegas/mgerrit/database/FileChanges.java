@@ -102,7 +102,9 @@ public class FileChanges extends DatabaseTable {
      */
     public static CursorLoader getFileChanges(Context context, String changeid) {
         return new CursorLoader(context, CONTENT_URI, PROJECTION,
-                C_CHANGE_ID + " = ?", new String[] { changeid }, SORT_BY);
+                C_CHANGE_ID + " = ? AND " + FileInfoTable.TABLE + "." + C_CHANGE_ID
+                        + " = " + Changes.TABLE + "." + Changes.C_CHANGE_ID,
+                new String[] { changeid }, SORT_BY);
     }
 
     @Override
