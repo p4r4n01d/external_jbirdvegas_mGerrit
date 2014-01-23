@@ -23,6 +23,8 @@
         <item>CarbonROM</item>
         <item>Gerrit Review</item>
         <item>CyanogenMod</item>
+        <item>Gerrit Review</item>
+        <item>Omni</item>
         <item>Paranoid Android</item>
     </string-array>
     <string-array name="gerrit_webaddresses" translatable="false">
@@ -31,6 +33,8 @@
         <item>http://review.carbon-rom.com</item>
         <item>https://gerrit-review.googlesource.com/</item>
         <item>http://review.cyanogenmod.org/</item>
+        <item>https://gerrit-review.googlesource.com/</item>
+        <item>https://gerrit.omnirom.org/</item>
         <item>https://gerrit.paranoidandroid.co/</item>
     </string-array>
     <string-array name="status_entries">
