@@ -116,10 +116,9 @@ public class PatchSetChangesCard implements CardBinder {
         }
 
         // We have already set an anonymous tag so we need to use ids
-        convertView.setTag(R.id.changeID, cursor.getString(mChangeId_index));
         convertView.setTag(R.id.changeNumber, cursor.getInt(mCommit_index));
         convertView.setTag(R.id.filePath, cursor.getString(mFileName_index));
-        convertView.setTag(R.id.patchSetNumber, cursor.getString(mPatchSet_index));
+        convertView.setTag(R.id.patchSetNumber, cursor.getInt(mPatchSet_index));
 
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +126,6 @@ public class PatchSetChangesCard implements CardBinder {
                 AlertDialog.Builder ad = new AlertDialog.Builder(mContext)
                         .setTitle(R.string.choose_diff_view);
 
-                final String changeId = (String) view.getTag(R.id.changeID);
                 final Integer changeNumber = (Integer) view.getTag(R.id.changeNumber);
                 final String filePath = (String) view.getTag(R.id.filePath);
                 final Integer patchset = (Integer) view.getTag(R.id.patchSetNumber);
@@ -138,10 +136,10 @@ public class PatchSetChangesCard implements CardBinder {
                         // v2.8 (returns Base64 encoded String)
                         // http://gerrit.aokp.co/changes/I554a3ab/revisions/current/files/res%2Fvalues%2Fcustom_arrays.xml/diff
                         //changes/{change-id}/revisions/current/files/{file-path}/content
-                        String base64 = "%schanges/%s/revisions/current/files/%s/content";
+                        String base64 = "%schanges/%s/revisions/current/patch";
                         String url = String.format(base64,
                                 Prefs.getCurrentGerrit(mContext),
-                                changeId, filePath);
+                                changeNumber);
                         launchDiffDialog(url, filePath);
                     }
                 });
