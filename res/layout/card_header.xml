@@ -21,7 +21,6 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="?attr/cardBackgroundColor"
               android:orientation="vertical"
               android:weightSum="1"
               android:paddingBottom="4dp">
@@ -33,6 +32,6 @@
         android:id="@+id/header"
         style="?attr/cardTitleStyle"
         android:enabled="false"
-        android:paddingLeft="12dp"/>
+        android:paddingLeft="32dp"/>
 
 </LinearLayout>

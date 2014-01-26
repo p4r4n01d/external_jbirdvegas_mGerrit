@@ -20,6 +20,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/mainBackgroundColor"
     android:id="@+id/vs_patchset">
 
     <ExpandableListView
@@ -32,6 +33,7 @@
         android:paddingRight="@dimen/cards_list_padding_horiz"
         android:divider="@android:color/transparent"
         android:dividerHeight="@dimen/cards_list_divider_height"
+        android:childDivider="@android:color/transparent"
         android:fastScrollEnabled="true"/>
 
     <RelativeLayout

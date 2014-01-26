@@ -22,10 +22,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -33,19 +35,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ViewSwitcher;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
-import com.fima.cardsui.views.CardUI;
 import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.MapBuilder;
-import com.jbirdvegas.mgerrit.cards.PatchSetChangesCard;
-import com.jbirdvegas.mgerrit.cards.PatchSetCommentsCard;
-import com.jbirdvegas.mgerrit.cards.PatchSetMessageCard;
-import com.jbirdvegas.mgerrit.cards.PatchSetPropertiesCard;
-import com.jbirdvegas.mgerrit.cards.PatchSetReviewersCard;
+import com.jbirdvegas.mgerrit.adapters.CommitDetailsAdapter;
 import com.jbirdvegas.mgerrit.database.Changes;
+import com.jbirdvegas.mgerrit.database.FileChanges;
+import com.jbirdvegas.mgerrit.database.Revisions;
 import com.jbirdvegas.mgerrit.database.SelectedChange;
+import com.jbirdvegas.mgerrit.database.UserMessage;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.message.StatusSelected;
@@ -53,10 +53,8 @@ import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
-import com.jbirdvegas.mgerrit.tasks.GerritTask;
+
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 /**
  * Class handles populating the screen with several
@@ -64,11 +62,12 @@ import org.json.JSONException;
  * <p/>
  * All cards are located at jbirdvegas.mgerrit.cards.*
  */
-public class PatchSetViewerFragment extends Fragment {
+public class PatchSetViewerFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = PatchSetViewerFragment.class.getSimpleName();
 
     private ViewSwitcher mViewSwitcher;
-    private CardUI mCardsUI;
+    private ExpandableListView mListView;
     private RequestQueue mRequestQueue;
     private Activity mParent;
     private Context mContext;
@@ -77,11 +76,17 @@ public class PatchSetViewerFragment extends Fragment {
     private String mSelectedChange;
     private String mStatus;
 
+    private CommitDetailsAdapter mAdapter;
+
     public static final String NEW_CHANGE_SELECTED = "Change Selected";
     public static final String EXPAND_TAG = "expand";
     public static final String CHANGE_ID = "changeID";
     public static final String CHANGE_NO = "changeNo";
     public static final String STATUS = "queryStatus";
+
+    public static final int LOADER_MESSAGE = 1;
+    public static final int LOADER_FILES = 2;
+    public static final int LOADER_COMMENTS = 4;
 
     private final BroadcastReceiver mStatusReceiver = new BroadcastReceiver() {
         @Override
@@ -98,6 +103,7 @@ public class PatchSetViewerFragment extends Fragment {
             }
         }
     };
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -121,8 +127,11 @@ public class PatchSetViewerFragment extends Fragment {
     private void init() {
         View currentFragment = this.getView();
 
-        mCardsUI = (CardUI) currentFragment.findViewById(R.id.commit_cards);
+        mListView = (ExpandableListView) currentFragment.findViewById(R.id.commit_cards);
         mViewSwitcher = (ViewSwitcher) currentFragment.findViewById(R.id.vs_patchset);
+
+        mAdapter = new CommitDetailsAdapter(mParent);
+        mListView.setAdapter(mAdapter);
 
         mRequestQueue = Volley.newRequestQueue(mParent);
         mUrl = new GerritURL();
@@ -131,7 +140,7 @@ public class PatchSetViewerFragment extends Fragment {
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                executeGerritTask(mUrl.toString());
+                sendRequest();
             }
         });
 
@@ -148,73 +157,27 @@ public class PatchSetViewerFragment extends Fragment {
         }
     }
 
-    private void executeGerritTask(final String query) {
+    /**
+     * Start the updater to check for an update if necessary
+     */
+    private void sendRequest() {
+
         // If we aren't connected, there's nothing to do here
         if (!switchViews()) return;
 
-        final long start = System.currentTimeMillis();
-        new GerritTask(mParent) {
-            @Override
-            public void onJSONResult(String s) {
-                try {
-                    mCardsUI.clearCards();
-                    addCards(mCardsUI,
-                            JSONCommit.getInstance(
-                                    new JSONArray(s).getJSONObject(0),
-                                    mContext));
-                    EasyTracker.getInstance(mParent).send(
-                            MapBuilder.createTiming(
-                                    AnalyticsHelper.GA_PERFORMANCE,
-                                    System.currentTimeMillis() - start,
-                                    AnalyticsHelper.GA_TIME_TO_LOAD,
-                                    AnalyticsHelper.GA_CARDS_LOAD_TIME)
-                             .build()
-                    );
-                } catch (JSONException e) {
-                    Log.d(TAG, "Response from "
-                            + query + " could not be parsed into cards :(", e);
-                }
-            }
-        }.execute(query);
+        /*
+         * Requires Gerrit version 2.8
+         * /changes/{change-id}/detail with arguments was introduced in version 2.8,
+         * so this will not be able to get the files changed or the full commit message
+         * in prior Gerrit versions.
+         */
+        GerritService.sendRequest(mParent, GerritService.DataType.CommitDetails, mUrl);
     }
 
-    private void addCards(CardUI ui, JSONCommit jsonCommit) {
+    private void setTitle(int commitNumber) {
         if (!Prefs.isTabletMode(mParent)) {
             String s = mParent.getResources().getString(R.string.change_detail_heading);
-            mParent.setTitle(String.format(s, jsonCommit.getCommitNumber()));
-        }
-
-        // Properties card
-        Log.d(TAG, "Loading Properties Card...");
-        ui.addCard(new PatchSetPropertiesCard(jsonCommit, this, mRequestQueue, mParent), true);
-
-        // Message card
-        Log.d(TAG, "Loading Message Card...");
-        ui.addCard(new PatchSetMessageCard(jsonCommit), true);
-
-        // Changed files card
-        if (jsonCommit.getChangedFiles() != null
-                && !jsonCommit.getChangedFiles().isEmpty()) {
-            Log.d(TAG, "Loading Changes Card...");
-            ui.addCard(new PatchSetChangesCard(jsonCommit, mParent), true);
-        }
-
-        // Code reviewers card
-        if (jsonCommit.getCodeReviewers() != null
-                && !jsonCommit.getCodeReviewers().isEmpty()) {
-            Log.d(TAG, "Loading Reviewers Card...");
-            ui.addCard(new PatchSetReviewersCard(jsonCommit, mRequestQueue, mParent), true);
-        } else {
-            Log.d(TAG, "No reviewers found! Not adding reviewers card");
-        }
-
-        // Comments Card
-        if (jsonCommit.getMessagesList() != null
-                && !jsonCommit.getMessagesList().isEmpty()) {
-            Log.d(TAG, "Loading Comments Card...");
-            ui.addCard(new PatchSetCommentsCard(jsonCommit, this, mRequestQueue), true);
-        } else {
-            Log.d(TAG, "No commit comments found! Not adding comments card");
+            mParent.setTitle(String.format(s, commitNumber));
         }
     }
 
@@ -234,15 +197,19 @@ public class PatchSetViewerFragment extends Fragment {
         mUrl.setChangeID(mSelectedChange);
         mUrl.setChangeNumber(changeNo);
         mUrl.requestChangeDetail(true);
-        //executeGerritTask(mUrl.toString());
 
-        /*
-         * Requires Gerrit version 2.8
-         * /changes/{change-id}/detail with arguments was introduced in version 2.8,
-         * so this will not be able to get the files changed or the full commit message
-         * in prior Gerrit versions.
-         */
-        GerritService.sendRequest(mParent, GerritService.DataType.CommitDetails, mUrl);
+        sendRequest();
+
+        initLoaders(changeID);
+    }
+
+    private void initLoaders(String changeID) {
+        Bundle args = new Bundle();
+        args.putString(CHANGE_ID, changeID);
+
+        getLoaderManager().initLoader(LOADER_MESSAGE, args, this);
+        getLoaderManager().initLoader(LOADER_FILES, args, this);
+        getLoaderManager().initLoader(LOADER_COMMENTS, args, this);
     }
 
     /**
@@ -363,10 +330,6 @@ public class PatchSetViewerFragment extends Fragment {
 
     private CommitterObject committerObject = null;
 
-    public void registerViewForContextMenu(View view) {
-        registerForContextMenu(view);
-    }
-
     private static final int OWNER = 0;
     private static final int REVIEWER = 1;
 
@@ -406,5 +369,42 @@ public class PatchSetViewerFragment extends Fragment {
             if (mViewSwitcher.getDisplayedChild() != 1) mViewSwitcher.showNext();
         }
         return isconn;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        String changeID = args.getString(PatchSetViewerFragment.CHANGE_ID);
+
+        switch (id) {
+            case LOADER_MESSAGE:
+                return Revisions.getCommitMessage(mContext, changeID);
+            case LOADER_FILES:
+                return FileChanges.getFileChanges(mContext, changeID);
+            case LOADER_COMMENTS:
+                return UserMessage.getMessagesForChange(mContext, changeID);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        switch (cursorLoader.getId()) {
+            case LOADER_MESSAGE:
+                mAdapter.setCursor(CommitDetailsAdapter.Cards.COMMIT_MSG, cursor);
+                break;
+            case LOADER_FILES:
+                mAdapter.setCursor(CommitDetailsAdapter.Cards.CHANGED_FILES, cursor);
+                break;
+            case LOADER_COMMENTS:
+                mAdapter.setCursor(CommitDetailsAdapter.Cards.COMMENTS, cursor);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        onLoadFinished(cursorLoader, null);
     }
 }

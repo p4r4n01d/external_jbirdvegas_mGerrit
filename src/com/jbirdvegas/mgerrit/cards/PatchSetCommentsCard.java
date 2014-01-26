@@ -105,6 +105,10 @@ public class PatchSetCommentsCard implements CardBinder {
     }
 
     private void setIndicies(@NotNull Cursor cursor) {
+        if (cursor.getPosition() < 0) {
+            cursor.moveToFirst();
+        }
+
         // These indices will not change regardless of the view
         if (message_index == null) {
             message_index = cursor.getColumnIndex(UserMessage.C_MESSAGE);

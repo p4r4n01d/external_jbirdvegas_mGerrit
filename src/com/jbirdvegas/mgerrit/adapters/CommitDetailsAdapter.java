@@ -2,15 +2,20 @@ package com.jbirdvegas.mgerrit.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.cards.CardBinder;
 import com.jbirdvegas.mgerrit.cards.PatchSetChangesCard;
+import com.jbirdvegas.mgerrit.cards.PatchSetCommentsCard;
+import com.jbirdvegas.mgerrit.cards.PatchSetMessageCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetPropertiesCard;
 
 import org.jetbrains.annotations.Nullable;
@@ -44,18 +49,20 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
     private final Context mContext;
 
     // Cards supported:
-    enum Cards { PROPERTIES, COMMIT_MSG, CHANGED_FILES, REVIEWERS, COMMENTS };
+    public enum Cards { PROPERTIES, COMMIT_MSG, CHANGED_FILES, REVIEWERS, COMMENTS };
     private static final int _cards_count = Cards.values().length;
 
     // Stores the type of card at position
     private ArrayList<ChildGroupDetails> childGroupDetails = new ArrayList<>();
 
     // Contents for added card list headers
-    private ArrayList<String> headerContents = new ArrayList<>();
+    private ArrayList<String> headerContents = new ArrayList<>(5);
 
     public CommitDetailsAdapter(Context context) {
         mContext = context;
         mInflator = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        setup();
     }
 
     @Nullable
@@ -68,7 +75,7 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
     @Override
     public Object getChild(int groupPosition, int childPosition) {
         ChildGroupDetails details = childGroupDetails.get(groupPosition);
-        details.cursor.move(childPosition);
+        details.cursor.moveToPosition(childPosition);
         return details.cursor;
     }
 
@@ -114,8 +121,7 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
         // Get the set binder and delegate the work to the set binder
         ChildGroupDetails details = childGroupDetails.get(groupPosition);
         Cursor cursor = (Cursor) getChild(groupPosition, childPosition);
-        details.binder.setViewValue(cursor, convertView, parent);
-        return null;
+        return details.binder.setViewValue(cursor, convertView, parent);
     }
 
     @Override
@@ -136,7 +142,7 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildType(int groupPosition, int childPosition) {
-        return super.getChildType(groupPosition, childPosition);
+        return groupPosition;
     }
 
     @Override
@@ -144,32 +150,34 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
        return _cards_count; // Number of different cards supported (view layouts)
     }
 
-    public void appendPropertiesCard(Cursor cursor) {
+    /**
+     * Card order:
+     *  Properties card, Message card, Changed files card, Code reviewers card, Comments Card
+     */
+    public void setup() {
         headerContents.add(mContext.getString(R.string.header_properties));
-        /*childGroupDetails.add(
-                new ChildGroupDetails(Cards.PROPERTIES, cursor,
-                        new PatchSetPropertiesCard()));*/
-    }
-
-    public void appendCommitMessageCard(Cursor cursor) {
         headerContents.add(mContext.getString(R.string.header_commit_message));
-        //childGroupDetails.add(new ChildGroupDetails(Cards.COMMIT_MSG, cursor));
-    }
-
-    public void appendChangedFilesCards(Cursor cursor) {
         headerContents.add(mContext.getString(R.string.header_changed_files));
-        childGroupDetails.add(new ChildGroupDetails(Cards.CHANGED_FILES, cursor,
-                new PatchSetChangesCard(mContext)));
-    }
-
-    public void appendReviewersCards(Cursor cursor) {
         headerContents.add(mContext.getString(R.string.header_reviewers));
-        //childGroupDetails.add(new ChildGroupDetails(Cards.REVIEWERS, cursor));
+        headerContents.add(mContext.getString(R.string.header_comments));
+
+        RequestQueue rq = Volley.newRequestQueue(mContext);
+
+        childGroupDetails.add(null);
+        /*childGroupDetails.add(new ChildGroupDetails(Cards.PROPERTIES,
+                        new PatchSetPropertiesCard(mContext, rq)));*/
+        childGroupDetails.add(new ChildGroupDetails(Cards.COMMIT_MSG,
+                new PatchSetMessageCard(mContext)));
+        childGroupDetails.add(new ChildGroupDetails(Cards.CHANGED_FILES,
+                new PatchSetChangesCard(mContext)));
+        childGroupDetails.add(null);
+        //childGroupDetails.add(new ChildGroupDetails(Cards.REVIEWERS, ));
+        childGroupDetails.add(new ChildGroupDetails(Cards.COMMENTS,
+                new PatchSetCommentsCard(mContext, rq)));
     }
 
-    public void appendCommentsCards(Cursor cursor) {
-        headerContents.add(mContext.getString(R.string.header_comments));
-        //childGroupDetails.add(new ChildGroupDetails(Cards.COMMENTS, cursor));
+    public void setCursor(Cards cardType, Cursor cursor) {
+        childGroupDetails.get(cardType.ordinal()).setCursor(cursor);
     }
 
     private static class GroupViewHolder {
@@ -181,14 +189,16 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
     }
 
     private class ChildGroupDetails {
-        Cards cardType;
-        Cursor cursor;
-        CardBinder binder; // handles inflating the layout and binding data from the cursor
+        final Cards cardType;
 
-        private ChildGroupDetails(Cards cardType, Cursor cursor, CardBinder binder) {
+        Cursor cursor;
+        final CardBinder binder; // handles inflating the layout and binding data from the cursor
+
+        private ChildGroupDetails(Cards cardType, CardBinder binder) {
             this.cardType = cardType;
-            this.cursor = cursor;
             this.binder = binder;
         }
+
+        public void setCursor(Cursor cursor) {this.cursor = cursor; }
     }
 }

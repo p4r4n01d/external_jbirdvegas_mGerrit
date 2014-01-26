@@ -68,7 +68,7 @@ public class PatchSetChangesCard implements CardBinder {
     public View setViewValue(Cursor cursor, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            mInflater.inflate(R.layout.patchset_file_changed_list_item, null);
+            convertView = mInflater.inflate(R.layout.patchset_file_changed_list_item, null);
         }
 
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
@@ -184,6 +184,10 @@ public class PatchSetChangesCard implements CardBinder {
     }
 
     private void setupCusorIndicies(Cursor cursor) {
+        if (cursor.getPosition() < 0) {
+            cursor.moveToFirst();
+        }
+
         if (mChangeId_index == null) {
             mChangeId_index = cursor.getColumnIndex(FileChanges.C_CHANGE_ID);
         }
