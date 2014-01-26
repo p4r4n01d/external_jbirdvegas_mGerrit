@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ViewSwitcher;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -45,6 +46,7 @@ import com.jbirdvegas.mgerrit.database.Changes;
 import com.jbirdvegas.mgerrit.database.FileChanges;
 import com.jbirdvegas.mgerrit.database.Revisions;
 import com.jbirdvegas.mgerrit.database.SelectedChange;
+import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.database.UserMessage;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
@@ -84,6 +86,7 @@ public class PatchSetViewerFragment extends Fragment
     public static final String CHANGE_NO = "changeNo";
     public static final String STATUS = "queryStatus";
 
+    public static final int LOADER_PROPERTIES = 0;
     public static final int LOADER_MESSAGE = 1;
     public static final int LOADER_FILES = 2;
     public static final int LOADER_COMMENTS = 4;
@@ -207,6 +210,7 @@ public class PatchSetViewerFragment extends Fragment
         Bundle args = new Bundle();
         args.putString(CHANGE_ID, changeID);
 
+        getLoaderManager().initLoader(LOADER_PROPERTIES, args, this);
         getLoaderManager().initLoader(LOADER_MESSAGE, args, this);
         getLoaderManager().initLoader(LOADER_FILES, args, this);
         getLoaderManager().initLoader(LOADER_COMMENTS, args, this);
@@ -377,6 +381,8 @@ public class PatchSetViewerFragment extends Fragment
         String changeID = args.getString(PatchSetViewerFragment.CHANGE_ID);
 
         switch (id) {
+            case LOADER_PROPERTIES:
+                return UserChanges.getCommitProperties(mContext, changeID);
             case LOADER_MESSAGE:
                 return Revisions.getCommitMessage(mContext, changeID);
             case LOADER_FILES:
@@ -391,6 +397,15 @@ public class PatchSetViewerFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         switch (cursorLoader.getId()) {
+            case LOADER_PROPERTIES:
+                mAdapter.setCursor(CommitDetailsAdapter.Cards.PROPERTIES, cursor);
+                if (cursor != null && cursor.getCount() > 0) {
+                    // Set the screen title
+                    cursor.moveToFirst();
+                    int change = cursor.getInt(cursor.getColumnIndex(UserChanges.C_COMMIT_NUMBER));
+                    setTitle(change);
+                }
+                break;
             case LOADER_MESSAGE:
                 mAdapter.setCursor(CommitDetailsAdapter.Cards.COMMIT_MSG, cursor);
                 break;

@@ -2,7 +2,6 @@ package com.jbirdvegas.mgerrit.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,6 +120,8 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
         // Get the set binder and delegate the work to the set binder
         ChildGroupDetails details = childGroupDetails.get(groupPosition);
         Cursor cursor = (Cursor) getChild(groupPosition, childPosition);
+
+        if (cursor.getPosition() < 0) cursor.moveToFirst();
         return details.binder.setViewValue(cursor, convertView, parent);
     }
 
@@ -163,9 +164,8 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
 
         RequestQueue rq = Volley.newRequestQueue(mContext);
 
-        childGroupDetails.add(null);
-        /*childGroupDetails.add(new ChildGroupDetails(Cards.PROPERTIES,
-                        new PatchSetPropertiesCard(mContext, rq)));*/
+        childGroupDetails.add(new ChildGroupDetails(Cards.PROPERTIES,
+                        new PatchSetPropertiesCard(mContext, rq)));
         childGroupDetails.add(new ChildGroupDetails(Cards.COMMIT_MSG,
                 new PatchSetMessageCard(mContext)));
         childGroupDetails.add(new ChildGroupDetails(Cards.CHANGED_FILES,

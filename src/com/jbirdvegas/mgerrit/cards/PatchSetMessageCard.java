@@ -49,7 +49,6 @@ public class PatchSetMessageCard implements CardBinder {
             convertView.setTag(viewHolder);
         }
 
-        cursor.moveToFirst();
         // We are only getting one item from the cursor, so just get the first one
         String message = cursor.getString(0);
         if (message != null && !message.isEmpty()) {

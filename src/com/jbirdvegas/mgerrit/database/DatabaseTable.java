@@ -64,6 +64,7 @@ public abstract class DatabaseTable {
     enum UriType {
         ChangesList, ChangesID,
         CommitMarkerList, CommitMarkerID,
+        CommitPropertiesList, CommitPropertiesID,
         ConfigList, ConfigID,
         FileChangesList, FileChangesID,
         FileInfoList, FileInfoID,

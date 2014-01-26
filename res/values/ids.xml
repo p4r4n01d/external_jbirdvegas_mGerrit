@@ -22,4 +22,5 @@
     <item type="id" name="changeNumber" />
     <item type="id" name="patchSetNumber" />
     <item type="id" name="filePath" />
+    <item type="id" name="webAddress" />
 </resources>
