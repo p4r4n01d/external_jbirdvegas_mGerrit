@@ -34,4 +34,9 @@
         android:enabled="false"
         android:paddingLeft="32dp"/>
 
+    <View android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:background="?android:attr/listDivider"
+          android:layout_marginLeft="32dp"/>
+
 </LinearLayout>
