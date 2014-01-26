@@ -60,8 +60,8 @@ public class FileChanges extends DatabaseTable {
     public static final String C_COMMIT_NUMBER = "_change_number";
 
 
-    public static final int ITEM_LIST = UriType.FileInfoList.ordinal();
-    public static final int ITEM_ID = UriType.FileInfoID.ordinal();
+    public static final int ITEM_LIST = UriType.FileChangesList.ordinal();
+    public static final int ITEM_ID = UriType.FileChangesID.ordinal();
 
     public static final Uri CONTENT_URI = Uri.parse(DatabaseFactory.BASE_URI + TABLE);
 
@@ -72,8 +72,12 @@ public class FileChanges extends DatabaseTable {
     public static final String SORT_BY = FileInfoTable.SORT_BY;
 
     public static final String[] PROJECTION = new String[] {
-            FileInfoTable.TABLE + ".rowid AS _id", C_CHANGE_ID, C_COMMIT_NUMBER,
-            C_PATCH_SET_NUMBER, C_FILE_NAME, C_STATUS, C_ISBINARY, C_OLDPATH,
+            FileInfoTable.TABLE + ".rowid AS _id",
+            Changes.TABLE + "." + Changes.C_CHANGE_ID,
+            Changes.TABLE + "." + Changes.C_COMMIT_NUMBER,
+            C_PATCH_SET_NUMBER, C_FILE_NAME,
+            FileInfoTable.TABLE + "." + FileInfoTable.C_STATUS,
+            C_ISBINARY, C_OLDPATH,
             C_LINES_INSERTED, C_LINES_DELETED };
 
     private static FileChanges mInstance = null;
@@ -102,7 +106,8 @@ public class FileChanges extends DatabaseTable {
      */
     public static CursorLoader getFileChanges(Context context, String changeid) {
         return new CursorLoader(context, CONTENT_URI, PROJECTION,
-                C_CHANGE_ID + " = ? AND " + FileInfoTable.TABLE + "." + C_CHANGE_ID
+                FileInfoTable.TABLE + "." + C_CHANGE_ID + " = ? AND "
+                        + FileInfoTable.TABLE + "." + C_CHANGE_ID
                         + " = " + Changes.TABLE + "." + Changes.C_CHANGE_ID,
                 new String[] { changeid }, SORT_BY);
     }

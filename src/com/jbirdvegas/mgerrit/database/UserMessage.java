@@ -69,8 +69,8 @@ public class UserMessage extends DatabaseTable {
 
 
     // --- Content Provider stuff ---
-    public static final int ITEM_LIST = UriType.UserChangesList.ordinal();
-    public static final int ITEM_ID = UriType.UserChangesID.ordinal();
+    public static final int ITEM_LIST = UriType.UserMessageList.ordinal();
+    public static final int ITEM_ID = UriType.UserMessageID.ordinal();
 
     public static final Uri CONTENT_URI = Uri.parse(DatabaseFactory.BASE_URI + TABLE);
 

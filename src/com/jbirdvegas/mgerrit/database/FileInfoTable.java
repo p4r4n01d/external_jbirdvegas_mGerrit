@@ -106,12 +106,12 @@ public class FileInfoTable extends DatabaseTable {
         _urim.addURI(DatabaseFactory.AUTHORITY, TABLE + "/#", ITEM_ID);
     }
 
-    public static int insertChangedFiles(Context context, String changeid,
+    public static int insertChangedFiles(Context context, String changeid, String patchset,
                                          List<FileInfo> diff) {
 
         List<ContentValues> values = new ArrayList<>();
 
-        for (com.jbirdvegas.mgerrit.objects.FileInfo file : diff) {
+        for (FileInfo file : diff) {
             if (file == null) {
                 continue;
             }
@@ -122,6 +122,7 @@ public class FileInfoTable extends DatabaseTable {
             String oldPath = file.getOldPath();
             if (oldPath != null && !oldPath.isEmpty()) row.put(C_OLDPATH, oldPath);
 
+            row.put(C_PATCH_SET_NUMBER, patchset);
             row.put(C_LINES_INSERTED, file.getInserted());
             row.put(C_LINES_DELETED, file.getDeleted());
             row.put(C_STATUS, String.valueOf(file.getStatus()));

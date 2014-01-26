@@ -97,7 +97,9 @@ public class CommitInfo implements Parcelable{
             CommitInfo r2 = new Gson().fromJson(commitObj, CommitInfo.class);
             merge(revision, r2);
 
-            revision.mCommit = commitObj.get(KEY_COMMIT).getAsString();
+            if (commitObj.has(KEY_COMMIT)) {
+                revision.mCommit = commitObj.get(KEY_COMMIT).getAsString();
+            }
         }
 
         return revision;
@@ -132,6 +134,16 @@ public class CommitInfo implements Parcelable{
             this.mMessage = context.getString(R.string.current_revision_is_draft_message);
         }
     }
+
+    public String getChangeId() { return mChangeId; }
+
+    public String getCommit() { return mCommit; }
+
+    public String getSubject() { return mSubject; }
+
+    public String getPatchSetNumber() { return mPatchSetNumber; }
+
+    public boolean isIsDraft() { return mIsDraft; }
 
     public List<FileInfo> getChangedFiles() { return mFileInfos.getFiles(); }
     public void setChangedFiles(FileInfoList fileInfos) { this.mFileInfos = fileInfos; }

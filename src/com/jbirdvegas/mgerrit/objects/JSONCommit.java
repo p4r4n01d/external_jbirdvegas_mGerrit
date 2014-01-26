@@ -392,9 +392,8 @@ public class JSONCommit implements Parcelable {
         this.mCurrentRevision = currentRevision;
     }
 
-    public void setPatchSet(CommitInfo patchSet) {
-        this.mPatchSet = patchSet;
-    }
+    public CommitInfo getPatchSet() { return mPatchSet; }
+    public void setPatchSet(CommitInfo patchSet) { this.mPatchSet = patchSet; }
 
     // Parcelable implementation
     public JSONCommit(Parcel parcel) {

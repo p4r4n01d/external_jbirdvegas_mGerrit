@@ -94,7 +94,7 @@ public class FileInfo implements Parcelable {
 
     public boolean isBinary() { return isBinary; }
 
-    public static FileInfo deserialise(String _path, JsonObject object){
+    public static FileInfo deserialise(JsonObject object, String _path) {
         FileInfo file = new Gson().fromJson(object, FileInfo.class);
         file.path = _path;
 

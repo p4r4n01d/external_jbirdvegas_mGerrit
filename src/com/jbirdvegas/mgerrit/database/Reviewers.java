@@ -89,7 +89,7 @@ public class Reviewers extends DatabaseTable {
             ContentValues row = new ContentValues();
             row.put(C_USER, reviewer.getCommiterObject().getAccountId());
             row.put(C_CHANGE_ID, changeid);
-            //row.put(C_CODE_REVIEW, reviewer.getValue());
+            row.put(C_CODE_REVIEW, reviewer.getValue());
             values.add(row);
         }
 

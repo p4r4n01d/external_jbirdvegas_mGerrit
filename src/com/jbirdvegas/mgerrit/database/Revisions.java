@@ -1,5 +1,6 @@
 package com.jbirdvegas.mgerrit.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.sqlite.SQLiteDatabase;
@@ -7,6 +8,10 @@ import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 
 import com.jbirdvegas.mgerrit.helpers.DBParams;
+import com.jbirdvegas.mgerrit.objects.CommitInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (C) 2014 Android Open Kang Project (AOKP)
@@ -40,12 +45,14 @@ public class Revisions extends DatabaseTable {
     public static final String C_PATCH_SET_NUMBER = "psNumber";
 
     // The commit ID, used by Git.
-    public static final String C_COMMIT = "commit";
+    public static final String C_COMMIT = "commitId";
 
-    // The author ID of this commit
+    /* The author's email of this commit. This information is directly linked to Git so no
+     Gerrit username or account id are included. */
     public static final String C_AUTHOR = "author";
 
-    // The committer ID of this commit
+    /* The committer's email of this commit. This information is directly linked to Git so no
+     Gerrit username or account id are included. */
     public static final String C_COMMITTER = "committer";
 
     // The commit message
@@ -74,10 +81,10 @@ public class Revisions extends DatabaseTable {
         db.execSQL("create table " + TABLE + " ("
                 + C_CHANGE_ID + " text PRIMARY KEY ON CONFLICT REPLACE, "
                 + C_PATCH_SET_NUMBER + " INTEGER NOT NULL, "
-                + C_COMMIT + " text NOT NULL, "
-                + C_AUTHOR + " INTEGER NOT NULL ,"
-                + C_COMMITTER + " INTEGER NOT NULL, "
-                + C_MESSAGE + " text NOT NULL, "
+                + C_COMMIT + " text, "
+                + C_AUTHOR + " TEXT ,"
+                + C_COMMITTER + " TEXT, "
+                + C_MESSAGE + " text, "
                 + "FOREIGN KEY (" + C_CHANGE_ID + ") REFERENCES "
                 + Changes.TABLE + "(" + Changes.C_CHANGE_ID + "), "
                 + "FOREIGN KEY (" + C_AUTHOR + ") REFERENCES "
@@ -98,9 +105,28 @@ public class Revisions extends DatabaseTable {
      * @param changeid The ID of the change to get the commit message for
      * @return A CursorLoader
      */
-    private static CursorLoader getCommitMessage(Context context, String changeid) {
+    public static CursorLoader getCommitMessage(Context context, String changeid) {
         Uri uri = DBParams.fetchOneRow(CONTENT_URI);
         return new CursorLoader(context, uri, new String[] { C_MESSAGE },
                 C_CHANGE_ID + " = ?", new String[] { changeid }, null);
+    }
+
+    public static void insertRevision(Context context, CommitInfo patchSet) {
+        String ps = patchSet.getPatchSetNumber();
+        ContentValues row = new ContentValues(9);
+
+        row.put(C_CHANGE_ID, patchSet.getChangeId());
+        row.put(C_PATCH_SET_NUMBER, ps);
+        row.put(C_COMMIT, patchSet.getCommit());
+        row.put(C_AUTHOR, patchSet.getAuthorObject().getEmail());
+        row.put(C_COMMITTER, patchSet.getCommitterObject().getEmail());
+        row.put(C_MESSAGE, patchSet.getMessage());
+
+        Uri uri = DBParams.insertWithReplace(CONTENT_URI);
+        context.getContentResolver().insert(uri, row);
+
+        // Insert the changed files into the FileInfoTable
+        FileInfoTable.insertChangedFiles(context, patchSet.getChangeId(), ps,
+                patchSet.getChangedFiles());
     }
 }
