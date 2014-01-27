@@ -16,6 +16,7 @@ import com.jbirdvegas.mgerrit.cards.PatchSetChangesCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetCommentsCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetMessageCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetPropertiesCard;
+import com.jbirdvegas.mgerrit.cards.PatchSetReviewersCard;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -170,8 +171,8 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
                 new PatchSetMessageCard(mContext)));
         childGroupDetails.add(new ChildGroupDetails(Cards.CHANGED_FILES,
                 new PatchSetChangesCard(mContext)));
-        childGroupDetails.add(null);
-        //childGroupDetails.add(new ChildGroupDetails(Cards.REVIEWERS, ));
+        childGroupDetails.add(new ChildGroupDetails(Cards.REVIEWERS,
+                new PatchSetReviewersCard(mContext, rq)));
         childGroupDetails.add(new ChildGroupDetails(Cards.COMMENTS,
                 new PatchSetCommentsCard(mContext, rq)));
     }
@@ -199,6 +200,8 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
             this.binder = binder;
         }
 
-        public void setCursor(Cursor cursor) {this.cursor = cursor; }
+        public void setCursor(Cursor cursor) {
+            this.cursor = cursor;
+        }
     }
 }

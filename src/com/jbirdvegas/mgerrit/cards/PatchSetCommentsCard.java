@@ -35,6 +35,7 @@ import com.jbirdvegas.mgerrit.caches.BitmapLruCache;
 import com.jbirdvegas.mgerrit.database.UserMessage;
 import com.jbirdvegas.mgerrit.helpers.EmoticonSupportHelper;
 import com.jbirdvegas.mgerrit.helpers.GravatarHelper;
+import com.jbirdvegas.mgerrit.helpers.Tools;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -50,6 +51,7 @@ public class PatchSetCommentsCard implements CardBinder {
     private Integer authorId_index;
     private Integer authorName_index;
     private Integer authorEmail_index;
+    private Integer timestamp_index;
 
 
     public PatchSetCommentsCard(Context context, RequestQueue requestQueue) {
@@ -83,6 +85,13 @@ public class PatchSetCommentsCard implements CardBinder {
                 setTrackingUser((Integer) v.getTag());
             }
         });
+
+        String timestamp = cursor.getString(timestamp_index);
+        if (timestamp != null) {
+            viewHolder.timestamp.setText(Tools.prettyPrintDate(mContext, timestamp,
+                    Prefs.getServerTimeZone(mContext),
+                    Prefs.getLocalTimeZone(mContext)));
+        }
 
         // setup styled comments
         // use Linkify to automatically linking http/email/addresses
@@ -118,6 +127,9 @@ public class PatchSetCommentsCard implements CardBinder {
         if (authorEmail_index == null) {
             authorEmail_index = cursor.getColumnIndex(UserMessage.C_EMAIL);
         }
+        if (timestamp_index == null) {
+            timestamp_index = cursor.getColumnIndex(UserMessage.C_TIMESTAMP);
+        }
     }
 
 
@@ -125,11 +137,13 @@ public class PatchSetCommentsCard implements CardBinder {
         TextView authorTextView;
         TextView commentMessage;
         NetworkImageView gravatar;
+        TextView timestamp;
 
         private ViewHolder(View view) {
             authorTextView = (TextView) view.findViewById(R.id.comment_author_name);
             commentMessage = (TextView) view.findViewById(R.id.comment_message);
             gravatar = (NetworkImageView) view.findViewById(R.id.comment_gravatar);
+            timestamp = (TextView) view.findViewById(R.id.comment_timestamp);
         }
     }
 }

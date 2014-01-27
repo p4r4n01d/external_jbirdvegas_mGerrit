@@ -33,8 +33,7 @@
         android:paddingRight="@dimen/cards_list_padding_horiz"
         android:divider="@android:color/transparent"
         android:dividerHeight="@dimen/cards_list_divider_height"
-        android:childDivider="@android:color/transparent"
-        android:fastScrollEnabled="true"/>
+        android:childDivider="@android:color/transparent"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

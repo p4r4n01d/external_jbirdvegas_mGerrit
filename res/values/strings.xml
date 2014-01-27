@@ -28,8 +28,8 @@
     <string name="status_explanation_merged">Change has been merged to its branch.</string>
     <string name="status_explanation_abandoned">Change was abandoned by its owner or administrator.</string>
     <string name="status_explanation_draft">Change is a draft change that only consists of draft patchsets.</string>
-    <string name="patchset_labels_code_reviewer_title">Code-Reviewers:</string>
-    <string name="patchset_labels_verified_reviewer_title">Verified:</string>
+    <string name="patchset_labels_code_reviewer">Code-Review:</string>
+    <string name="patchset_labels_verified_reviewer">Verified:</string>
     <string name="dash" translatable="false">-</string>
     <string name="inserted">Inserted Lines:</string>
     <string name="deleted">Deleted Lines:</string>

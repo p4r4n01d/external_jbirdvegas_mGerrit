@@ -23,8 +23,8 @@
     "</string>
     <string name="status_explanation_merged">"Veränderung hat ihre Niederlassung zusammengeführt."</string>
     <string name="status_explanation_abandoned">"Veränderung wurde von seinem Besitzer oder Administrator aufgegeben."</string>
-    <string name="patchset_labels_code_reviewer_title">"Code-Prüfer:"</string>
-    <string name="patchset_labels_verified_reviewer_title">"Geprüft"</string>
+    <string name="patchset_labels_code_reviewer">"Code-Prüfer:"</string>
+    <string name="patchset_labels_verified_reviewer">"Geprüft"</string>
     <string name="inserted">"Eingefügt Linien:"</string>
     <string name="deleted">"Gelöschte Zeilen:"</string>
     <string name="binary_file">"Binary-Datei"</string>

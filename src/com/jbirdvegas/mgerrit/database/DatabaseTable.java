@@ -76,6 +76,7 @@ public abstract class DatabaseTable {
         SyncTimeList, SyncTimeID,
         UserChangesList, UserChangesID,
         UserMessageList, UserMessageID,
+        UserReviewersList, UserReviewersID,
         UsersList, UsersID,
     }
 
@@ -96,6 +97,7 @@ public abstract class DatabaseTable {
         tables.add(SyncTime.class);
         tables.add(UserChanges.class);
         tables.add(UserMessage.class);
+        tables.add(UserReviewers.class);
         tables.add(Users.class);
     }
 

@@ -18,85 +18,82 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+              xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:paddingBottom="8dip"
-              android:background="?attr/cardBackgroundColor">
+              android:background="?attr/cardBackgroundColor"
+              android:orientation="vertical"
+              android:paddingBottom="8dip">
 
     <TextView
+        android:id="@+id/changed_file_path"
         style="@style/CardText.Normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/changed_file_path"
         android:gravity="left"
+        android:paddingBottom="8dip"
         android:paddingLeft="8dip"
         android:paddingRight="8dip"
-        android:paddingBottom="8dip"
-        android:textSize="@dimen/text_size_medium"/>
+        android:textSize="@dimen/text_size_medium"
+        tools:text="path/to/file.java"/>
 
     <RelativeLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <TextView
-            style="?attr/cardTextStyle"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
             android:id="@+id/binary_text"
-            android:text="@string/binary_file"
+            style="?attr/cardTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:paddingLeft="@dimen/standard_padding"
             android:paddingRight="@dimen/standard_padding"
-            android:textSize="@dimen/text_size_micro"
+            android:text="@string/binary_file"
             android:visibility="gone"/>
 
         <TextView
-            style="?attr/cardTextStyle"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/inserted"
             android:id="@+id/inserted_text"
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"
-            android:textSize="@dimen/text_size_micro"/>
-
-        <TextView
             style="?attr/cardTextStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/changed_file_inserted"
-            android:gravity="right"
-            android:layout_gravity="right"
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"
-            android:textSize="@dimen/text_size_micro"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_toRightOf="@+id/inserted_text"/>
-
-        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/deleted"
-            android:id="@+id/deleted_text"
             android:paddingLeft="@dimen/standard_padding"
             android:paddingRight="@dimen/standard_padding"
-            style="?attr/cardTextStyle"
-            android:textSize="@dimen/text_size_micro"
-            android:layout_below="@id/inserted_text"/>
+            android:text="@string/inserted"/>
 
         <TextView
+            android:id="@+id/changed_file_inserted"
+            style="?attr/cardTextStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/changed_file_deleted"
-            android:gravity="right"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
             android:layout_gravity="right"
+            android:layout_toRightOf="@+id/inserted_text"
+            android:gravity="right"
+            android:paddingLeft="@dimen/standard_padding"
+            android:paddingRight="@dimen/standard_padding"/>
+
+        <TextView
+            android:id="@+id/deleted_text"
+            style="?attr/cardTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/inserted_text"
             android:paddingLeft="@dimen/standard_padding"
             android:paddingRight="@dimen/standard_padding"
+            android:text="@string/deleted"/>
+
+        <TextView
+            android:id="@+id/changed_file_deleted"
             style="?attr/cardTextStyle"
-            android:textSize="@dimen/text_size_micro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_below="@id/inserted_text"
+            android:layout_gravity="right"
             android:layout_toRightOf="@+id/deleted_text"
-            android:layout_below="@id/inserted_text"/>
+            android:gravity="right"
+            android:paddingLeft="@dimen/standard_padding"
+            android:paddingRight="@dimen/standard_padding"/>
     </RelativeLayout>
 </LinearLayout>

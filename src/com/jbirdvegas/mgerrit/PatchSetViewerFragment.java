@@ -48,6 +48,7 @@ import com.jbirdvegas.mgerrit.database.Revisions;
 import com.jbirdvegas.mgerrit.database.SelectedChange;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.database.UserMessage;
+import com.jbirdvegas.mgerrit.database.UserReviewers;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.message.StatusSelected;
@@ -89,6 +90,7 @@ public class PatchSetViewerFragment extends Fragment
     public static final int LOADER_PROPERTIES = 0;
     public static final int LOADER_MESSAGE = 1;
     public static final int LOADER_FILES = 2;
+    public static final int LOADER_REVIEWERS = 3;
     public static final int LOADER_COMMENTS = 4;
 
     private final BroadcastReceiver mStatusReceiver = new BroadcastReceiver() {
@@ -213,6 +215,7 @@ public class PatchSetViewerFragment extends Fragment
         getLoaderManager().initLoader(LOADER_PROPERTIES, args, this);
         getLoaderManager().initLoader(LOADER_MESSAGE, args, this);
         getLoaderManager().initLoader(LOADER_FILES, args, this);
+        getLoaderManager().initLoader(LOADER_REVIEWERS, args, this);
         getLoaderManager().initLoader(LOADER_COMMENTS, args, this);
     }
 
@@ -387,6 +390,8 @@ public class PatchSetViewerFragment extends Fragment
                 return Revisions.getCommitMessage(mContext, changeID);
             case LOADER_FILES:
                 return FileChanges.getFileChanges(mContext, changeID);
+            case LOADER_REVIEWERS:
+                return UserReviewers.getReviewersForChange(mContext, changeID);
             case LOADER_COMMENTS:
                 return UserMessage.getMessagesForChange(mContext, changeID);
         }
@@ -396,9 +401,12 @@ public class PatchSetViewerFragment extends Fragment
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        CommitDetailsAdapter.Cards cardType = null;
+
         switch (cursorLoader.getId()) {
             case LOADER_PROPERTIES:
-                mAdapter.setCursor(CommitDetailsAdapter.Cards.PROPERTIES, cursor);
+                cardType = CommitDetailsAdapter.Cards.PROPERTIES;
+
                 if (cursor != null && cursor.getCount() > 0) {
                     // Set the screen title
                     cursor.moveToFirst();
@@ -407,15 +415,19 @@ public class PatchSetViewerFragment extends Fragment
                 }
                 break;
             case LOADER_MESSAGE:
-                mAdapter.setCursor(CommitDetailsAdapter.Cards.COMMIT_MSG, cursor);
+                cardType = CommitDetailsAdapter.Cards.COMMIT_MSG;
                 break;
             case LOADER_FILES:
-                mAdapter.setCursor(CommitDetailsAdapter.Cards.CHANGED_FILES, cursor);
+                cardType = CommitDetailsAdapter.Cards.CHANGED_FILES;
+                break;
+            case LOADER_REVIEWERS:
+                cardType = CommitDetailsAdapter.Cards.REVIEWERS;
                 break;
             case LOADER_COMMENTS:
-                mAdapter.setCursor(CommitDetailsAdapter.Cards.COMMENTS, cursor);
+                cardType = CommitDetailsAdapter.Cards.COMMENTS;
                 break;
         }
+        if (cardType != null) mAdapter.setCursor(cardType, cursor);
     }
 
     @Override
