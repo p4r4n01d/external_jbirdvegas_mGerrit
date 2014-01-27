@@ -263,7 +263,7 @@ public class DatabaseFactory extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int updateCount = 0, result = URI_MATCHER.match(uri);
 
-        if (isUriList(uri)) selection = handleID(uri, selection);
+        if (!isUriList(uri)) selection = handleID(uri, selection);
 
         String tableName = getUriTable(uri);
         lock();
@@ -280,8 +280,6 @@ public class DatabaseFactory extends ContentProvider {
     @Override  @Contract("null -> fail")
     public int bulkInsert(Uri uri, @NotNull ContentValues[] values) {
         String table = getUriTable(uri);
-
-        Map<String, Integer> params = DBParams.getParameters(uri);
 
         Integer conflictAlgorithm = DBParams.getConflictParameter(uri);
         boolean update = DBParams.updateOnDuplicateInsertion(uri);

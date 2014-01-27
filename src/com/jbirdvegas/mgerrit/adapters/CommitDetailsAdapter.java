@@ -61,7 +61,6 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
     public CommitDetailsAdapter(Context context) {
         mContext = context;
         mInflator = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         setup();
     }
 
@@ -121,6 +120,7 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
         // Get the set binder and delegate the work to the set binder
         ChildGroupDetails details = childGroupDetails.get(groupPosition);
         Cursor cursor = (Cursor) getChild(groupPosition, childPosition);
+        if (cursor == null) return convertView;
 
         if (cursor.getPosition() < 0) cursor.moveToFirst();
         return details.binder.setViewValue(cursor, convertView, parent);
@@ -139,7 +139,8 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
     @Override
     public int getChildrenCount(int groupPosition) {
         ChildGroupDetails details = childGroupDetails.get(groupPosition);
-        return details.cursor.getCount();
+        if (details.cursor != null) return details.cursor.getCount();
+        else return  0;
     }
 
     @Override
@@ -191,7 +192,6 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
 
     private class ChildGroupDetails {
         final Cards cardType;
-
         Cursor cursor;
         final CardBinder binder; // handles inflating the layout and binding data from the cursor
 
@@ -202,6 +202,7 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
 
         public void setCursor(Cursor cursor) {
             this.cursor = cursor;
+            notifyDataSetChanged();
         }
     }
 }

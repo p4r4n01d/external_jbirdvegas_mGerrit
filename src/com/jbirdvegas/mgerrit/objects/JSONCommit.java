@@ -356,26 +356,6 @@ public class JSONCommit implements Parcelable {
         this.mReviewers = reviewerlist;
     }
 
-    public List<Reviewer> getVerifiedReviewers() {
-        ArrayList<Reviewer> rs = new ArrayList<>();
-        for (Reviewer r : mReviewers.getReviewers()) {
-            if (KEY_VERIFIED.equals(r.getLabel())) {
-                rs.add(r);
-            }
-        }
-        return rs;
-    }
-
-    public List<Reviewer> getCodeReviewers() {
-        ArrayList<Reviewer> rs = new ArrayList<>();
-        for (Reviewer r : mReviewers.getReviewers()) {
-            if (KEY_CODE_REVIEW.equals(r.getLabel())) {
-                rs.add(r);
-            }
-        }
-        return rs;
-    }
-
     public CommitterObject getOwnerObject() {
         return mOwnerObject;
     }
