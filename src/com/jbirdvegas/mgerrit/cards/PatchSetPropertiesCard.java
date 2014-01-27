@@ -95,9 +95,9 @@ public class PatchSetPropertiesCard implements CardBinder {
         String topic = cursor.getString(topic_index);
         if (topic != null && !topic.isEmpty()) {
             viewHolder.topic.setText(topic);
-            viewHolder.topic.setVisibility(View.VISIBLE);
+            viewHolder.topicContainer.setVisibility(View.VISIBLE);
         } else {
-            viewHolder.topic.setVisibility(View.GONE);
+            viewHolder.topicContainer.setVisibility(View.GONE);
         }
 
         setClicksToActionViews(cursor, viewHolder.shareBtn, viewHolder.browserBtn);
@@ -219,6 +219,7 @@ public class PatchSetPropertiesCard implements CardBinder {
         private final TextView subject;
         private final TextView author;
         private final TextView branch;
+        private final View topicContainer;
         private final TextView topic;
         private final TextView updated;
 
@@ -229,6 +230,7 @@ public class PatchSetPropertiesCard implements CardBinder {
             subject = (TextView) view.findViewById(R.id.prop_card_subject);
             author = (TextView) view.findViewById(R.id.prop_card_author);
             branch = (TextView) view.findViewById(R.id.prop_card_branch);
+            topicContainer = view.findViewById(R.id.prop_card_topic_container);
             topic = (TextView) view.findViewById(R.id.prop_card_topic);
             updated = (TextView) view.findViewById(R.id.prop_card_last_update);
 

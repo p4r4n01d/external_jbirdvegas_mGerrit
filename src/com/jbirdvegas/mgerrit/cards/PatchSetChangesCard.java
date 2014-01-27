@@ -68,7 +68,7 @@ public class PatchSetChangesCard implements CardBinder {
     public View setViewValue(Cursor cursor, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.patchset_file_changed_list_item, null);
+            convertView = mInflater.inflate(R.layout.patchset_changes_card, null);
         }
 
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
@@ -89,30 +89,40 @@ public class PatchSetChangesCard implements CardBinder {
             viewHolder.path.setTextColor(mRed);
         }
 
-        int insertedInFile = cursor.getInt(mInserted_index);
-        int deletedInFile = cursor.getInt(mDeleted_index);
-        // we may not have inserted lines so remove if unneeded
-        if (insertedInFile < 1) {
-            viewHolder.inserted.setVisibility(View.GONE);
-            viewHolder.insText.setVisibility(View.GONE);
+        String oldPath = cursor.getString(mOldPath_index);
+        if (oldPath != null && !oldPath.isEmpty()) {
+            viewHolder.oldPathContainer.setVisibility(View.VISIBLE);
+            viewHolder.oldPath.setText(oldPath);
         } else {
-            viewHolder.inserted.setText('+' + String.valueOf(insertedInFile));
-            viewHolder.inserted.setTextColor(mGreen);
-        }
-        // we may not have deleted lines so remove if unneeded
-        if (deletedInFile < 1) {
-            viewHolder.deleted.setVisibility(View.GONE);
-            viewHolder.delText.setVisibility(View.GONE);
-        } else {
-            viewHolder.deleted.setText('-' + String.valueOf(deletedInFile));
-            viewHolder.deleted.setTextColor(mRed);
+            viewHolder.oldPathContainer.setVisibility(View.GONE);
         }
 
         /* If the file is binary don't offer to show the diff or any statistics as
          *  we cannot get detailed information on binary files */
         if (cursor.getInt(mIsBinary_index) != 0) {
-            convertView.findViewById(R.id.binary_text).setVisibility(View.VISIBLE);
+            viewHolder.binaryText.setVisibility(View.VISIBLE);
             return convertView;
+        } else {
+            viewHolder.binaryText.setVisibility(View.GONE);
+        }
+
+        int insertedInFile = cursor.getInt(mInserted_index);
+        int deletedInFile = cursor.getInt(mDeleted_index);
+        // we may not have inserted lines so remove if unneeded
+        if (insertedInFile < 1) {
+            viewHolder.insText.setVisibility(View.GONE);
+        } else {
+            viewHolder.insText.setVisibility(View.VISIBLE);
+            viewHolder.inserted.setText('+' + String.valueOf(insertedInFile));
+            viewHolder.inserted.setTextColor(mGreen);
+        }
+        // we may not have deleted lines so remove if unneeded
+        if (deletedInFile < 1) {
+            viewHolder.delText.setVisibility(View.GONE);
+        } else {
+            viewHolder.delText.setVisibility(View.VISIBLE);
+            viewHolder.deleted.setText('-' + String.valueOf(deletedInFile));
+            viewHolder.deleted.setTextColor(mRed);
         }
 
         // We have already set an anonymous tag so we need to use ids
@@ -220,15 +230,21 @@ public class PatchSetChangesCard implements CardBinder {
         TextView path;
         TextView inserted;
         TextView deleted;
-        TextView insText;
-        TextView delText;
+        View binaryText;
+        View insText;
+        View delText;
+        TextView oldPath;
+        View oldPathContainer;
 
         ViewHolder(View view) {
             path = (TextView)view.findViewById(R.id.changed_file_path);
             inserted = (TextView)view.findViewById(R.id.changed_file_inserted);
             deleted = (TextView)view.findViewById(R.id.changed_file_deleted);
-            insText = (TextView)view.findViewById(R.id.inserted_text);
-            delText = (TextView)view.findViewById(R.id.deleted_text);
+            binaryText = view.findViewById(R.id.binary_text);
+            insText = view.findViewById(R.id.inserted_text);
+            delText = view.findViewById(R.id.deleted_text);
+            oldPath = (TextView) view.findViewById(R.id.changed_file_old_path);
+            oldPathContainer = (View) view.findViewById(R.id.old_path_container);
         }
     }
 }

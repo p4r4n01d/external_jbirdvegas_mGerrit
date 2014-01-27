@@ -156,4 +156,5 @@
     <string name="header_reviewers">Reviewers</string>
     <string name="header_comments">Comments</string>
     <string name="commit_updated">Updated:</string>
+    <string name="renamed_label">Renamed from:</string>
 </resources>

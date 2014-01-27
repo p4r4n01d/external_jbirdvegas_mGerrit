@@ -20,6 +20,7 @@
     <dimen name="sticky_height">120dp</dimen>
     <dimen name="gravatar_image_padding">4dip</dimen>
     <dimen name="standard_padding">8dip</dimen>
+    <dimen name="extra_padding">16dip</dimen>
     <dimen name="default_left_card_start">5dip</dimen>
     <dimen name="reviewer_padding_top">2dip</dimen>
     <dimen name="reviewer_padding_left_indent">15dip</dimen>
