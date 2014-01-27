@@ -57,8 +57,6 @@
     <string name="transferring_json_data">Transferring JSON encoded data…</string>
 
     <string name="open_source_libs">Open Source Libraries</string>
-    <string name="cards_ui">CardsUI</string>
-    <string name="cards_ui_website" translatable="false">https://github.com/Androguide/cardsui-for-android</string>
     <string name="nine_old_androids">NineOldAndroids</string>
     <string name="nine_old_androids_website" translatable="false">http://nineoldandroids.com/</string>
     <string name="listview_animations">ListViewAnimations</string>
