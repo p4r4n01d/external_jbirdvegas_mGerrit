@@ -45,6 +45,8 @@ public class PatchSetChangesCard implements CardBinder {
     // Colors
     private final int mGreen;
     private final int mRed;
+    // The theme we are using, so we can get the default text color
+    private final boolean mUsingLightTheme;
 
     // Cursor indices
     private Integer mChangeId_index;
@@ -62,6 +64,8 @@ public class PatchSetChangesCard implements CardBinder {
         mGreen = context.getResources().getColor(R.color.text_green);
         mRed = context.getResources().getColor(R.color.text_red);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        mUsingLightTheme = (Prefs.getCurrentThemeID(mContext) == R.style.Theme_Light);
     }
 
     @Override
@@ -87,6 +91,13 @@ public class PatchSetChangesCard implements CardBinder {
             viewHolder.path.setTextColor(mGreen);
         } else if (status == FileInfo.Status.DELETED) {
             viewHolder.path.setTextColor(mRed);
+        } else {
+            // Need to determine from the current theme what the default color is and set it back
+            if (mUsingLightTheme) {
+                viewHolder.path.setTextColor(mContext.getResources().getColor(R.color.text_light));
+            } else {
+                viewHolder.path.setTextColor(mContext.getResources().getColor(R.color.text_dark));
+            }
         }
 
         String oldPath = cursor.getString(mOldPath_index);
@@ -114,7 +125,6 @@ public class PatchSetChangesCard implements CardBinder {
         } else {
             viewHolder.insText.setVisibility(View.VISIBLE);
             viewHolder.inserted.setText('+' + String.valueOf(insertedInFile));
-            viewHolder.inserted.setTextColor(mGreen);
         }
         // we may not have deleted lines so remove if unneeded
         if (deletedInFile < 1) {
@@ -122,7 +132,6 @@ public class PatchSetChangesCard implements CardBinder {
         } else {
             viewHolder.delText.setVisibility(View.VISIBLE);
             viewHolder.deleted.setText('-' + String.valueOf(deletedInFile));
-            viewHolder.deleted.setTextColor(mRed);
         }
 
         // We have already set an anonymous tag so we need to use ids

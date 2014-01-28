@@ -91,13 +91,10 @@
 
         <TextView
             android:id="@+id/changed_file_inserted"
-            style="?attr/cardTextStyle"
+            style="?attr/changeInsertedStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:gravity="right"
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"/>
+            android:layout_gravity="right"/>
     </LinearLayout>
 
     <LinearLayout
@@ -116,13 +113,9 @@
 
         <TextView
             android:id="@+id/changed_file_deleted"
-            style="?attr/cardTextStyle"
+            style="?attr/changeDeletedStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:gravity="right"
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
 </LinearLayout>
