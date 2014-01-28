@@ -39,7 +39,7 @@
     <color name="text_green_light">#ff8ec600</color>
     <color name="text_orange">#ee8800</color>
     <color name="text_red">#ffCC0000</color>
-    <color name="text_red_light">#ffef0000</color>
+    <color name="text_red_light">#ffff0000</color>
     <color name="text_light_red">#faa</color>
     <color name="text_purple">#FF800080</color>
     <color name="text_purple_light">#FFD000D0</color>

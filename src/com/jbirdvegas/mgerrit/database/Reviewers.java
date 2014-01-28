@@ -68,8 +68,8 @@ public class Reviewers extends DatabaseTable {
         db.execSQL("create table " + TABLE + " ("
                 + C_USER + " INTEGER, "
                 + C_CHANGE_ID + " text, "
-                + C_CODE_REVIEW + " text NOT NULL DEFAULT 0, "
-                + C_VERIFIED + " text NOT NULL DEFAULT 0, "
+                + C_CODE_REVIEW + " text DEFAULT 0, "
+                + C_VERIFIED + " text DEFAULT 0, "
                 + "PRIMARY KEY (" + C_USER + ", " + C_CHANGE_ID + ") ON CONFLICT REPLACE)");
     }
 

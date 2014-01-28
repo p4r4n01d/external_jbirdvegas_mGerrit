@@ -134,23 +134,27 @@
         <item name="android:paddingTop">2dip</item>
     </style>
 
-    <style name="Changes" parent="CardText">
+    <!-- Styles for changed files cards -->
+    <style name="CardText.Inserted">
         <item name="android:gravity">right</item>
         <item name="android:paddingLeft">@dimen/standard_padding</item>
         <item name="android:paddingRight">@dimen/standard_padding</item>
     </style>
-    <style name="Changes.Inserted" parent="CardText.Light"/>
-    <style name="Changes.Inserted.Light">
+    <style name="CardText.Inserted.Light">
         <item name="android:textColor">@color/text_green</item>
     </style>
-    <style name="Changes.Inserted.Dark" parent="CardText.Dark">
+    <style name="CardText.Inserted.Dark">
         <item name="android:textColor">@color/text_green_light</item>
     </style>
-    <style name="Changes.Deleted" parent="CardText.Light"/>
-    <style name="Changes.Deleted.Light">
+    <style name="CardText.Deleted">
+        <item name="android:gravity">right</item>
+        <item name="android:paddingLeft">@dimen/standard_padding</item>
+        <item name="android:paddingRight">@dimen/standard_padding</item>
+    </style>
+    <style name="CardText.Deleted.Light">
         <item name="android:textColor">@color/text_red</item>
     </style>
-    <style name="Changes.Deleted.Dark" parent="CardText.Dark">
+    <style name="CardText.Deleted.Dark">
         <item name="android:textColor">@color/text_red_light</item>
     </style>
 

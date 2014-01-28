@@ -36,10 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.ViewSwitcher;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.jbirdvegas.mgerrit.adapters.CommitDetailsAdapter;
 import com.jbirdvegas.mgerrit.database.Changes;
@@ -67,11 +64,9 @@ import org.jetbrains.annotations.Nullable;
  */
 public class PatchSetViewerFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String TAG = PatchSetViewerFragment.class.getSimpleName();
 
-    private ViewSwitcher mViewSwitcher;
+    private View disconnectedView;
     private ExpandableListView mListView;
-    private RequestQueue mRequestQueue;
     private Activity mParent;
     private Context mContext;
 
@@ -133,12 +128,11 @@ public class PatchSetViewerFragment extends Fragment
         View currentFragment = this.getView();
 
         mListView = (ExpandableListView) currentFragment.findViewById(R.id.commit_cards);
-        mViewSwitcher = (ViewSwitcher) currentFragment.findViewById(R.id.vs_patchset);
+        disconnectedView = currentFragment.findViewById(R.id.disconnected_view);
 
         mAdapter = new CommitDetailsAdapter(mParent);
         mListView.setAdapter(mAdapter);
 
-        mRequestQueue = Volley.newRequestQueue(mParent);
         mUrl = new GerritURL();
 
         Button retryButton = (Button) currentFragment.findViewById(R.id.btn_retry);
@@ -369,11 +363,9 @@ public class PatchSetViewerFragment extends Fragment
     private boolean switchViews() {
         boolean isconn = Tools.isConnected(mParent);
         if (isconn) {
-            // Switch to first child
-            if (mViewSwitcher.getDisplayedChild() != 0) mViewSwitcher.showPrevious();
+            disconnectedView.setVisibility(View.GONE);
         } else {
-            // Switch to second child
-            if (mViewSwitcher.getDisplayedChild() != 1) mViewSwitcher.showNext();
+            disconnectedView.setVisibility(View.VISIBLE);
         }
         return isconn;
     }

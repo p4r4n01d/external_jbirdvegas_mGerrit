@@ -35,8 +35,8 @@
         <item name="saveIcon">@drawable/ic_action_save</item>
         <item name="searchIcon">@drawable/ic_action_search</item>
         <item name="diffStyle">@style/Diff.Light</item>
-        <item name="changeInsertedStyle">@style/Changes.Inserted.Light</item>
-        <item name="changeDeletedStyle">@style/Changes.Deleted.Light</item>
+        <item name="changeInsertedStyle">@style/CardText.Inserted.Light</item>
+        <item name="changeDeletedStyle">@style/CardText.Deleted.Light</item>
     </style>
 
     <style name="Theme.Dark" parent="android:style/Theme.Holo">
@@ -57,7 +57,7 @@
         <item name="saveIcon">@drawable/ic_action_save_dark</item>
         <item name="searchIcon">@drawable/ic_action_search_dark</item>
         <item name="diffStyle">@style/Diff.Dark</item>
-        <item name="changeInsertedStyle">@style/Changes.Inserted.Dark</item>
-        <item name="changeDeletedStyle">@style/Changes.Deleted.Dark</item>
+        <item name="changeInsertedStyle">@style/CardText.Inserted.Dark</item>
+        <item name="changeDeletedStyle">@style/CardText.Deleted.Dark</item>
     </style>
 </resources>
