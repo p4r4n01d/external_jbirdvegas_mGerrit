@@ -21,8 +21,8 @@
     <color name="stroke">#dddddd</color>
     <color name="stroke_dark">#222222</color>
 
-    <color name="text_light">#66000000</color>
-    <color name="text_dark">#66ffffff</color>
+    <color name="text_light">#ff000000</color>
+    <color name="text_dark">#ffffffff</color>
 
     <color name="card_text">#ff606060</color>
     <color name="card_text_dark">#ff9F9F9F</color>
