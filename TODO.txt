@@ -26,8 +26,6 @@ Outstanding
         - List all tracked projects under the the one heading (that is collapsable)
 - Seperate debug/release versioning (not sure if gradle fully supports this)
 - Layout optimisations using Android Hierarchy Viewer (debug version)
-- Lint optimisations:
-    - Use --html switch: Very pretty output.
 - Check in DefaultGerritReceivers whether the broadcast response matches the query
 	- When initializing the DefaultGerritReceivers specify the query being performed (GerritURL)
 	- Check query before incrementing/decrementing the number of running queries
@@ -36,11 +34,6 @@ Outstanding
 		(re-)delivered to the activity that was listening to broadcasts matching the actual query
 - Change detail viewpager
 	- Viewpager to swipe through changes in the change detail screen (phone layout only)
-
-
-Database
---------
-    - Sync and cache patch set (change) details in database
 
 
 Searching (Requires database), action bar
@@ -56,9 +49,6 @@ Searching (Requires database), action bar
 		- Idea: Users can do filtering and bypass the filter draw entirely. The filter draw provides assistance on how to formulate queries that the web interface uses.
 		- We are going to support new filter types (keywords) and/or new parameters for them (e.g. date range filtering for the age keyword)
 
-	- When expanded, the searchview should fill the action bar (with room for the overflow and app icon)
-	- Fix menu icons not appearing in action bar when search view collapsed
-
 
 Change List
 -----------
@@ -71,11 +61,6 @@ Tablet (master-detail layout)
 -----------------------------
     - Selection indicator for the currently selected change.
         - Visual aid to show that the details pane expands the selected change (arrow perhaps?)
-
-
-CM Gerrit (Requires Server side changes to version 2.8+)
-----------------------------------------
-	- Get change diffs
 
 
 Future Direction
@@ -101,13 +86,6 @@ More on Auth (privileged actions)
 
 Errors
 ------
-Website down (stacktrace):
-java.io.FileNotFoundException: http://review.cyanogenmod.org/changes/?q=I6710a62a82ed274eb9e8c86cd2a1faf657ae53f1&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=CURRENT_FILES&o=DETAILED_LABELS&o=DETAILED_ACCOUNTS&o=MESSAGES
-            at libcore.net.http.HttpURLConnectionImpl.getInputStream(HttpURLConnectionImpl.java:186)
-            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:92)
-            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:43)
-            ...
-
 Timeout connecting to server
 01-02 13:59:27.552  16414-16414/com.jbirdvegas.mgerrit E/GravatarHelper: http Volley request failed!
     com.android.volley.TimeoutError
