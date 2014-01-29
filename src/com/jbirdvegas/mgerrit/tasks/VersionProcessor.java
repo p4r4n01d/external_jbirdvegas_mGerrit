@@ -15,6 +15,8 @@ import com.jbirdvegas.mgerrit.message.StartingRequest;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
  * Copyright (C) 2014 Android Open Kang Project (AOKP)
@@ -39,19 +41,25 @@ public class VersionProcessor extends SyncProcessor<String> {
     VersionProcessor(Context context) {
         super(context);
         String url = Prefs.getCurrentGerrit(context);
-        mUrl = url + "/config/server/version";
+        mUrl = url + "config/server/version";
     }
 
     @Override
     void insert(String data) {
         // Trim off the junk beginning and the quotes around the version number
-        data = data.substring(6, data.length() - 1);
-        Config.setValue(getContext(), Config.KEY_VERSION, data);
+        Pattern p = Pattern.compile("\"([^\"]+)\"");
+        Matcher m = p.matcher(data);
+        if (m.find()) {
+            Config.setValue(getContext(), Config.KEY_VERSION, m.group(1));
+        } else {
+            Config.setValue(getContext(), Config.KEY_VERSION, data);
+        }
     }
 
     @Override
     boolean isSyncRequired() {
-        return false;
+        // Look up the database to see if we have previously saved the version
+        return Config.getValue(getContext(), Config.KEY_VERSION) == null;
     }
 
     @Override
@@ -60,32 +68,23 @@ public class VersionProcessor extends SyncProcessor<String> {
     }
 
     @Override
-    protected void fetchData() {
-
+    protected void fetchData(RequestQueue queue) {
         Response.Listener<String> listener = getListener(mUrl);
 
         StringRequest request = new StringRequest(mUrl,
-                getListener(mUrl), new Response.ErrorListener() {
+                listener, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 // Need to make sure this is a 404 error
                 if (volleyError.networkResponse.statusCode == 404) {
                     // Pretend we got a response
                     getListener(mUrl).onResponse(Config.VERSION_DEFAULT);
+                } else {
+                    new ErrorDuringConnection(mContext, volleyError, mUrl);
                 }
             }
         });
 
-        this.fetchData(mUrl, request);
-
-        // Won't be able to actually get JSON response back as it
-        //  is improperly formed (junk at start), but requesting raw text and
-        //  trimming it should be fine.
-
-        RequestQueue queue = Volley.newRequestQueue(mContext);
-        new StartingRequest(mContext, mUrl).sendUpdateMessage();
-
-
-        queue.add(request);
+        this.fetchData(mUrl, request, queue);
     }
 }

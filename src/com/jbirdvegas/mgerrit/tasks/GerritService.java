@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +38,8 @@ public class GerritService extends IntentService {
 
     public static enum DataType { Project, Commit, CommitDetails, GetVersion }
 
+    public static RequestQueue mRequestQueue;
+
     private GerritURL mCurrentUrl;
 
     // This is required for the service to be started
@@ -43,6 +47,10 @@ public class GerritService extends IntentService {
 
     @Override
     protected void onHandleIntent(@NotNull Intent intent) {
+        if (mRequestQueue != null) {
+            mRequestQueue = Volley.newRequestQueue(this);
+        }
+
         mCurrentUrl = intent.getParcelableExtra(URL_KEY);
         SyncProcessor processor;
 
@@ -63,7 +71,7 @@ public class GerritService extends IntentService {
 
         // Call the SyncProcessor to fetch the data if necessary
         boolean needsSync = processor.isSyncRequired();
-        if (needsSync) processor.fetchData();
+        if (needsSync) processor.fetchData(mRequestQueue);
     }
 
     /**

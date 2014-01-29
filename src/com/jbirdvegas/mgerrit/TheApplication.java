@@ -8,6 +8,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.jbirdvegas.mgerrit.database.DatabaseFactory;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
+import com.jbirdvegas.mgerrit.tasks.GerritService;
 
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)
@@ -40,6 +41,8 @@ public class TheApplication extends Application
         super.onCreate();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
+
+        requestServerVersion();
     }
 
     @Override
@@ -64,6 +67,8 @@ public class TheApplication extends Application
 
         Intent intent = new Intent(GERRIT_CHANGED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        requestServerVersion();
     }
 
     @Override
@@ -72,5 +77,14 @@ public class TheApplication extends Application
         if (key.equals(Prefs.APP_THEME)) {
             this.setTheme(Prefs.getCurrentThemeID(this));
         }
+    }
+
+    /**
+     * Starts a request to check the server version
+     */
+    private void requestServerVersion() {
+        Intent it = new Intent(this, GerritService.class);
+        it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.GetVersion);
+        startService(it);
     }
 }

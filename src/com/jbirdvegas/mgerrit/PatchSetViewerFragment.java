@@ -226,7 +226,6 @@ public class PatchSetViewerFragment extends Fragment
             return;
         }
 
-
         Pair<String, Integer> change = SelectedChange.getSelectedChange(mContext, mStatus);
         String changeID = change.first;
         int changeNumber = change.second;
@@ -328,37 +327,6 @@ public class PatchSetViewerFragment extends Fragment
     -------------------------
 
      */
-
-    private CommitterObject committerObject = null;
-
-    private static final int OWNER = 0;
-    private static final int REVIEWER = 1;
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        committerObject = (CommitterObject) v.getTag();
-        menu.setHeaderTitle(R.string.developers_role);
-        menu.add(0, v.getId(), OWNER, v.getContext().getString(R.string.context_menu_owner));
-        menu.add(0, v.getId(), REVIEWER, v.getContext().getString(R.string.context_menu_reviewer));
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        String tab = null;
-        switch (item.getOrder()) {
-            case OWNER:
-                tab = CardsFragment.KEY_OWNER;
-                break;
-            case REVIEWER:
-                tab = CardsFragment.KEY_REVIEWER;
-        }
-        committerObject.setState(tab);
-        Intent intent = new Intent(mParent, ReviewTab.class);
-        intent.putExtra(CardsFragment.KEY_DEVELOPER, committerObject);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(intent);
-        return true;
-    }
 
     private boolean switchViews() {
         boolean isconn = Tools.isConnected(mParent);
