@@ -246,14 +246,14 @@ public class PatchSetChangesCard implements CardBinder {
 
     class ViewHolder {
 
-        TextView path;
-        TextView inserted;
-        TextView deleted;
-        View binaryText;
-        View insText;
-        View delText;
-        TextView oldPath;
-        View oldPathContainer;
+        final TextView path;
+        final TextView inserted;
+        final TextView deleted;
+        final View binaryText;
+        final View insText;
+        final View delText;
+        final TextView oldPath;
+        final View oldPathContainer;
 
         ViewHolder(View view) {
             path = (TextView)view.findViewById(R.id.changed_file_path);
@@ -263,7 +263,7 @@ public class PatchSetChangesCard implements CardBinder {
             insText = view.findViewById(R.id.inserted_text);
             delText = view.findViewById(R.id.deleted_text);
             oldPath = (TextView) view.findViewById(R.id.changed_file_old_path);
-            oldPathContainer = (View) view.findViewById(R.id.old_path_container);
+            oldPathContainer = view.findViewById(R.id.old_path_container);
         }
     }
 }

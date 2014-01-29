@@ -39,6 +39,9 @@ public class TheApplication extends Application
     @Override
     public void onCreate() {
         super.onCreate();
+        // Ensure Gerrit URL has a context set
+        GerritURL.setContext(this);
+
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
 
@@ -58,7 +61,6 @@ public class TheApplication extends Application
      */
     public void onGerritChanged(String newGerrit)
     {
-        GerritURL.setGerrit(newGerrit);
         DatabaseFactory.changeGerrit(this, newGerrit);
 
         // Unset the project - we don't track these across Gerrit instances

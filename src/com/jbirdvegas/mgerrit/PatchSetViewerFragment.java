@@ -29,9 +29,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -40,6 +38,7 @@ import android.widget.ExpandableListView;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.jbirdvegas.mgerrit.adapters.CommitDetailsAdapter;
 import com.jbirdvegas.mgerrit.database.Changes;
+import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.FileChanges;
 import com.jbirdvegas.mgerrit.database.Revisions;
 import com.jbirdvegas.mgerrit.database.SelectedChange;
@@ -49,7 +48,6 @@ import com.jbirdvegas.mgerrit.database.UserReviewers;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.message.StatusSelected;
-import com.jbirdvegas.mgerrit.objects.CommitterObject;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
@@ -73,6 +71,8 @@ public class PatchSetViewerFragment extends Fragment
     private GerritURL mUrl;
     private String mSelectedChange;
     private String mStatus;
+    // Whether the server supports the new change details endpoint (false if so)
+    private boolean sIsLegacyVersion;
 
     private CommitDetailsAdapter mAdapter;
 
@@ -104,7 +104,6 @@ public class PatchSetViewerFragment extends Fragment
         }
     };
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -133,13 +132,16 @@ public class PatchSetViewerFragment extends Fragment
         mAdapter = new CommitDetailsAdapter(mParent);
         mListView.setAdapter(mAdapter);
 
+        sIsLegacyVersion = !Config.isDiffSupported(mParent);
+
         mUrl = new GerritURL();
 
         Button retryButton = (Button) currentFragment.findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendRequest();
+                if (sIsLegacyVersion) sendRequest(GerritService.DataType.Commit);
+                else sendRequest(GerritService.DataType.LegacyCommitDetails);
             }
         });
 
@@ -159,7 +161,7 @@ public class PatchSetViewerFragment extends Fragment
     /**
      * Start the updater to check for an update if necessary
      */
-    private void sendRequest() {
+    private void sendRequest(GerritService.DataType dataType) {
 
         // If we aren't connected, there's nothing to do here
         if (!switchViews()) return;
@@ -170,7 +172,7 @@ public class PatchSetViewerFragment extends Fragment
          * so this will not be able to get the files changed or the full commit message
          * in prior Gerrit versions.
          */
-        GerritService.sendRequest(mParent, GerritService.DataType.CommitDetails, mUrl);
+        GerritService.sendRequest(mParent, dataType, mUrl);
     }
 
     private void setTitle(int commitNumber) {
@@ -195,9 +197,10 @@ public class PatchSetViewerFragment extends Fragment
         this.mSelectedChange = changeID;
         mUrl.setChangeID(mSelectedChange);
         mUrl.setChangeNumber(changeNo);
-        mUrl.requestChangeDetail(true);
+        mUrl.requestChangeDetail(true, sIsLegacyVersion);
 
-        sendRequest();
+        if (sIsLegacyVersion) sendRequest(GerritService.DataType.LegacyCommitDetails);
+        else sendRequest(GerritService.DataType.CommitDetails);
 
         initLoaders(changeID);
     }

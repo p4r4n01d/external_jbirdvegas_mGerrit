@@ -36,7 +36,7 @@ public class GerritService extends IntentService {
     public static final String URL_KEY = "Url";
     public static final String DATA_TYPE_KEY = "Type";
 
-    public static enum DataType { Project, Commit, CommitDetails, GetVersion }
+    public static enum DataType { Project, Commit, CommitDetails, GetVersion, LegacyCommitDetails }
 
     public static RequestQueue mRequestQueue;
 
@@ -62,6 +62,8 @@ public class GerritService extends IntentService {
             processor = new ChangeListProcessor(this, mCurrentUrl);
         } else if (dataType == DataType.CommitDetails) {
             processor = new CommitProcessor(this, mCurrentUrl);
+        } else if (dataType == DataType.LegacyCommitDetails) {
+            processor = new LegacyCommitProcessor(this, mCurrentUrl);
         } else if (dataType == DataType.GetVersion) {
             processor = new VersionProcessor(this);
         } else {
