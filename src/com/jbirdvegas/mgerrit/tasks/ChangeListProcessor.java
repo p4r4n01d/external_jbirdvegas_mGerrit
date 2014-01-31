@@ -48,19 +48,6 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
     @Override
     void insert(JSONCommit[] commits) {
         UserChanges.insertCommits(getContext(), Arrays.asList(commits));
-
-        for (JSONCommit commit : commits) {
-            Reviewer[] reviewers = reviewersToArray(commit);
-            if (reviewers == null) {
-                // Assume we have not got change details for any of the commits
-                return;
-            }
-
-            String changeid = commit.getChangeId();
-            Reviewers.insertReviewers(getContext(), changeid, reviewers);
-            Revisions.insertRevision(getContext(), commit.getPatchSet());
-            MessageInfo.insertMessages(getContext(), changeid, commit.getMessagesList());
-        }
     }
 
     @Override
