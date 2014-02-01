@@ -23,7 +23,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -155,21 +154,12 @@ public class PatchSetChangesCard implements CardBinder {
 
                 AlertDialog.Builder ad = new AlertDialog.Builder(mContext)
                         .setTitle(R.string.choose_diff_view);
-
                 ad.setPositiveButton(R.string.context_menu_view_diff_dialog, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        // v2.8 (returns Base64 encoded String)
-                        // http://gerrit.aokp.co/changes/I554a3ab/revisions/current/files/res%2Fvalues%2Fcustom_arrays.xml/diff
-                        //changes/{change-id}/revisions/current/files/{file-path}/content
-                        String base64 = "%schanges/%s/revisions/current/patch";
-                        String url = String.format(base64,
-                                Prefs.getCurrentGerrit(mContext),
-                                changeNumber);
-                        launchDiffDialog(url, filePath);
+                        launchDiffDialog(changeNumber, patchset, filePath);
                     }
                 });
-
                 ad.setNegativeButton(
                         R.string.context_menu_diff_view_in_browser, new DialogInterface.OnClickListener() {
                     @Override
@@ -184,9 +174,8 @@ public class PatchSetChangesCard implements CardBinder {
     }
 
     // creates the Diff viewer dialog
-    private void launchDiffDialog(String url, String filePath) {
-        Log.d(TAG, "Attempting to contact: " + url);
-        DiffDialog diffDialog = new DiffDialog(mContext, url, filePath);
+    private void launchDiffDialog(Integer changeNumber, Integer patchSetNumber, String filePath) {
+        DiffDialog diffDialog = new DiffDialog(mContext, changeNumber, patchSetNumber, filePath);
         diffDialog.addExceptionCallback(new DiffDialog.DiffFailCallback() {
             @Override
             public void killDialogAndErrorOut(Exception e) {
