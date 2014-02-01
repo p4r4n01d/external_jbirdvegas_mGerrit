@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.jbirdvegas.mgerrit.adapters.FileAdapter;
 import com.jbirdvegas.mgerrit.database.FileChanges;
 import com.jbirdvegas.mgerrit.tasks.ZipRequest;
 import com.jbirdvegas.mgerrit.views.DiffTextView;
@@ -44,7 +45,7 @@ public class DiffViewer extends FragmentActivity
     private String mLineSplit = System.getProperty("line.separator");
     private DiffTextView mDiffTextView;
     private Spinner mSpinner;
-    private SimpleCursorAdapter mAdapter;
+    private FileAdapter mAdapter;
 
     private String mFilePath;
     private int mChangeNumber;
@@ -79,26 +80,8 @@ public class DiffViewer extends FragmentActivity
         mDiffTextView = (DiffTextView) findViewById(R.id.diff_view_diff);
         mSpinner = (Spinner) findViewById(R.id.diff_spinner);
 
-        mAdapter = new SimpleCursorAdapter(this, R.layout.diff_files_row, null,
-                new String[] { FileChanges.C_FILE_NAME, FileChanges.C_FILE_NAME,
-                FileChanges.C_LINES_INSERTED, FileChanges.C_LINES_DELETED },
-                new int[] { R.id.changed_file_path, R.id.changed_file_path_short,
-                R.id.changed_file_inserted, R.id.changed_file_deleted}, 0);
+        mAdapter = new FileAdapter(this, null);
         mSpinner.setAdapter(mAdapter);
-        mAdapter.setDropDownViewResource(R.layout.diff_files_dropdown_row);
-        mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                if (view.getId() == R.id.changed_file_path_short) {
-                    String filename = cursor.getString(columnIndex);
-                    int idx = filename.lastIndexOf("/");
-                    filename = idx >= 0 ? filename.substring(idx + 1) : filename;
-                    ((TextView) view).setText(filename);
-                    return true;
-                }
-                return false;
-            }
-        });
 
         ZipRequest request = new ZipRequest(this, mChangeNumber, patchSetNumber, new Response.Listener<String>() {
             @Override

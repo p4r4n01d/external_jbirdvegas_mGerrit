@@ -21,18 +21,16 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:background="?attr/cardBackgroundColor"
               android:orientation="vertical">
 
     <TextView
-        android:id="@+id/changed_file_path_short"
+        android:id="@+id/changed_file_path"
         style="@style/CardText.Normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="left"
+        android:layout_gravity="center_horizontal"
         android:paddingLeft="@dimen/standard_padding"
         android:paddingRight="@dimen/standard_padding"
         android:textSize="@dimen/text_size_medium"
         tools:text="file.ext"/>
-
 </LinearLayout>

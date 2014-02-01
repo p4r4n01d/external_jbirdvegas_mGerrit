@@ -24,7 +24,7 @@
     </item>
     <item android:top="1dp">
         <shape android:shape="rectangle">
-            <solid android:color="@color/card_background_dark" />
+            <solid android:color="@color/main_background_dark" />
         </shape>
     </item>
 </layer-list>
