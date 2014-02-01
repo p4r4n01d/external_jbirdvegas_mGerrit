@@ -24,8 +24,10 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.View;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -78,9 +80,25 @@ public class DiffViewer extends FragmentActivity
         mSpinner = (Spinner) findViewById(R.id.diff_spinner);
 
         mAdapter = new SimpleCursorAdapter(this, R.layout.diff_files_row, null,
-                new String[] { FileChanges.C_FILE_NAME },
-                new int[] { R.id.changed_file_path }, 0);
+                new String[] { FileChanges.C_FILE_NAME, FileChanges.C_FILE_NAME,
+                FileChanges.C_LINES_INSERTED, FileChanges.C_LINES_DELETED },
+                new int[] { R.id.changed_file_path, R.id.changed_file_path_short,
+                R.id.changed_file_inserted, R.id.changed_file_deleted}, 0);
         mSpinner.setAdapter(mAdapter);
+        mAdapter.setDropDownViewResource(R.layout.diff_files_dropdown_row);
+        mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                if (view.getId() == R.id.changed_file_path_short) {
+                    String filename = cursor.getString(columnIndex);
+                    int idx = filename.lastIndexOf("/");
+                    filename = idx >= 0 ? filename.substring(idx + 1) : filename;
+                    ((TextView) view).setText(filename);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         ZipRequest request = new ZipRequest(this, mChangeNumber, patchSetNumber, new Response.Listener<String>() {
             @Override

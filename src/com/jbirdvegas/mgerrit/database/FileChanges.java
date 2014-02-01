@@ -121,7 +121,7 @@ public class FileChanges extends DatabaseTable {
     public static CursorLoader getNonBinaryChangedFiles(Context context, Integer changeNumber) {
         String[] PROJECTION = new String[] {
                 FileInfoTable.TABLE + ".rowid AS _id", C_FILE_NAME,
-                FileInfoTable.TABLE + "." + C_STATUS};
+                FileInfoTable.TABLE + "." + C_STATUS, C_LINES_INSERTED, C_LINES_DELETED};
 
         return new CursorLoader(context, CONTENT_URI, PROJECTION,
                 Changes.TABLE + "." + C_COMMIT_NUMBER + " = ? AND "

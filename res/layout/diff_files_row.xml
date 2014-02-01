@@ -22,11 +22,10 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:background="?attr/cardBackgroundColor"
-              android:orientation="vertical"
-              android:paddingBottom="8dip">
+              android:orientation="vertical">
 
     <TextView
-        android:id="@+id/changed_file_path"
+        android:id="@+id/changed_file_path_short"
         style="@style/CardText.Normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,48 +33,6 @@
         android:paddingLeft="@dimen/standard_padding"
         android:paddingRight="@dimen/standard_padding"
         android:textSize="@dimen/text_size_medium"
-        tools:text="path/to/file.ext"/>
-
-    <LinearLayout
-        android:id="@+id/inserted_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            style="?attr/cardTextStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"
-            android:text="@string/inserted"/>
-
-        <TextView
-            android:id="@+id/changed_file_inserted"
-            style="?attr/changeInsertedStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/deleted_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            style="?attr/cardTextStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"
-            android:text="@string/deleted"/>
-
-        <TextView
-            android:id="@+id/changed_file_deleted"
-            style="?attr/changeDeletedStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+        tools:text="file.ext"/>
 
 </LinearLayout>
