@@ -31,6 +31,7 @@
         <attr name="mainBackgroundColor" format="color"/>
         <attr name="cardBackgroundColor" format="color"/>
         <attr name="clickableCardBackground" format="reference" />
+        <attr name="backgroundTop" format="reference"/>
     </declare-styleable>
     <declare-styleable name="CommitCard">
         <attr name="isSelected" format="boolean"/>
@@ -46,6 +47,8 @@
         <attr name="shareIcon" format="reference"/>
         <attr name="viewIcon" format="reference"/>
         <attr name="saveIcon" format="reference"/>
+        <attr name="backIcon" format="reference"/>
+        <attr name="nextIcon" format="reference"/>
     </declare-styleable>
 
     <attr name="diffStyle" format="reference" />

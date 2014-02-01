@@ -32,15 +32,12 @@ import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.FileChanges;
-import com.jbirdvegas.mgerrit.dialogs.DiffDialog;
-import com.jbirdvegas.mgerrit.helpers.Tools;
+import com.jbirdvegas.mgerrit.DiffViewer;
 import com.jbirdvegas.mgerrit.objects.FileInfo;
 
 public class PatchSetChangesCard implements CardBinder {
-    private static final String TAG = PatchSetChangesCard.class.getSimpleName();
     private final Context mContext;
     private final LayoutInflater mInflater;
-    private AlertDialog mAlertDialog;
 
     // Colors
     private final int mGreen;
@@ -175,18 +172,12 @@ public class PatchSetChangesCard implements CardBinder {
 
     // creates the Diff viewer dialog
     private void launchDiffDialog(Integer changeNumber, Integer patchSetNumber, String filePath) {
-        DiffDialog diffDialog = new DiffDialog(mContext, changeNumber, patchSetNumber, filePath);
-        diffDialog.addExceptionCallback(new DiffDialog.DiffFailCallback() {
-            @Override
-            public void killDialogAndErrorOut(Exception e) {
-                if (mAlertDialog != null) {
-                    mAlertDialog.cancel();
-                }
-                Tools.showErrorDialog(mContext, e);
-            }
-        });
-        mAlertDialog = diffDialog.create();
-        mAlertDialog.show();
+
+        Intent diffIntent = new Intent(mContext, DiffViewer.class);
+        diffIntent.putExtra(DiffViewer.CHANGE_NUMBER_TAG, changeNumber);
+        diffIntent.putExtra(DiffViewer.PATCH_SET_NUMBER_TAG, patchSetNumber);
+        diffIntent.putExtra(DiffViewer.FILE_PATH_TAG, filePath);
+        mContext.startActivity(diffIntent);
     }
 
     private void launchDiffInBrowser(Integer changeNumber, Integer patchset, String filePath) {

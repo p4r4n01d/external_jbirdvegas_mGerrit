@@ -158,4 +158,6 @@
     <string name="commit_updated">Updated:</string>
     <string name="renamed_label">Renamed from:</string>
     <string name="no_changelog">There are no recent builds for your device</string>
+    <string name="diff_back">Previous File</string>
+    <string name="diff_next">Next File</string>
 </resources>

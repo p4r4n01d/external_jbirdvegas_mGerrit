@@ -56,13 +56,15 @@ public class ZipRequest extends Request<String> {
                       Response.ErrorListener errorListener) {
         super(Method.GET, getUrl(context, changeNumber, patchSetNumber), errorListener);
         mListener = listener;
-
     }
 
     private static String getUrl(Context context, Integer changeNumber, Integer patchSetNumber) {
-        return String.format("%schanges/%d/revisions/%d/patch?zip",
+        String ps;
+        if (patchSetNumber == null || patchSetNumber < 1) ps = "current";
+        else ps = String.valueOf(patchSetNumber);
+        return String.format("%schanges/%d/revisions/%s/patch?zip",
                 Prefs.getCurrentGerrit(context),
-                changeNumber, patchSetNumber);
+                changeNumber, ps);
     }
 
     @Override
