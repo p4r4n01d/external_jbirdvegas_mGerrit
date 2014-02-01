@@ -18,8 +18,7 @@
     <LinearLayout android:orientation="vertical"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:paddingBottom="8dip"
-                  android:background="?attr/cardBackgroundColor">
+                  android:paddingBottom="8dip">
 
         <TextView
             android:gravity="center"
