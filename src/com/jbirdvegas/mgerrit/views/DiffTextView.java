@@ -142,8 +142,7 @@ public class DiffTextView extends TextView {
                         charCounter + startWhitespace - 1, end, 0);
             }
 // test line with trailing whitespaces ->
-// Here are 3 tabs ->	-	-	<- this line ends with four whitespaces ->
-
+// Here are 3 tabs ->	-	-	<- this line ends with four whitespaces ->    
             charCounter += string.length();
         }
     }
@@ -171,14 +170,14 @@ public class DiffTextView extends TextView {
     private void highlightUnwantedChars(SpannableString spannableString) {
         for (Integer ints : tabs) {
             Log.d(TAG, "Index of tab: " + ints);
-            spannableString.setSpan(getTrailingSpaceColor(),
-                    ints - 1,
-                    ints + 1,
-                    Spanned.SPAN_INTERMEDIATE);
-            spannableString.setSpan(new ForegroundColorSpan(Color.WHITE),
-                    ints - 1,
-                    ints + 1,
-                    Spanned.SPAN_INTERMEDIATE);
+            if (ints + 1 < spannableString.length()) {
+                spannableString.setSpan(getTrailingSpaceColor(),
+                        ints - 1, ints + 1,
+                        Spanned.SPAN_INTERMEDIATE);
+                spannableString.setSpan(new ForegroundColorSpan(Color.WHITE),
+                        ints - 1, ints + 1,
+                        Spanned.SPAN_INTERMEDIATE);
+            }
         }
     }
 
@@ -201,7 +200,8 @@ public class DiffTextView extends TextView {
                         i += 4;
                     } else if (c == 't') {
                         // leave \t so we can highlight
-                        c = '\t';
+                        sb.append("\\t");
+                        continue;
                     }
                     // add other cases here as desired...
                 }
