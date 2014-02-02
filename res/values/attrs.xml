@@ -47,8 +47,6 @@
         <attr name="shareIcon" format="reference"/>
         <attr name="viewIcon" format="reference"/>
         <attr name="saveIcon" format="reference"/>
-        <attr name="backIcon" format="reference"/>
-        <attr name="nextIcon" format="reference"/>
     </declare-styleable>
 
     <attr name="diffStyle" format="reference" />
@@ -59,5 +57,10 @@
         <attr name="origHeader" format="color" />
         <attr name="newHeader" format="color" />
         <attr name="pathInfo" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="ImageButton">
+        <attr name="backIcon" format="reference"/>
+        <attr name="nextIcon" format="reference"/>
     </declare-styleable>
 </resources>

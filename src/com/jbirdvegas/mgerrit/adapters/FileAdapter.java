@@ -96,10 +96,10 @@ public class FileAdapter extends CursorAdapter {
         viewHolder.path.setText(cursor.getString(mPath_index));
 
         int inserted = cursor.getInt(mInserted_index);
-        setTextOrHide(viewHolder.inserted, inserted);
+        setTextOrHide(viewHolder.inserted, viewHolder.insertedContainer, inserted);
 
         int deleted = cursor.getInt(mDeleted_index);
-        setTextOrHide(viewHolder.deleted, deleted);
+        setTextOrHide(viewHolder.deleted, viewHolder.deletedContainer, deleted);
 
         return convertView;
     }
@@ -112,17 +112,37 @@ public class FileAdapter extends CursorAdapter {
         return cursor;
     }
 
+    public int getPreviousPosition(int currentPosition) {
+        if (currentPosition < 1) return -1;
+        else return currentPosition - 1;
+    }
+
+    public int getNextPosition(int currentPosition) {
+        if (currentPosition + 1 >= getCount()) return -1;
+        else return currentPosition + 1;
+    }
+
+    public String getPathAtPosition(int position) {
+        if (position >= 0 && position < getCount()) {
+            Cursor cursor = (Cursor) getItem(position);
+            if (cursor != null) {
+                return cursor.getString(mPath_index);
+            }
+        }
+        return null;
+    }
+
     private void colorPath(TextView view, Cursor cursor) {
         Tools.colorPath(mContext.getResources(), view,
                 cursor.getString(mStatus_index), mUsingLightTheme);
     }
 
-    private void setTextOrHide(TextView view, Integer count) {
+    private void setTextOrHide(TextView textView, View container, Integer count) {
         if (count > 0) {
-            view.setVisibility(View.VISIBLE);
-            view.setText(String.valueOf(count));
+            container.setVisibility(View.VISIBLE);
+            textView.setText(String.valueOf(count));
         } else {
-            view.setVisibility(View.GONE);
+            container.setVisibility(View.GONE);
         }
     }
 
@@ -145,11 +165,15 @@ public class FileAdapter extends CursorAdapter {
         private final TextView path;
         private final TextView inserted;
         private final TextView deleted;
+        private final View insertedContainer;
+        private final View deletedContainer;
 
         ViewHolder(View view) {
             path = (TextView) view.findViewById(R.id.changed_file_path);
             inserted = (TextView) view.findViewById(R.id.changed_file_inserted);
             deleted = (TextView) view.findViewById(R.id.changed_file_deleted);
+            insertedContainer = view.findViewById(R.id.inserted_text);
+            deletedContainer = view.findViewById(R.id.deleted_text);
         }
     }
 }

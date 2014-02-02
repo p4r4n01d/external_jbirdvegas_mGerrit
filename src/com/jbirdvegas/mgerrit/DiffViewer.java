@@ -25,10 +25,12 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
-import android.widget.SimpleCursorAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
@@ -46,13 +48,36 @@ public class DiffViewer extends FragmentActivity
     private DiffTextView mDiffTextView;
     private Spinner mSpinner;
     private FileAdapter mAdapter;
+    private final OnItemSelectedListener selectedListener = new OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            String fileName = mAdapter.getPathAtPosition(position);
+            loadDiff(fileName);
+
+            int previousPosition = mAdapter.getPreviousPosition(position);
+            mBtnPrevious.setVisibility(previousPosition >= 0 ? View.VISIBLE : View.INVISIBLE);
+
+            int nextPosition = mAdapter.getNextPosition(position);
+            mBtnNext.setVisibility(nextPosition >= 0 ? View.VISIBLE : View.INVISIBLE);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            // Not used
+        }
+    };
+
+    private ImageButton mBtnPrevious, mBtnNext;
 
     private String mFilePath;
     private int mChangeNumber;
+    private int mPatchsetNumber;
 
     public static final String CHANGE_NUMBER_TAG = "changeNumber";
     public static final String PATCH_SET_NUMBER_TAG = "patchSetNumber";
     public static final String FILE_PATH_TAG = "file";
+
+    private static RequestQueue requestQueue;
 
 
     @Override
@@ -60,7 +85,7 @@ public class DiffViewer extends FragmentActivity
         this.setTheme(Prefs.getCurrentThemeID(this));
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.diff_dialog);
+        setContentView(R.layout.diff_viewer);
 
         // Action bar Up affordance
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -73,30 +98,20 @@ public class DiffViewer extends FragmentActivity
 
         setChangeTitle(mChangeNumber);
 
-        String filePath = intent.getStringExtra(FILE_PATH_TAG);
-        Integer patchSetNumber = intent.getIntExtra(PATCH_SET_NUMBER_TAG, 0);
+        mFilePath = intent.getStringExtra(FILE_PATH_TAG);
+        mPatchsetNumber = intent.getIntExtra(PATCH_SET_NUMBER_TAG, 0);
 
-        mFilePath = filePath;
         mDiffTextView = (DiffTextView) findViewById(R.id.diff_view_diff);
         mSpinner = (Spinner) findViewById(R.id.diff_spinner);
 
+        mBtnPrevious = (ImageButton) findViewById(R.id.diff_previous);
+        mBtnNext = (ImageButton) findViewById(R.id.diff_next);
+
         mAdapter = new FileAdapter(this, null);
         mSpinner.setAdapter(mAdapter);
+        mSpinner.setOnItemSelectedListener(selectedListener);
 
-        ZipRequest request = new ZipRequest(this, mChangeNumber, patchSetNumber, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                if (s != null) setTextView(s);
-                else mDiffTextView.setText("Failed to get diff!");
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                mDiffTextView.setText("Failed to load diff :(");
-            }
-        }
-        );
-        Volley.newRequestQueue(this).add(request);
+        loadDiff(mFilePath);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -127,9 +142,47 @@ public class DiffViewer extends FragmentActivity
         mDiffTextView.setDiffText(builder.toString());
     }
 
+    private void loadDiff(String fileName) {
+        mFilePath = fileName;
+
+        /* The whole diff may be too large to cache in memory or expired
+         *  so we will launch another request for it, even if we have
+         *  previously loaded a diff for this change
+         */
+        ZipRequest request = new ZipRequest(this, mChangeNumber,
+                mPatchsetNumber, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                if (s != null) setTextView(s);
+                else mDiffTextView.setText("Failed to get diff!");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                mDiffTextView.setText("Failed to load diff :(");
+            }
+        }
+        );
+
+        if (requestQueue == null) requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(request);
+    }
+
     private void setChangeTitle(Integer changeNumber) {
         String s = getResources().getString(R.string.change_detail_heading);
         setTitle(String.format(s, changeNumber));
+    }
+
+    // Handler for clicking on the previous file button
+    public void onPreviousClick(View view) {
+        int position = mAdapter.getPreviousPosition(mSpinner.getSelectedItemPosition());
+        if (position >= 0) mSpinner.setSelection(position);
+    }
+
+    // Handler for clicking on the next file button
+    public void onNextClick(View view) {
+        int position = mAdapter.getNextPosition(mSpinner.getSelectedItemPosition());
+        if (position >= 0) mSpinner.setSelection(position);
     }
 
     @Override
