@@ -168,6 +168,7 @@ public class DiffViewer extends FragmentActivity
         requestQueue.add(request);
     }
 
+    // Set the title of this activity
     private void setChangeTitle(Integer changeNumber) {
         String s = getResources().getString(R.string.change_detail_heading);
         setTitle(String.format(s, changeNumber));
@@ -193,6 +194,8 @@ public class DiffViewer extends FragmentActivity
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mAdapter.swapCursor(cursor);
+        int pos = mAdapter.getPositionOfFile(mFilePath);
+        if (pos >= 0) mSpinner.setSelection(pos);
     }
 
     @Override

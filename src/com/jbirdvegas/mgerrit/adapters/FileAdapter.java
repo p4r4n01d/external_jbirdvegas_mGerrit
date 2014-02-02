@@ -30,6 +30,8 @@ import org.jetbrains.annotations.Nullable;
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  Adapter for a file selector, used in DiffViewer.
  */
 public class FileAdapter extends CursorAdapter {
 
@@ -122,6 +124,11 @@ public class FileAdapter extends CursorAdapter {
         else return currentPosition + 1;
     }
 
+    /**
+     * @param position An unsigned integer
+     * @return The file path of the item at that position
+     *  or null if the position is invalid
+     */
     public String getPathAtPosition(int position) {
         if (position >= 0 && position < getCount()) {
             Cursor cursor = (Cursor) getItem(position);
@@ -130,6 +137,24 @@ public class FileAdapter extends CursorAdapter {
             }
         }
         return null;
+    }
+
+    /**
+     * @param fileName A file path
+     * @return The position of the given file in the cursor, returns
+     *  -1 if the file does not exist.
+     */
+    public int getPositionOfFile(String fileName) {
+        Cursor cursor = getCursor();
+        if (cursor != null) {
+            setupIndicies(cursor);
+            while (cursor.moveToNext()) {
+                if (cursor.getString(mPath_index).equals(fileName)) {
+                    return cursor.getPosition();
+                }
+            }
+        }
+        return -1;
     }
 
     private void colorPath(TextView view, Cursor cursor) {
@@ -146,6 +171,11 @@ public class FileAdapter extends CursorAdapter {
         }
     }
 
+    /**
+     * Initialise the constant cursor index fields. This should always be called
+     *  before trying to access these fields.
+     * @param cursor A cursor from which to initialise the constant cursor indices.
+     */
     private void setupIndicies(Cursor cursor) {
         if (mStatus_index == null) {
             mStatus_index = cursor.getColumnIndex(FileChanges.C_STATUS);
