@@ -11,8 +11,13 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.jbirdvegas.mgerrit.Prefs;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
@@ -90,23 +95,21 @@ public class ZipRequest extends Request<String> {
         StringBuilder builder = new StringBuilder();
 
         ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(response_data));
-
+        BufferedReader in;
         try {
+            in = new BufferedReader(new InputStreamReader(zis, "UTF-8"));
             if (zis.getNextEntry() != null) {
-                byte data[] = new byte[BUFFER];
-                while (zis.read(data, 0, BUFFER) != -1) {
-                    // Use UTF-8 decoding
-                    String temp = new String(data, "UTF-8");
-                    builder.append(temp);
+                String temp;
+                while ((temp = in.readLine()) != null) {
+                    builder.append(temp).append(System.getProperty("line.separator"));
                 }
-                zis.close();
-                return Response.success(builder.toString(),
-                        parseIgnoreCacheHeaders(response));
             }
+            in.close();
+            return Response.success(builder.toString(),
+                    parseIgnoreCacheHeaders(response));
         } catch (IOException e) {
             return Response.error(new ParseError(e));
         }
-        return Response.error(new ParseError());
     }
 
     /**
