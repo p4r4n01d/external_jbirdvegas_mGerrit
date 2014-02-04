@@ -145,15 +145,13 @@ public class ChangelogFragment extends Fragment {
         public void onResponse(JSONObject response) {
             JSONArray result = response.optJSONArray("list");
             if (result == null) {
-                Log.w(TAG, mParent.getString(R.string.no_changelog));
                 TextView text = (TextView) mParent.findViewById(R.id.changelog_searching);
-                text.setText("There are no recent builds for your device");
+                text.setText(mParent.getString(R.string.no_changelog));
                 mParent.findViewById(R.id.changelog_progressBar).setVisibility(View.GONE);
                 return;
             }
             mViewSwitcher.showNext();
-            Toast.makeText(mParent,
-                    R.string.please_select_update_for_range,
+            Toast.makeText(mParent, R.string.please_select_update_for_range,
                     Toast.LENGTH_LONG).show();
 
             int resultsSize = result.length();
