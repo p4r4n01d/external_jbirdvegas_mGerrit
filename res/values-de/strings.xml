@@ -71,7 +71,7 @@
     <string name="commit_reviewer">"Commit Bewerter"</string>
     <string name="context_menu_reviewer">"Änderungen im Rückblick Abfrage."</string>
     <string name="context_menu_owner">"Änderungen ursprünglich eingereicht."</string>
-    <string name="context_menu_view_diff_dialog">"Sehen Unterschied im Dialog"</string>
+    <string name="context_menu_view_diff_viewer">"Sehen Unterschied im Dialog"</string>
     <string name="context_menu_diff_view_in_browser">"Sehen Unterschied im Browser"</string>
     <string name="choose_diff_view">"Wie möchten Sie den Unterschied sehen?"</string>
     <string name="stalker_mode_toast">"Jetzt Stalking Nutzer:"</string>

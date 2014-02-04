@@ -150,20 +150,20 @@ public class PatchSetChangesCard implements CardBinder {
                 }
 
                 AlertDialog.Builder ad = new AlertDialog.Builder(mContext)
-                        .setTitle(R.string.choose_diff_view);
-                ad.setPositiveButton(R.string.context_menu_view_diff_dialog, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        launchDiffDialog(changeNumber, patchset, filePath);
-                    }
-                });
-                ad.setNegativeButton(
-                        R.string.context_menu_diff_view_in_browser, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        launchDiffInBrowser(changeNumber, patchset, filePath);
-                    }
-                });
+                        .setTitle(R.string.choose_diff_view)
+                        .setPositiveButton(R.string.context_menu_view_diff_viewer, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                launchDiffDialog(changeNumber, patchset, filePath);
+                            }
+                        })
+                        .setNegativeButton(
+                                R.string.context_menu_diff_view_in_browser, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                launchDiffInBrowser(changeNumber, patchset, filePath);
+                            }
+                        });
                 ad.create().show();
             }
         });
