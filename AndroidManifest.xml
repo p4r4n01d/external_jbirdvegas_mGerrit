@@ -21,7 +21,7 @@
           android:versionCode="210000"
           android:versionName="2.10.000-DEVELOP">
 
-    <uses-sdk android:minSdkVersion="11"
+    <uses-sdk android:minSdkVersion="14"
         android:targetSdkVersion="18"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

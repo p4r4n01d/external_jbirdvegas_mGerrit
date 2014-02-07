@@ -29,14 +29,18 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.jbirdvegas.mgerrit.adapters.CommitDetailsAdapter;
+import com.jbirdvegas.mgerrit.cards.PatchSetChangesCard;
 import com.jbirdvegas.mgerrit.database.Changes;
 import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.FileChanges;
@@ -48,6 +52,7 @@ import com.jbirdvegas.mgerrit.database.UserReviewers;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.message.StatusSelected;
+import com.jbirdvegas.mgerrit.objects.DiffActionBar;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
@@ -75,6 +80,7 @@ public class PatchSetViewerFragment extends Fragment
     private boolean sIsLegacyVersion;
 
     private CommitDetailsAdapter mAdapter;
+    private DiffActionBar mDiffActionBar;
 
     public static final String NEW_CHANGE_SELECTED = "Change Selected";
     public static final String EXPAND_TAG = "expand";
@@ -104,6 +110,7 @@ public class PatchSetViewerFragment extends Fragment
         }
     };
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -129,10 +136,45 @@ public class PatchSetViewerFragment extends Fragment
         mListView = (ExpandableListView) currentFragment.findViewById(R.id.commit_cards);
         disconnectedView = currentFragment.findViewById(R.id.disconnected_view);
 
+        sIsLegacyVersion = !Config.isDiffSupported(mParent);
+
         mAdapter = new CommitDetailsAdapter(mParent);
         mListView.setAdapter(mAdapter);
 
-        sIsLegacyVersion = !Config.isDiffSupported(mParent);
+        // Child click listeners (relevant for the changes cards)
+        mListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+        mDiffActionBar = new DiffActionBar(mParent, !sIsLegacyVersion);
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                ExpandableListView listView = (ExpandableListView) parent;
+                long pos = listView.getExpandableListPosition(position);
+                int childPos = ExpandableListView.getPackedPositionChild(pos);
+
+                // This is only valid for the changed files group
+                if (!PatchSetChangesCard.isViewChangesCard(mAdapter, pos)) return false;
+
+                mDiffActionBar.setActionMode(getActivity().startActionMode(mDiffActionBar));
+                ActionMode actionMode = mDiffActionBar.getActionMode();
+
+                // Call requires API 14 (ICS)
+                actionMode.setTag(new DiffActionBar.TagHolder(view, childPos));
+                view.setSelected(true);
+                return true;
+            }
+        });
+        mListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+
+                // This is only valid for the changed files group
+                int childItemType = mAdapter.getChildType(groupPosition, childPosition);
+                if (childItemType != CommitDetailsAdapter.Cards.CHANGED_FILES.ordinal()) {
+                    return false;
+                }
+                return PatchSetChangesCard.onViewClicked(mParent, v);
+            }
+        });
 
         mUrl = new GerritURL();
 

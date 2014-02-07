@@ -26,13 +26,16 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import com.jbirdvegas.mgerrit.DiffViewer;
 import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
+import com.jbirdvegas.mgerrit.adapters.CommitDetailsAdapter;
 import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.FileChanges;
-import com.jbirdvegas.mgerrit.DiffViewer;
 import com.jbirdvegas.mgerrit.objects.FileInfo;
 
 public class PatchSetChangesCard implements CardBinder {
@@ -55,6 +58,7 @@ public class PatchSetChangesCard implements CardBinder {
     private Integer mDeleted_index;
     private Integer mPatchSet_index;
     private Integer mCommit_index;
+
 
     public PatchSetChangesCard(Context context) {
         mContext = context;
@@ -136,71 +140,94 @@ public class PatchSetChangesCard implements CardBinder {
         convertView.setTag(R.id.filePath, cursor.getString(mFileName_index));
         convertView.setTag(R.id.patchSetNumber, cursor.getInt(mPatchSet_index));
 
-        convertView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                final Integer changeNumber = (Integer) view.getTag(R.id.changeNumber);
-                final String filePath = (String) view.getTag(R.id.filePath);
-                final Integer patchset = (Integer) view.getTag(R.id.patchSetNumber);
-
-                // If the server does not support diffs then do not show the dialog
-                if (!Config.isDiffSupported(mContext)) {
-                    launchDiffInBrowser(changeNumber, patchset, filePath);
-                    return;
-                }
-
-                Prefs.DiffModes mode = Prefs.getDiffDefault(mContext);
-                if (mode == Prefs.DiffModes.INTERNAL) {
-                    launchDiffViewer(changeNumber, patchset, filePath);
-                } else if (mode == Prefs.DiffModes.EXTERNAL) {
-                    launchDiffInBrowser(changeNumber, patchset, filePath);
-                } else {
-                    launchDiffOptionDialog(changeNumber, patchset, filePath);
-                }
-            }
-        });
         return convertView;
     }
 
     // launches internal diff viewer
-    private void launchDiffViewer(Integer changeNumber, Integer patchSetNumber, String filePath) {
-
-        Intent diffIntent = new Intent(mContext, DiffViewer.class);
+    public static void launchDiffViewer(Context context, Integer changeNumber,
+                                        Integer patchSetNumber, String filePath) {
+        Intent diffIntent = new Intent(context, DiffViewer.class);
         diffIntent.putExtra(DiffViewer.CHANGE_NUMBER_TAG, changeNumber);
         diffIntent.putExtra(DiffViewer.PATCH_SET_NUMBER_TAG, patchSetNumber);
         diffIntent.putExtra(DiffViewer.FILE_PATH_TAG, filePath);
-        mContext.startActivity(diffIntent);
+        context.startActivity(diffIntent);
     }
 
-    private void launchDiffInBrowser(Integer changeNumber, Integer patchset, String filePath) {
+    public static void launchDiffInBrowser(Context context, Integer changeNumber, Integer patchset,
+                                           String filePath) {
         String base = "%s#/c/%d/%d/%s,unified";
         Intent browserIntent = new Intent(
                 Intent.ACTION_VIEW, Uri.parse(String.format(base,
-                Prefs.getCurrentGerrit(mContext),
+                Prefs.getCurrentGerrit(context),
                 changeNumber,
                 patchset, filePath)));
-        mContext.startActivity(browserIntent);
+        context.startActivity(browserIntent);
     }
 
-    private void launchDiffOptionDialog(final Integer changeNumber, final Integer patchset,
+    public static void launchDiffOptionDialog(final Context context, final Integer changeNumber,
+                                              final Integer patchset,
                                         final String filePath) {
-        AlertDialog.Builder ad = new AlertDialog.Builder(mContext)
+        AlertDialog.Builder ad = new AlertDialog.Builder(context)
                 .setTitle(R.string.choose_diff_view)
                 .setPositiveButton(R.string.context_menu_view_diff_viewer, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        launchDiffViewer(changeNumber, patchset, filePath);
+                        launchDiffViewer(context, changeNumber, patchset, filePath);
                     }
                 })
                 .setNegativeButton(
                         R.string.context_menu_diff_view_in_browser, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        launchDiffInBrowser(changeNumber, patchset, filePath);
+                        launchDiffInBrowser(context, changeNumber, patchset, filePath);
                     }
                 });
         ad.create().show();
     }
+
+    public static boolean onViewClicked(Context context, View view) {
+        if (view == null) return false;
+
+        final Integer changeNumber = (Integer) view.getTag(R.id.changeNumber);
+        final String filePath = (String) view.getTag(R.id.filePath);
+        final Integer patchset = (Integer) view.getTag(R.id.patchSetNumber);
+
+        if (changeNumber == null) return false;
+
+        // If the server does not support diffs then do not show the dialog
+        if (!Config.isDiffSupported(context)) {
+            PatchSetChangesCard.launchDiffInBrowser(context, changeNumber, patchset, filePath);
+            return true;
+        }
+
+        Prefs.DiffModes mode = Prefs.getDiffDefault(context);
+        if (mode == Prefs.DiffModes.INTERNAL) {
+            PatchSetChangesCard.launchDiffViewer(context, changeNumber, patchset, filePath);
+        } else if (mode == Prefs.DiffModes.EXTERNAL) {
+            PatchSetChangesCard.launchDiffInBrowser(context, changeNumber, patchset, filePath);
+        } else {
+            PatchSetChangesCard.launchDiffOptionDialog(context, changeNumber, patchset, filePath);
+        }
+
+        return true;
+    }
+
+    public static boolean isViewChangesCard(BaseExpandableListAdapter adapter, long position) {
+        // get type and correct positions
+        int itemType = ExpandableListView.getPackedPositionType(position);
+        int groupPos = ExpandableListView.getPackedPositionGroup(position);
+        int childPos = ExpandableListView.getPackedPositionChild(position);
+
+        // We only want to respond to child items
+        if (itemType != ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+            return false;
+        }
+
+        // This is only valid for the changed files group
+        int childItemType = adapter.getChildType(groupPos, childPos);
+        return childItemType == CommitDetailsAdapter.Cards.CHANGED_FILES.ordinal();
+    }
+
 
     private void setupCusorIndicies(Cursor cursor) {
         if (cursor.getPosition() < 0) {

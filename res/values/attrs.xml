@@ -26,6 +26,8 @@
         <attr name="refreshIcon" format="reference"/>
         <attr name="overflowIcon" format="reference"/>
         <attr name="searchIcon" format="reference"/>
+        <attr name="browserIcon" format="reference"/>
+        <attr name="viewIcon" format="reference"/>
     </declare-styleable>
     <declare-styleable name="LinearLayout">
         <attr name="mainBackgroundColor" format="color"/>
@@ -45,7 +47,6 @@
     </declare-styleable>
     <declare-styleable name="ImageView">
         <attr name="shareIcon" format="reference"/>
-        <attr name="viewIcon" format="reference"/>
         <attr name="saveIcon" format="reference"/>
     </declare-styleable>
 

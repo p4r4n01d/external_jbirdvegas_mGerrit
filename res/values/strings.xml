@@ -162,4 +162,7 @@
     <string name="diff_options_ask">Ask</string>
     <string name="diff_options_internal">In internal viewer when available</string>
     <string name="diff_options_external">In browser</string>
+
+    <string name="diff_menu_internal_condensed">Viewer</string>
+    <string name="diff_menu_external_condensed">Browser</string>
 </resources>
