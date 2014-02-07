@@ -149,29 +149,21 @@ public class PatchSetChangesCard implements CardBinder {
                     return;
                 }
 
-                AlertDialog.Builder ad = new AlertDialog.Builder(mContext)
-                        .setTitle(R.string.choose_diff_view)
-                        .setPositiveButton(R.string.context_menu_view_diff_viewer, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                launchDiffDialog(changeNumber, patchset, filePath);
-                            }
-                        })
-                        .setNegativeButton(
-                                R.string.context_menu_diff_view_in_browser, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                launchDiffInBrowser(changeNumber, patchset, filePath);
-                            }
-                        });
-                ad.create().show();
+                Prefs.DiffModes mode = Prefs.getDiffDefault(mContext);
+                if (mode == Prefs.DiffModes.INTERNAL) {
+                    launchDiffViewer(changeNumber, patchset, filePath);
+                } else if (mode == Prefs.DiffModes.EXTERNAL) {
+                    launchDiffInBrowser(changeNumber, patchset, filePath);
+                } else {
+                    launchDiffOptionDialog(changeNumber, patchset, filePath);
+                }
             }
         });
         return convertView;
     }
 
-    // creates the Diff viewer dialog
-    private void launchDiffDialog(Integer changeNumber, Integer patchSetNumber, String filePath) {
+    // launches internal diff viewer
+    private void launchDiffViewer(Integer changeNumber, Integer patchSetNumber, String filePath) {
 
         Intent diffIntent = new Intent(mContext, DiffViewer.class);
         diffIntent.putExtra(DiffViewer.CHANGE_NUMBER_TAG, changeNumber);
@@ -188,6 +180,26 @@ public class PatchSetChangesCard implements CardBinder {
                 changeNumber,
                 patchset, filePath)));
         mContext.startActivity(browserIntent);
+    }
+
+    private void launchDiffOptionDialog(final Integer changeNumber, final Integer patchset,
+                                        final String filePath) {
+        AlertDialog.Builder ad = new AlertDialog.Builder(mContext)
+                .setTitle(R.string.choose_diff_view)
+                .setPositiveButton(R.string.context_menu_view_diff_viewer, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        launchDiffViewer(changeNumber, patchset, filePath);
+                    }
+                })
+                .setNegativeButton(
+                        R.string.context_menu_diff_view_in_browser, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        launchDiffInBrowser(changeNumber, patchset, filePath);
+                    }
+                });
+        ad.create().show();
     }
 
     private void setupCusorIndicies(Cursor cursor) {
