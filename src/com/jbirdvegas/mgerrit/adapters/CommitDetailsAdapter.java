@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -17,6 +18,7 @@ import com.jbirdvegas.mgerrit.cards.PatchSetCommentsCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetMessageCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetPropertiesCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetReviewersCard;
+import com.jbirdvegas.mgerrit.database.FileChanges;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -181,6 +183,19 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
     public void setCursor(Cards cardType, Cursor cursor) {
         childGroupDetails.get(cardType.ordinal()).setCursor(cursor);
     }
+
+    public boolean isLongClickSupported(int groupPosition, int childPosition) {
+        // Only changed files cards are supported
+        if (groupPosition != Cards.CHANGED_FILES.ordinal()) {
+            return false;
+        } else if (childPosition < 0) {
+            return true; // Always allow group headers
+        } else {
+            Cursor data = (Cursor) getChild(groupPosition, childPosition);
+            return data.getInt(data.getColumnIndex(FileChanges.C_ISBINARY)) == 0;
+        }
+    }
+
 
     private static class GroupViewHolder {
         TextView headerText;

@@ -26,14 +26,24 @@ import android.view.View;
 
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.cards.PatchSetChangesCard;
+import com.jbirdvegas.mgerrit.database.Changes;
+import com.jbirdvegas.mgerrit.helpers.Tools;
 
-public class DiffActionBar implements ActionMode.Callback {
+/**
+ * Handler for the Changed files contextual action bar.
+ */
+public class FilesCAB implements ActionMode.Callback {
 
+    // Whether to enable the internal viewer icon
     private final boolean mShowViewer;
+    // Backing action mode where the data is tagged
     private ActionMode mActionMode;
+    // View/activity context for both database access and dialog drawing
     private final Context mContext;
+    // The title to be shown in the CAB
+    private String mSelectedFile;
 
-    public DiffActionBar(Context context, boolean diffSupported) {
+    public FilesCAB(Context context, boolean diffSupported) {
         mContext = context;
         mShowViewer = diffSupported;
     }
@@ -47,15 +57,21 @@ public class DiffActionBar implements ActionMode.Callback {
 
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Set the selected file name as the title, note group headers do not have a file name
+        if (mSelectedFile != null) {
+            mode.setTitle(Tools.getFileName(mSelectedFile));
+        }
+
+        // Enable/Disable the diff viewer icon
         final MenuItem viewerItem = menu.findItem(R.id.menu_diff_internal);
-        final boolean enabled = viewerItem.isEnabled();
         viewerItem.setEnabled(mShowViewer);
-        return enabled != mShowViewer;
+        return true;
     }
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         TagHolder holder = (TagHolder) mode.getTag();
+        holder.setChangeNumberFromID(mContext);
 
         switch (item.getItemId()) {
             case R.id.menu_diff_internal:
@@ -78,25 +94,37 @@ public class DiffActionBar implements ActionMode.Callback {
         mActionMode = null;
     }
 
-    public void setActionMode(ActionMode mActionMode) {
-        this.mActionMode = mActionMode;
+    public void setActionMode(ActionMode mActionMode) { this.mActionMode = mActionMode; }
+    public ActionMode getActionMode() { return mActionMode; }
+
+    public void setSelectedFileName(String fileName) {
+        mSelectedFile = fileName;
     }
 
-    public ActionMode getActionMode() {
-        return mActionMode;
-    }
-
+    /**
+     * ActionMode only supports one default tag to be set, so this is a container
+     *  class where we can set multiple data items.
+     */
     public static class TagHolder {
+        // The 0-based position of the item that was selected, -1 for the group header
         public final int position;
-        public final Integer changeNumber;
+        public Integer changeNumber;
         public final String filePath;
         public final Integer patchset;
+        public final String changeID;
 
         public TagHolder(View view, int pos) {
             position = pos;
             changeNumber = (Integer) view.getTag(R.id.changeNumber);
             filePath = (String) view.getTag(R.id.filePath);
             patchset = (Integer) view.getTag(R.id.patchSetNumber);
+            changeID = (String) view.getTag(R.id.changeID);
+        }
+
+        private void setChangeNumberFromID(Context context) {
+            if (changeNumber == null && changeID != null) {
+                changeNumber = Changes.getChangeNumberForChange(context, changeID);
+            }
         }
     }
 }

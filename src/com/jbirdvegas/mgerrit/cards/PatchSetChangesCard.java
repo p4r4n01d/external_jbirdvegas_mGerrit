@@ -130,9 +130,11 @@ public class PatchSetChangesCard implements CardBinder {
          *  we cannot get detailed information on binary files */
         if (cursor.getInt(mIsBinary_index) != 0) {
             viewHolder.binaryText.setVisibility(View.VISIBLE);
+            convertView.setLongClickable(false);
             return convertView;
         } else {
             viewHolder.binaryText.setVisibility(View.GONE);
+            convertView.setLongClickable(true);
         }
 
         // We have already set an anonymous tag so we need to use ids
@@ -210,22 +212,6 @@ public class PatchSetChangesCard implements CardBinder {
         }
 
         return true;
-    }
-
-    public static boolean isViewChangesCard(BaseExpandableListAdapter adapter, long position) {
-        // get type and correct positions
-        int itemType = ExpandableListView.getPackedPositionType(position);
-        int groupPos = ExpandableListView.getPackedPositionGroup(position);
-        int childPos = ExpandableListView.getPackedPositionChild(position);
-
-        // We only want to respond to child items
-        if (itemType != ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-            return false;
-        }
-
-        // This is only valid for the changed files group
-        int childItemType = adapter.getChildType(groupPos, childPos);
-        return childItemType == CommitDetailsAdapter.Cards.CHANGED_FILES.ordinal();
     }
 
 

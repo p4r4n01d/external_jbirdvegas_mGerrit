@@ -52,7 +52,7 @@ import com.jbirdvegas.mgerrit.database.UserReviewers;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.message.StatusSelected;
-import com.jbirdvegas.mgerrit.objects.DiffActionBar;
+import com.jbirdvegas.mgerrit.objects.FilesCAB;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
@@ -69,7 +69,6 @@ public class PatchSetViewerFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private View disconnectedView;
-    private ExpandableListView mListView;
     private Activity mParent;
     private Context mContext;
 
@@ -80,7 +79,7 @@ public class PatchSetViewerFragment extends Fragment
     private boolean sIsLegacyVersion;
 
     private CommitDetailsAdapter mAdapter;
-    private DiffActionBar mDiffActionBar;
+    private FilesCAB mFilesCAB;
 
     public static final String NEW_CHANGE_SELECTED = "Change Selected";
     public static final String EXPAND_TAG = "expand";
@@ -133,7 +132,7 @@ public class PatchSetViewerFragment extends Fragment
     private void init() {
         View currentFragment = this.getView();
 
-        mListView = (ExpandableListView) currentFragment.findViewById(R.id.commit_cards);
+        ExpandableListView mListView = (ExpandableListView) currentFragment.findViewById(R.id.commit_cards);
         disconnectedView = currentFragment.findViewById(R.id.disconnected_view);
 
         sIsLegacyVersion = !Config.isDiffSupported(mParent);
@@ -143,22 +142,31 @@ public class PatchSetViewerFragment extends Fragment
 
         // Child click listeners (relevant for the changes cards)
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-        mDiffActionBar = new DiffActionBar(mParent, !sIsLegacyVersion);
+        mFilesCAB = new FilesCAB(mParent, !sIsLegacyVersion);
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 ExpandableListView listView = (ExpandableListView) parent;
                 long pos = listView.getExpandableListPosition(position);
+                int groupPos = ExpandableListView.getPackedPositionGroup(pos);
                 int childPos = ExpandableListView.getPackedPositionChild(pos);
 
-                // This is only valid for the changed files group
-                if (!PatchSetChangesCard.isViewChangesCard(mAdapter, pos)) return false;
+                if (!mAdapter.isLongClickSupported(groupPos, childPos)) {
+                    return false;
+                }
 
-                mDiffActionBar.setActionMode(getActivity().startActionMode(mDiffActionBar));
-                ActionMode actionMode = mDiffActionBar.getActionMode();
+                // In case this is a group view and does not have the change number tagged
+                view.setTag(R.id.changeID, mSelectedChange);
+                FilesCAB.TagHolder holder = new FilesCAB.TagHolder(view, childPos);
+
+                // Set the title to be shown in the action bar
+                mFilesCAB.setSelectedFileName(holder.filePath);
+
+                mFilesCAB.setActionMode(getActivity().startActionMode(mFilesCAB));
+                ActionMode actionMode = mFilesCAB.getActionMode();
 
                 // Call requires API 14 (ICS)
-                actionMode.setTag(new DiffActionBar.TagHolder(view, childPos));
+                actionMode.setTag(holder);
                 view.setSelected(true);
                 return true;
             }
@@ -166,7 +174,6 @@ public class PatchSetViewerFragment extends Fragment
         mListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-
                 // This is only valid for the changed files group
                 int childItemType = mAdapter.getChildType(groupPosition, childPosition);
                 if (childItemType != CommitDetailsAdapter.Cards.CHANGED_FILES.ordinal()) {

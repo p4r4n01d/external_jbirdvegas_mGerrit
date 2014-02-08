@@ -78,6 +78,7 @@ public class DiffViewer extends FragmentActivity
     public static final String FILE_PATH_TAG = "file";
 
     private static RequestQueue requestQueue;
+    private ZipRequest request;
 
 
     @Override
@@ -149,17 +150,17 @@ public class DiffViewer extends FragmentActivity
          *  so we will launch another request for it, even if we have
          *  previously loaded a diff for this change
          */
-        ZipRequest request = new ZipRequest(this, mChangeNumber,
+        request = new ZipRequest(this, mChangeNumber,
                 mPatchsetNumber, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 if (s != null) setTextView(s);
-                else mDiffTextView.setText("Failed to get diff!");
+                else mDiffTextView.setText(getString(R.string.diff_load_failed));
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mDiffTextView.setText("Failed to load diff :(");
+                mDiffTextView.setText(R.string.diff_load_failed);
             }
         }
         );
@@ -194,8 +195,14 @@ public class DiffViewer extends FragmentActivity
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mAdapter.swapCursor(cursor);
+        if (cursor != null && cursor.isAfterLast()) {
+            if (request != null) request.cancel();
+            mDiffTextView.setText(getString(R.string.diff_no_files));
+        }
+
         int pos = mAdapter.getPositionOfFile(mFilePath);
         if (pos >= 0) mSpinner.setSelection(pos);
+
     }
 
     @Override
