@@ -33,6 +33,7 @@
         <attr name="mainBackgroundColor" format="color"/>
         <attr name="cardBackgroundColor" format="color"/>
         <attr name="clickableCardBackground" format="reference" />
+        <attr name="selectableCardBackground" format="reference" />
         <attr name="backgroundTop" format="reference"/>
     </declare-styleable>
     <declare-styleable name="CommitCard">

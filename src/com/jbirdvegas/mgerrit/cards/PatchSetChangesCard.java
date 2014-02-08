@@ -130,11 +130,11 @@ public class PatchSetChangesCard implements CardBinder {
          *  we cannot get detailed information on binary files */
         if (cursor.getInt(mIsBinary_index) != 0) {
             viewHolder.binaryText.setVisibility(View.VISIBLE);
-            convertView.setLongClickable(false);
+            convertView.setEnabled(false);
             return convertView;
         } else {
             viewHolder.binaryText.setVisibility(View.GONE);
-            convertView.setLongClickable(true);
+            convertView.setEnabled(true);
         }
 
         // We have already set an anonymous tag so we need to use ids

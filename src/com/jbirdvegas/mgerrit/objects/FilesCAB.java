@@ -97,7 +97,7 @@ public class FilesCAB implements ActionMode.Callback {
     public void setActionMode(ActionMode mActionMode) { this.mActionMode = mActionMode; }
     public ActionMode getActionMode() { return mActionMode; }
 
-    public void setSelectedFileName(String fileName) {
+    public void setTitle(String fileName) {
         mSelectedFile = fileName;
     }
 
@@ -106,22 +106,24 @@ public class FilesCAB implements ActionMode.Callback {
      *  class where we can set multiple data items.
      */
     public static class TagHolder {
-        // The 0-based position of the item that was selected, -1 for the group header
-        public final int position;
         public Integer changeNumber;
         public final String filePath;
         public final Integer patchset;
         public final String changeID;
+        public final int groupPosition;
+        public final boolean isChild;
 
-        public TagHolder(View view, int pos) {
-            position = pos;
+        public TagHolder(View view, Context context, int groupPos, boolean child) {
             changeNumber = (Integer) view.getTag(R.id.changeNumber);
             filePath = (String) view.getTag(R.id.filePath);
             patchset = (Integer) view.getTag(R.id.patchSetNumber);
             changeID = (String) view.getTag(R.id.changeID);
+            setChangeNumberFromID(context);
+            groupPosition = groupPos;
+            isChild = child;
         }
 
-        private void setChangeNumberFromID(Context context) {
+        public void setChangeNumberFromID(Context context) {
             if (changeNumber == null && changeID != null) {
                 changeNumber = Changes.getChangeNumberForChange(context, changeID);
             }

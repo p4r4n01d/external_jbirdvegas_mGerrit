@@ -2,6 +2,7 @@ package com.jbirdvegas.mgerrit.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.jbirdvegas.mgerrit.cards.PatchSetMessageCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetPropertiesCard;
 import com.jbirdvegas.mgerrit.cards.PatchSetReviewersCard;
 import com.jbirdvegas.mgerrit.database.FileChanges;
+import com.jbirdvegas.mgerrit.objects.FilesCAB;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -49,6 +51,9 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
 
     private final LayoutInflater mInflator;
     private final Context mContext;
+
+    // Contextual action bar handler instance so the adapter can close the CAB
+    private FilesCAB mContextualAB;
 
     // Cards supported:
     public enum Cards { PROPERTIES, COMMIT_MSG, CHANGED_FILES, REVIEWERS, COMMENTS };
@@ -155,6 +160,19 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
        return _cards_count; // Number of different cards supported (view layouts)
     }
 
+    @Override
+    public void onGroupCollapsed(int groupPosition) {
+        /* Check if we collapsed the same group as the selected item and the selected item
+         *   was a child. */
+        ActionMode am = mContextualAB.getActionMode();
+        FilesCAB.TagHolder holder = (FilesCAB.TagHolder) am.getTag();
+        if (holder.groupPosition == groupPosition && holder.isChild) {
+            am.finish();
+        }
+
+        super.onGroupCollapsed(groupPosition);
+    }
+
     /**
      * Card order:
      *  Properties card, Message card, Changed files card, Code reviewers card, Comments Card
@@ -194,6 +212,10 @@ public class CommitDetailsAdapter extends BaseExpandableListAdapter {
             Cursor data = (Cursor) getChild(groupPosition, childPosition);
             return data.getInt(data.getColumnIndex(FileChanges.C_ISBINARY)) == 0;
         }
+    }
+
+    public void setContextualActionBar(FilesCAB cab) {
+        this.mContextualAB = cab;
     }
 
 

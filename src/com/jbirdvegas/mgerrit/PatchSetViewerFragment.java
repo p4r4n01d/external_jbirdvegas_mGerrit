@@ -143,6 +143,7 @@ public class PatchSetViewerFragment extends Fragment
         // Child click listeners (relevant for the changes cards)
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         mFilesCAB = new FilesCAB(mParent, !sIsLegacyVersion);
+        mAdapter.setContextualActionBar(mFilesCAB);
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -157,10 +158,16 @@ public class PatchSetViewerFragment extends Fragment
 
                 // In case this is a group view and does not have the change number tagged
                 view.setTag(R.id.changeID, mSelectedChange);
-                FilesCAB.TagHolder holder = new FilesCAB.TagHolder(view, childPos);
+                FilesCAB.TagHolder holder = new FilesCAB.TagHolder(view, mContext,
+                        groupPos, childPos >= 0);
 
                 // Set the title to be shown in the action bar
-                mFilesCAB.setSelectedFileName(holder.filePath);
+                if (holder.filePath != null) {
+                    mFilesCAB.setTitle(holder.filePath);
+                } else {
+                    String s = mParent.getResources().getString(R.string.change_detail_heading);
+                    mFilesCAB.setTitle(String.format(s, holder.changeNumber));
+                }
 
                 mFilesCAB.setActionMode(getActivity().startActionMode(mFilesCAB));
                 ActionMode actionMode = mFilesCAB.getActionMode();
@@ -179,7 +186,13 @@ public class PatchSetViewerFragment extends Fragment
                 if (childItemType != CommitDetailsAdapter.Cards.CHANGED_FILES.ordinal()) {
                     return false;
                 }
-                return PatchSetChangesCard.onViewClicked(mParent, v);
+                // View the diff and close the CAB if a change diff could be viewed
+                boolean diffLaunched = PatchSetChangesCard.onViewClicked(mParent, v);
+                if (diffLaunched) {
+                    ActionMode mode = mFilesCAB.getActionMode();
+                    if (mode != null) mode.finish();
+                }
+                return diffLaunched;
             }
         });
 
