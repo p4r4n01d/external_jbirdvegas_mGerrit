@@ -26,14 +26,11 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.jbirdvegas.mgerrit.DiffViewer;
 import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
-import com.jbirdvegas.mgerrit.adapters.CommitDetailsAdapter;
 import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.FileChanges;
 import com.jbirdvegas.mgerrit.objects.FileInfo;
