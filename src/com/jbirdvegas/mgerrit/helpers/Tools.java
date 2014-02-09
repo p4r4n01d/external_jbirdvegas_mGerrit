@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.haarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
 import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
+import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.objects.FileInfo;
 
@@ -191,5 +192,9 @@ public class Tools {
         // Remove the path from the filename
         int idx = filePath.lastIndexOf("/");
         return idx >= 0 ? filePath.substring(idx + 1) : filePath;
+    }
+
+    public static String getWebAddress(Context context, int commitNumber) {
+        return String.format("%s#/c/%d/", Prefs.getCurrentGerrit(context), commitNumber);
     }
 }
