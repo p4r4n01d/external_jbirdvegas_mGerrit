@@ -3,8 +3,6 @@ mGerrit TODO List
 Outstanding
 ===========
 - Reset project if current project not listed in current Gerrit
-- Non-blocking JSON fetching operations
-	- Could include fetching JSON details in navigation bar (with ability to cancel using expandable notifications)
 - Smarter refresh - ideal: deprecate manual refresh and refresh automatically
 	- Compare change updated timestamps and change ids to determine when the rest of the data is old and does not need to be changed
 	- Only load the new stuff and don't reset all the cards views if not necesscary.
@@ -84,33 +82,9 @@ More on Auth (privileged actions)
             - Could even track these in mGerrit with updates view/tab
 
 
-Errors
-------
-Timeout connecting to server
-01-02 13:59:27.552  16414-16414/com.jbirdvegas.mgerrit E/GravatarHelper: http Volley request failed!
-    com.android.volley.TimeoutError
-            at com.android.volley.toolbox.BasicNetwork.performRequest(BasicNetwork.java:114)
-            at com.android.volley.NetworkDispatcher.run(NetworkDispatcher.java:105)
-01-02 14:00:37.930  16414-16566/com.jbirdvegas.mgerrit E/GerritTask: Gathering data threw IO
-    java.net.ConnectException: failed to connect to gerrit.aokp.co/91.194.90.122 (port 80): connect failed: ETIMEDOUT (Connection timed out)
-            at libcore.io.IoBridge.connect(IoBridge.java:114)
-            ...
-            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:84)
-            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:43)
-            ...
-     Caused by: libcore.io.ErrnoException: connect failed: ETIMEDOUT (Connection timed out)
-            at libcore.io.Posix.connect(Native Method)
-            ...
-            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:84)
-            at com.jbirdvegas.mgerrit.tasks.GerritTask.doInBackground(GerritTask.java:43)
-            at android.os.AsyncTask$2.call(AsyncTask.java:288)
-            ...
-
 Optional/Lower priority
 -----------------------
 	- Colour each project in a sperate colour
 	- Add tab for reviewed (verified)
 	    - May be useful for admins or others wishing to cherry pick changes that compile
 	    - Either revied in past PS or reviewed in current patch set - up to server classification
-	- Increase minimum API 14 (ICS) - No one is using mGerrit on a pre-Android 4.0 device.
-		- We could even set it to API 15 (minSdkVersion=14) as there is only 1 person using mGerrit on API 14 (as of 5 Nov 2013)
