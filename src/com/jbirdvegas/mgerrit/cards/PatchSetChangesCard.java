@@ -125,14 +125,14 @@ public class PatchSetChangesCard implements CardBinder {
 
         /* If the file is binary don't offer to show the diff as
          *  we cannot get detailed information on binary files */
-        if (cursor.getInt(mIsBinary_index) != 0) {
-            viewHolder.binaryText.setVisibility(View.VISIBLE);
-            convertView.setEnabled(false);
-            return convertView;
-        } else {
-            viewHolder.binaryText.setVisibility(View.GONE);
+//        if (cursor.getInt(mIsBinary_index) != 0) {
+//            viewHolder.binaryText.setVisibility(View.VISIBLE);
+//            convertView.setEnabled(false);
+//            return convertView;
+//        } else {
+//            viewHolder.binaryText.setVisibility(View.GONE);
             convertView.setEnabled(true);
-        }
+//        }
 
         // We have already set an anonymous tag so we need to use ids
         convertView.setTag(R.id.changeNumber, cursor.getInt(mCommit_index));

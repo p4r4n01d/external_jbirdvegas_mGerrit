@@ -9,13 +9,23 @@
     android:padding="@dimen/standard_padding"
     android:weightSum="10">
 
+    <ImageView
+        android:id="@+id/diff_image"
+        android:layout_weight="9"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <ScrollView
+        android:id="@+id/diff_scrollview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
         android:layout_weight="9">
 
         <HorizontalScrollView
+            android:id="@+id/diff_horizontal_scroll_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fillViewport="true">
@@ -50,13 +60,6 @@
             android:src="?attr/backIcon"
             android:onClick="onPreviousClick"/>
 
-        <Spinner
-            android:id="@+id/diff_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"/>
-
         <ImageButton
             android:id="@+id/diff_next"
             style="?android:attr/borderlessButtonStyle"
@@ -67,5 +70,13 @@
             android:src="?attr/nextIcon"
             android:onClick="onNextClick"/>
 
+        <Spinner
+            android:id="@+id/diff_spinner"
+            android:layout_toRightOf="@id/diff_previous"
+            android:layout_toLeftOf="@id/diff_next"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 </LinearLayout>
