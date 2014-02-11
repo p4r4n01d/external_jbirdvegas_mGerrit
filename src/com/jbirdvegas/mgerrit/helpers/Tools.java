@@ -20,6 +20,7 @@ package com.jbirdvegas.mgerrit.helpers;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -196,5 +197,21 @@ public class Tools {
 
     public static String getWebAddress(Context context, int commitNumber) {
         return String.format("%s#/c/%d/", Prefs.getCurrentGerrit(context), commitNumber);
+    }
+
+    public static Intent createShareIntent(Context context, String changeid, int changeNumber) {
+        String webAddress = Tools.getWebAddress(context, changeNumber);
+        return createShareIntent(context, changeid, webAddress);
+    }
+
+    public static Intent createShareIntent(Context context, String changeid, String webAddress) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        intent.putExtra(Intent.EXTRA_SUBJECT,
+                String.format(context.getResources().getString(R.string.commit_shared_from_mgerrit),
+                        changeid));
+        intent.putExtra(Intent.EXTRA_TEXT, webAddress + " #mGerrit");
+        return intent;
     }
 }
