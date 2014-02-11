@@ -68,11 +68,7 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
 
         setIndicies(cursor);
 
-        TagHolder tagHolder = (TagHolder) view.getTag();
-        if (tagHolder == null) {
-            tagHolder = new TagHolder(context, cursor);
-        }
-
+        TagHolder tagHolder = new TagHolder(context, cursor);
         view.setTag(tagHolder);
 
         if (tagHolder.changeid.equals(selectedChangeId)) {
@@ -173,7 +169,6 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         if (mProject_index == null) {
             mProject_index = cursor.getColumnIndex(UserChanges.C_PROJECT);
         }
-
     }
 
     @Override
@@ -184,6 +179,9 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
         }
 
         mChangenum_index = null;
+        mUserId_index = null;
+        mUserName_index = null;
+        mProject_index = null;
 
         return super.swapCursor(c);
     }
