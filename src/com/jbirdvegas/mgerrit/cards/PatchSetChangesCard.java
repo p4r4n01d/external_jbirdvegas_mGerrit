@@ -55,6 +55,7 @@ public class PatchSetChangesCard implements CardBinder {
     private Integer mDeleted_index;
     private Integer mPatchSet_index;
     private Integer mCommit_index;
+    private Integer mIsImage_index;
 
 
     public PatchSetChangesCard(Context context) {
@@ -125,14 +126,17 @@ public class PatchSetChangesCard implements CardBinder {
 
         /* If the file is binary don't offer to show the diff as
          *  we cannot get detailed information on binary files */
-//        if (cursor.getInt(mIsBinary_index) != 0) {
-//            viewHolder.binaryText.setVisibility(View.VISIBLE);
-//            convertView.setEnabled(false);
-//            return convertView;
-//        } else {
-//            viewHolder.binaryText.setVisibility(View.GONE);
+        if (cursor.getInt(mIsBinary_index) != 0) {
+            viewHolder.binaryText.setVisibility(View.VISIBLE);
+            convertView.setEnabled(false);
+            // If it is binary and not an image we don't need to tag diff-related data
+            if (cursor.getInt(mIsImage_index) == 0) {
+                return convertView;
+            }
+        } else {
+            viewHolder.binaryText.setVisibility(View.GONE);
             convertView.setEnabled(true);
-//        }
+        }
 
         // We have already set an anonymous tag so we need to use ids
         convertView.setTag(R.id.changeNumber, cursor.getInt(mCommit_index));
@@ -243,6 +247,9 @@ public class PatchSetChangesCard implements CardBinder {
         }
         if (mCommit_index == null) {
             mCommit_index = cursor.getColumnIndex(FileChanges.C_COMMIT_NUMBER);
+        }
+        if (mIsImage_index == null) {
+            mIsImage_index = cursor.getColumnIndex(FileChanges.C_ISIMAGE);
         }
     }
 

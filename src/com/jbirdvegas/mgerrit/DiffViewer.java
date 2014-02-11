@@ -31,6 +31,7 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.ViewSwitcher;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -80,6 +81,7 @@ public class DiffViewer extends FragmentActivity
     };
 
     private ImageButton mBtnPrevious, mBtnNext;
+    private ViewSwitcher mSwitcher;
 
     private String mFilePath;
     private int mChangeNumber;
@@ -91,6 +93,9 @@ public class DiffViewer extends FragmentActivity
 
     private static RequestQueue requestQueue;
     private ZipRequest request;
+
+    private static int DIFF_CHILD = 0;
+    private static int IMAGE_CHILD = 1;
 
 
     @Override
@@ -116,6 +121,7 @@ public class DiffViewer extends FragmentActivity
 
         mDiffTextView = (DiffTextView) findViewById(R.id.diff_view_diff);
         mSpinner = (Spinner) findViewById(R.id.diff_spinner);
+        mSwitcher = (ViewSwitcher) findViewById(R.id.diff_switcher);
 
         mBtnPrevious = (ImageButton) findViewById(R.id.diff_previous);
         mBtnNext = (ImageButton) findViewById(R.id.diff_next);
@@ -124,11 +130,11 @@ public class DiffViewer extends FragmentActivity
         mSpinner.setAdapter(mAdapter);
         mSpinner.setOnItemSelectedListener(mSelectedListener);
 
-        if (Tools.isImage(mFilePath)) {
-            makeImageRequest(mFilePath);
-        } else {
-            loadDiff(mFilePath);
-        }
+        boolean isImage = Tools.isImage(mFilePath);
+        if (isImage) mSwitcher.showNext();
+        else mSwitcher.showPrevious();
+        switchViews(isImage);
+
         mAdapter = new FileAdapter(this, null);
         mSpinner.setAdapter(mAdapter);
         mSpinner.setOnItemSelectedListener(mSelectedListener);
@@ -221,6 +227,12 @@ public class DiffViewer extends FragmentActivity
     private void setChangeTitle(Integer changeNumber) {
         String s = getResources().getString(R.string.change_detail_heading);
         setTitle(String.format(s, changeNumber));
+    }
+
+    private void switchViews(boolean isImage) {
+        int displayedChild = mSwitcher.getDisplayedChild();
+        if (isImage && displayedChild == 0) mSwitcher.showNext();
+        else if (!isImage && displayedChild == 1) mSwitcher.showPrevious();
     }
 
     // Handler for clicking on the previous file button
