@@ -17,34 +17,41 @@
   ~  limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:weightSum="1">
+              android:orientation="horizontal">
 
     <View
         android:id="@+id/striped_image_stripe_left"
-        android:layout_height="match_parent"
         android:layout_width="@dimen/card_stroke_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_gravity="left"
+        android:background="@android:color/transparent"
+        android:paddingRight="@dimen/commit_card_stroke_padding"/>
+
+    <View
+        android:id="@+id/striped_image_stripe_right"
+        android:layout_width="@dimen/card_stroke_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="right"
         android:background="@android:color/transparent"
         android:paddingRight="@dimen/commit_card_stroke_padding"/>
 
     <ImageView
         android:id="@+id/striped_image"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_gravity="center"
+        android:layout_toLeftOf="@id/striped_image_stripe_right"
+        android:layout_toRightOf="@id/striped_image_stripe_left"
         android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_weight="1"/>
+        tools:src="@drawable/ic_menu_view"
+        tools:visibility="visible"/>
 
-    <View
-        android:id="@+id/striped_image_stripe_right"
-        android:layout_height="match_parent"
-        android:layout_width="@dimen/card_stroke_width"
-        android:background="@android:color/transparent"
-        android:paddingRight="@dimen/commit_card_stroke_padding"/>
-
-</LinearLayout>
+</RelativeLayout>
