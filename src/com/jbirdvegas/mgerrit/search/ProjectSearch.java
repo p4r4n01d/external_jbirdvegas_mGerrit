@@ -36,4 +36,9 @@ public class ProjectSearch extends SearchKeyword {
         // Exact match only
         return UserChanges.C_PROJECT + " = ?";
     }
+
+    @Override
+    public String getGerritQuery() {
+        return toString();
+    }
 }

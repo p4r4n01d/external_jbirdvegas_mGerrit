@@ -247,4 +247,21 @@ public class AgeSearch extends SearchKeyword {
         // Fall back to modifying years
         return period.withFieldAdded(DurationFieldType.years(), adjustment);
     }
+
+    @Override
+    public String getGerritQuery() {
+        String operator = getOperator();
+        if ("<=".equals(operator) || "<".equals(operator)) {
+            // These queries don't match any Gerrit queries
+            return "";
+        }
+
+        // Need to leave off the operator and make sure we are using relative format
+        String string = OP_NAME + ":\"";
+        Period period = mPeriod;
+        if (period == null) {
+            period = new Period(mInstant, Instant.now());
+        }
+        return string + periodParser.print(period) + '"';
+    }
 }

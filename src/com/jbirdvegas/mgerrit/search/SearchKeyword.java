@@ -208,6 +208,16 @@ public abstract class SearchKeyword {
         return new String[] { getParam() };
     }
 
+    /**
+     * Get the Gerrit search query that this keyword corresponds to.
+     *  Some keywords do not have corresponding queries supported by Gerrit, so
+     *  it is safe to return an empty string in that case. The default implementation
+     *  returns an empty string.
+     */
+    public String getGerritQuery() {
+        return "";
+    }
+
     public static String replaceKeyword(String query, SearchKeyword keyword) {
         Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
         tokens = removeKeyword(tokens, keyword.getClass());

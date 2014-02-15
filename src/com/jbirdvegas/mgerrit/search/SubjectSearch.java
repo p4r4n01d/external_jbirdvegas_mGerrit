@@ -42,4 +42,9 @@ public class SubjectSearch extends SearchKeyword {
     public String[] getEscapeArgument() {
         return new String[] { getParam() + '%' };
     }
+
+    @Override
+    public String getGerritQuery() {
+        return toString();
+    }
 }
