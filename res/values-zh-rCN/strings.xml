@@ -26,10 +26,12 @@
     </string>
     <string name="status_explanation_merged">更改已合并到其分支。</string>
     <string name="status_explanation_abandoned">更改被其所有者或管理员废弃。</string>
-    <string name="patchset_labels_code_reviewer">代码评审者</string>
-    <string name="patchset_labels_verified_reviewer">已审核</string>
+    <string name="status_explanation_draft">更改是一个草稿，它只包含草稿补丁集。</string>
+    <string name="patchset_labels_code_reviewer">代码评审：</string>
+    <string name="patchset_labels_verified_reviewer">已审核：</string>
     <string name="inserted">插入行</string>
     <string name="deleted">删除行</string>
+    <string name="binary_file">二进制文件</string>
     <string name="none_found">找不到</string>
     <string name="please_try_again">请返回并重试</string>
     <string name="menu_preferences">偏好</string>
@@ -68,16 +70,21 @@
     <string name="aosp_volley_title">AOSP\'s Volley</string>
     <string name="developers_role">选择开发者角色用于查看</string>
     <string name="commit_reviewer">提交审核者</string>
-    <string name="context_menu_reviewer">更改审核查询。</string>
-    <string name="context_menu_owner">更改原始提交。</string>
-    <string name="context_menu_view_diff_viewer">在对话框中查看差异</string>
+
+    <string name="context_menu_view_diff_viewer">使用内置查看器</string>
     <string name="context_menu_diff_view_in_browser">在浏览器中查看差异</string>
+    <string name="context_menu_change_browser">在浏览器中查看更改</string>
+    <string name="context_menu_change_viewer">查看更改详情</string>
     <string name="choose_diff_view">你想要查看差异吗？</string>
+    <string name="context_menu_track_user" formatted="false">跟踪用户 %s</string>
+    <string name="context_menu_track_project">跟踪项目</string>
+
     <string name="stalker_mode_toast">现在跟踪用户：</string>
     <string name="share">分享</string>
+    <string name="view_in_browser">在默认浏览器中查看本变更</string>
+    <string name="moar_info">本变更的更多详细信息</string>
     <string name="commit_shared_from_mgerrit" formatted="false">分享提交 %s 来自mGerrit！</string>
     <string name="found_cards_toast" formatted="false"><![CDATA[找到 %d 提交耗时 %d 秒]]></string>
-    <string name="cancel">取消</string>
     <string name="menu_projects">按项目查看</string>
     <string name="aokp_changelog">AOKP 更新日志</string>
     <string name="download_update">下载</string>
@@ -94,7 +101,6 @@
     <string name="please_enter_gerrit_url">请输入Gerrit的地址</string>
     <string name="add_team_url">新Gerrit团队地址</string>
     <string name="add_gerrit_name">新Gerrit团队名称</string>
-    <string name="save">保存</string>
     <string name="handshake_fail_message">尝试在你的设备上安装提供者证书失败。
     </string>
     <string name="caused_by">引起原因：</string>
@@ -110,5 +116,44 @@
     <string name="remove_content">移除内容</string>
     <string name="connection_starting">开始 Gerrit 请求</string>
     <string name="projects_search_hint">搜索项目</string>
+    <string name="changes_search_hint">搜索变更</string>
     <string name="failed_to_find_url">失败，找不到项目URL</string>
+    <string name="change_status_update">一个新变更状态被选中</string>
+    <string name="invalid_gerrit_name">Gerrit名称设置无效</string>
+    <string name="invalid_gerrit_url">Gerrit地址设置无效</string>
+    <string name="change_detail_heading" formatted="false">更改 %d</string>
+    <string name="commit_branch">分支：</string>
+    <string name="commit_topic">主题：</string>
+    <string name="change_theme">选择主题</string>
+    <string name="theme_light">亮色主题</string>
+    <string name="theme_dark">暗色主题</string>
+    <string name="gerrit_help">Gerrit 帮助</string>
+    <string name="not_connected">当前没有网络链接。请稍后再试。</string>
+    <string name="aokp_changelog_card_title">最近AOKP编译版本</string>
+    <string name="changelog_loading">正在搜索最近编译版本&#8230;</string>
+    <string name="retry_label">重试</string>
+    <string name="header_properties">属性</string>
+    <string name="header_commit_message">提交信息</string>
+    <string name="header_changed_files">变更文件</string>
+    <string name="header_reviewers">评审人</string>
+    <string name="header_comments">评论</string>
+    <string name="commit_updated">更新：</string>
+    <string name="renamed_label">重命名自：</string>
+    <string name="no_changelog">您的设备没有最近的编译版本</string>
+    <string name="diff_back">上一个文件</string>
+    <string name="diff_next">下一个文件</string>
+
+    <string name="diff_options_title">查看更新差异</string>
+    <string name="diff_options_ask">询问</string>
+    <string name="diff_options_internal">内置查看器（若可用）</string>
+    <string name="diff_options_external">浏览器</string>
+
+    <string name="diff_menu_internal_condensed">查看器</string>
+    <string name="diff_menu_external_condensed">浏览器</string>
+    <string name="diff_no_files">更新中没有发现非二进制文件。</string>
+    <string name="failed_to_get_diff">读取差异失败</string>
+    <string name="failed_to_load_image">读取图像失败</string>
+    <string name="failed_to_decode_image">解码图像失败</string>
+    <string name="diff_text_loading">读取差异文本</string>
+    <string name="diff_image_loading">读取图片</string>
 </resources>

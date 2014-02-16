@@ -19,12 +19,13 @@
   <string name="reviewable">Обзор</string>
   <string name="merged">Добавлено</string>
   <string name="abandoned">Убрано</string>
-  <string name="status_explanation_new">Изменение рассматривается</string>
-  <string name="status_explanation_submitted">Изменение принято и находится в очереди на добавление. Возможно, ожидается доработка зависящих от него файлов.</string>
-  <string name="status_explanation_merged">Изменение добавлено в соответствующую ветку.</string>
-  <string name="status_explanation_abandoned">Изменение убрано владельцем или администратором.</string>
-  <string name="patchset_labels_code_reviewer">Обзор кодов:</string>
-  <string name="patchset_labels_verified_reviewer">Проверено:</string>
+  <string name="status_explaination_new">Изменение рассматривается</string>
+  <string name="status_explaination_submitted">Изменение принято и находится в очереди на добавление. Возможно, ожидается доработка зависящих от него файлов.</string>
+  <string name="status_explaination_merged">Изменение добавлено в соответствующую ветку.</string>
+  <string name="status_explaination_abandoned">Изменение убрано владельцем или администратором.</string>
+  <string name="patchset_labels_code_reviewer_title">Обзор кодов:</string>
+  <string name="patchset_labels_verified_reviewer_title">Проверено:</string>
+  <string name="dash">-</string>
   <string name="inserted">Вставленные строки:</string>
   <string name="deleted">Удалённые строки:</string>
   <string name="none_found">Не найдено</string>
@@ -36,19 +37,21 @@
   <string name="commit_author">Автор:</string>
   <string name="commit_owner">Владелец:</string>
   <string name="failed_to_parse_json_response">Не удалось получить ответ от</string>
+  <string name="ok">хорошо</string>
   <string name="show_exception">Показать исключение</string>
   <string name="exit">Выход</string>
   <string name="gerrit_call_failed">Не удалось получить ответ от Gerrit, пожалуйста, проверьте соединение и попытайтесь снова.</string>
   <string name="establishing_connection">Соединение...</string>
-  <string name="transferring">Передача данных JSON...</string>
+  <string name="transfering">Передача данных JSON...</string>
   <string name="downloading_status" formatted="false">%d из %d байт загружено\t%d%% выполнено</string>
   <string name="connection_established">Соединение установлено</string>
   <string name="initializing_data_transfer">Инициализация передачи данных...</string>
   <string name="communications_error">ОШИБКА связи!!!</string>
-  <string name="transferring_json_data">Передача данных JSON...</string>
+  <string name="transfering_json_data">Передача данных JSON...</string>
   <string name="open_source_libs">Библиотеки открытого кода</string>
   <string name="cards_ui">CardsUI</string>
   <string name="nine_old_androids">NineOldAndroids</string>
+  <string name="nine_old_androids_website">http://nineoldandroids.com/</string>
   <string name="explain_status_title">Объяснение статусов</string>
   <string name="explain_status_summary">Краткое объяснение значений вкладок статусов</string>
   <string name="menu_gerrit_instance">Выбор Gerrit</string>
@@ -64,7 +67,7 @@
   <string name="commit_reviewer">Обзор изменений</string>
   <string name="context_menu_reviewer">Изменения в очереди обзора.</string>
   <string name="context_menu_owner">Первоначальные изменения.</string>
-  <string name="context_menu_view_diff_viewer">Просмотр различий в диалоговом окне</string>
+  <string name="context_menu_view_diff_dialog">Просмотр различий в диалоговом окне</string>
   <string name="context_menu_diff_view_in_browser">Просмотр различий в браузере</string>
   <string name="choose_diff_view">Какой вид просмотра различий Вы предпочитаете?</string>
   <string name="stalker_mode_toast">Слежение за пользователем:</string>
@@ -79,6 +82,8 @@
   <string name="download_rom_zip">Скачать zip-файл с прошивкой</string>
   <string name="failed_to_decode_base64">Не удалось расшифровать ответ Base64.</string>
   <string name="return_was_null">Нет ответа... Пожалуйста, используйте для просмотра браузер</string>
+  <string name="apache_commons_title">Apache Commons Codec v1.8</string>
+  <string name="apache_commons_website">http://commons.apache.org/proper/commons-codec/</string>
   <string name="using_gerrit_toast">Использование Gerrit:</string>
   <string name="google_now_style_animations_title">Анимация карт</string>
   <string name="google_now_style_animations_summary">Включить анимацию в стиле Google Now при отрисовке карт</string>
@@ -87,7 +92,7 @@
   <string name="please_enter_gerrit_name">Пожалуйста, введите имя варианта Gerrit</string>
   <string name="please_enter_gerrit_url">Пожалуйста, введите URL-адрес Gerrit</string>
   <string name="add_team_url">URL-адрес новой команды Gerrit.</string>
-  <string name="add_gerrit_name">Имя новой команды Gerrit</string>
+  <string name="add_gerrit_url">Имя новой команды Gerrit</string>
   <string name="save">Сохранить</string>
   <string name="handshake_fail_message">Не удалось, попробуйте установить сертификат провайдера на устройство.
     </string>

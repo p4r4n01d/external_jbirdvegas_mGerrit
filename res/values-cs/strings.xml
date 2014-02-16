@@ -73,7 +73,6 @@
     <string name="share">Sdílet</string>
     <string name="commit_shared_from_mgerrit" formatted="false">Požadavek %s sdílen přes mGerrit!</string>
     <string name="found_cards_toast" formatted="false"><![CDATA[Nalezeno %d požadavů za %d sekund]]></string>
-    <string name="cancel">Zrušit</string>
     <string name="menu_projects">Zobrazit podle projektu</string>
     <string name="aokp_changelog">AOKP seznam změn</string>
     <string name="download_update">Stáhnout</string>
@@ -90,7 +89,55 @@
     <string name="please_enter_gerrit_url">Vložit url adresu Gerritu</string>
     <string name="add_team_url">Adresa nového Gerrti týmu.</string>
     <string name="add_gerrit_name">Jméno nového Gerrit týmu</string>
-    <string name="save">Uložit</string>
     <string name="handshake_fail_message">Chyba načtení, není potřeba nainstalovat na zařízení certifikát?</string>
     <string name="caused_by">Způsobeno:</string>
+    <string name="at">v</string>
+    <string name="locales">Lokalizace časové zóny</string>
+    <string name="server_timezone_title">Časová zóna serveru</string>
+    <string name="local_timezone_title">Mistní časová zóna</string>
+    <string name="server_timezone_summary">Lokální časová zóna místa, kde je umístěn server gerritu.</string>
+    <string name="local_timezone_summary">Výchozí časová zóna může být nepřesná. Touto volbou je možné výchozí časovou zónu změnit.</string>
+    <string name="patchset_labels_change_diff">Rozdíly změny</string>
+    <string name="remove_content">Odstranit tento obsah</string>
+    <string name="connection_starting">Zařít gerrit požadavek</string>
+    <string name="projects_search_hint">Hledat projekty</string>
+    <string name="changes_search_hint">Hledat změny</string>
+    <string name="failed_to_find_url">Chyba při hledání adresy projektu</string>
+    <string name="change_status_update">Byl vybrán nový status změny</string>
+    <string name="invalid_gerrit_name">Zvolené jméno Gerritu bylo vadné</string>
+    <string name="invalid_gerrit_url">Nastavení adresy Gerritu selhalo</string>
+    <string name="gerrit_protocol">https://</string>
+    <string name="change_detail_heading" formatted="false">Change %d</string>
+    <string name="commit_branch">Branch:</string>
+    <string name="commit_topic">Topic:</string>
+    <string name="change_theme">Vybrat téma</string>
+    <string name="theme_light">Světlé téma</string>
+    <string name="theme_dark">Tmavé téma</string>
+    <string name="gerrit_help">Nápověda Gerritu</string>
+    <string name="not_connected">Momentálně není k dispozici připojení k internetu, je třeba to zkusit později.</string>
+    <string name="aokp_changelog_card_title">Poslední buildy AOKP</string>
+    <string name="changelog_loading">Vyhledávání posledních buildů&#8230;</string>
+    <string name="retry_label">Opakovat</string>
+    <string name="header_properties">Vlastnosti</string>
+    <string name="header_commit_message">Zpráva commitu</string>
+    <string name="header_changed_files">Změněné soubory</string>
+    <string name="header_reviewers">Revidenti</string>
+    <string name="header_comments">Komentáře</string>
+    <string name="commit_updated">Aktualizováno:</string>
+    <string name="renamed_label">Přejmenováno z:</string>
+    <string name="no_changelog">Pro toto zařízení nejsou k dispozici žádné nivé buildy</string>
+    <string name="diff_back">Předchozí soubor</string>
+    <string name="diff_next">Další soubor</string>
+    <string name="diff_options_title">Zobrazit rozdíly change</string>
+    <string name="diff_options_ask">Zeptat se</string>
+    <string name="diff_options_internal">V interním prohlížeči (pokud je k dispozici)</string>
+    <string name="diff_options_external">V internetovém prohlížeči</string>
+    <string name="diff_menu_internal_condensed">Prohlížeč</string>
+    <string name="diff_menu_external_condensed">Internetový prohlížeč</string>
+    <string name="diff_no_files">V této change nejsou žádné nebinární soubory.</string>
+    <string name="failed_to_get_diff">Chyba při načítání změny</string>
+    <string name="failed_to_load_image">Chyba při načítání obrázku</string>
+    <string name="failed_to_decode_image">Chyba při dekódování obrázku</string>
+    <string name="diff_text_loading">Načítání textu změny</string>
+    <string name="diff_image_loading">Načítání obrázku</string>
 </resources>

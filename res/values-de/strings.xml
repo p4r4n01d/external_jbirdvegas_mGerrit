@@ -23,8 +23,8 @@
     "</string>
     <string name="status_explanation_merged">"Veränderung hat ihre Niederlassung zusammengeführt."</string>
     <string name="status_explanation_abandoned">"Veränderung wurde von seinem Besitzer oder Administrator aufgegeben."</string>
-    <string name="patchset_labels_code_reviewer">"Code-Prüfer:"</string>
-    <string name="patchset_labels_verified_reviewer">"Geprüft"</string>
+    <string name="patchset_labels_code_reviewer_title">"Code-Prüfer:"</string>
+    <string name="patchset_labels_verified_reviewer_title">"Geprüft"</string>
     <string name="inserted">"Eingefügt Linien:"</string>
     <string name="deleted">"Gelöschte Zeilen:"</string>
     <string name="binary_file">"Binary-Datei"</string>
@@ -71,7 +71,7 @@
     <string name="commit_reviewer">"Commit Bewerter"</string>
     <string name="context_menu_reviewer">"Änderungen im Rückblick Abfrage."</string>
     <string name="context_menu_owner">"Änderungen ursprünglich eingereicht."</string>
-    <string name="context_menu_view_diff_viewer">"Sehen Unterschied im Dialog"</string>
+    <string name="context_menu_view_diff_dialog">"Sehen Unterschied im Dialog"</string>
     <string name="context_menu_diff_view_in_browser">"Sehen Unterschied im Browser"</string>
     <string name="choose_diff_view">"Wie möchten Sie den Unterschied sehen?"</string>
     <string name="stalker_mode_toast">"Jetzt Stalking Nutzer:"</string>
