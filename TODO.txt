@@ -32,6 +32,11 @@ Outstanding
 		(re-)delivered to the activity that was listening to broadcasts matching the actual query
 - Change detail viewpager
 	- Viewpager to swipe through changes in the change detail screen (phone layout only)
+- Option to disable quick scroll
+- ProgressBar infinite spinning: Spinner keeps spinning when no internet connection
+- Why don't images load on properties card in change list?
+- Fetching changes updates projects list
+- Change detail ViewPager: Add ViewPager to swipe through changes in the change detail screen (phone layout only)
 
 
 Searching (Requires database), action bar
@@ -46,6 +51,9 @@ Searching (Requires database), action bar
 		- Filter options modify search query (present in either action bar (search) or filter draw)
 		- Idea: Users can do filtering and bypass the filter draw entirely. The filter draw provides assistance on how to formulate queries that the web interface uses.
 		- We are going to support new filter types (keywords) and/or new parameters for them (e.g. date range filtering for the age keyword)
+	- Support allintitle -
+		intitle:<QUERY>
+		allintitle:<QUERY1 QUERY2 ...> == intitle<QUERY1> intitle:<QUERY2>
 
 
 Change List
@@ -53,6 +61,7 @@ Change List
 	- Restore projects and owner cards
 		- Investigate card swiping
 	- Infinate list - load more changes when scrolled to the bottom of the list
+	- Titles only - Easiest to do with a setting in the preferences
 
 
 Tablet (master-detail layout)
