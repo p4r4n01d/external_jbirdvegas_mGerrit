@@ -43,7 +43,7 @@ class CommitProcessor extends SyncProcessor<JSONCommit> {
     }
 
     @Override
-    boolean isSyncRequired() {
+    boolean isSyncRequired(Context context) {
         return true;
     }
 

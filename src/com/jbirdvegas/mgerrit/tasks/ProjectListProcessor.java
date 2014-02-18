@@ -49,8 +49,7 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
     }
 
     @Override
-    boolean isSyncRequired() {
-        Context context = getContext();
+    boolean isSyncRequired(Context context) {
         long syncInterval = context.getResources().getInteger(R.integer.projects_sync_interval);
         long lastSync = SyncTime.getValueForQuery(context, SyncTime.PROJECTS_LIST_SYNC_TIME, mUrl);
         boolean sync = isInSyncInterval(syncInterval, lastSync);

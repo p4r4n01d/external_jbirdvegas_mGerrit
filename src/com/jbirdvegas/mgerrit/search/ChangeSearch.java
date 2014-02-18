@@ -43,7 +43,7 @@ public class ChangeSearch extends SearchKeyword {
     }
 
     @Override
-    public String getGerritQuery() {
+    public String getGerritQuery(String serverVersion) {
         return toString();
     }
 }

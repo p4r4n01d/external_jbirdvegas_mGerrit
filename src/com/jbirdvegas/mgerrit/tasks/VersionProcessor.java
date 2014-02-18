@@ -52,9 +52,9 @@ public class VersionProcessor extends SyncProcessor<String> {
     }
 
     @Override
-    boolean isSyncRequired() {
+    boolean isSyncRequired(Context context) {
         // Look up the database to see if we have previously saved the version
-        return Config.getValue(getContext(), Config.KEY_VERSION) == null;
+        return Config.getValue(context, Config.KEY_VERSION) == null;
     }
 
     @Override

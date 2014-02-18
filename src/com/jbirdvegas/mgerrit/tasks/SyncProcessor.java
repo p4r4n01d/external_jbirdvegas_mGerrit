@@ -83,7 +83,7 @@ abstract class SyncProcessor<T> {
     /**
      * @return Whether it is necessary to contact the server
      */
-    abstract boolean isSyncRequired();
+    abstract boolean isSyncRequired(Context context);
 
     /**
      * @return T.class (the class of T). This is used for Volley Gson requests

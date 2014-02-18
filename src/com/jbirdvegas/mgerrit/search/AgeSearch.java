@@ -92,7 +92,7 @@ public class AgeSearch extends SearchKeyword {
 
     /** Used for serialising the period into a string and must be output
      *   in a format that can be re-parsed later */
-    private static PeriodFormatter periodParser = new PeriodFormatterBuilder()
+    protected static PeriodFormatter periodParser = new PeriodFormatterBuilder()
             .appendYears().appendSuffix(" years ")
             .appendMonths().appendSuffix(" months ")
             .appendWeeks().appendSuffix(" weeks ")
@@ -172,12 +172,16 @@ public class AgeSearch extends SearchKeyword {
 
     @Override
     public String toString() {
+        return toString(OP_NAME);
+    }
+
+    public String toString(String keywordName) {
         /* Use the same format as the one initially provided. I.e. if a
          *  relative time period was set initially, we want a relative period
          *  to come back out. Otherwise it is a different search */
         String operator = getOperator() ;
         if ("=".equals(operator)) operator = "";
-        String string = OP_NAME + ":\"" + operator;
+        String string = keywordName + ":\"" + operator;
         if (mPeriod != null) {
             return string + periodParser.print(mPeriod) + '"';
         } else {
@@ -249,19 +253,34 @@ public class AgeSearch extends SearchKeyword {
     }
 
     @Override
-    public String getGerritQuery() {
+    public String getGerritQuery(String serverVersion) {
         String operator = getOperator();
-        if ("<=".equals(operator) || "<".equals(operator)) {
-            // These queries don't match any Gerrit queries
-            return "";
-        }
+        if (serverVersion.startsWith("2.8.1") && mInstant != null) {
+            if ("<=".equals(operator) || "<".equals(operator)) {
+                return "before:" + mInstant.toString() + '"';
+            } else if (">=".equals(operator) || ">".equals(operator)) {
+                return "after:" + mInstant.toString() + '"';
+            } else {
+                // TODO: Use a combination of before and after to get an interval if given in
+                //  relative time.
+                return "";
+            }
+        } else {
+            if ("<=".equals(operator) || "<".equals(operator)) {
+                // These queries don't match any Gerrit queries
+                return "";
+            }
 
-        // Need to leave off the operator and make sure we are using relative format
-        String string = OP_NAME + ":\"";
-        Period period = mPeriod;
-        if (period == null) {
-            period = new Period(mInstant, Instant.now());
+            // Need to leave off the operator and make sure we are using relative format
+            String string = OP_NAME + ":\"";
+            Period period = mPeriod;
+            if (period == null) {
+                period = new Period(mInstant, Instant.now());
+            }
+            return string + periodParser.print(period) + '"';
         }
-        return string + periodParser.print(period) + '"';
     }
+
+    protected Period getPeriod() { return mPeriod; }
+    protected Instant getInstant() { return mInstant; }
 }

@@ -72,7 +72,7 @@ public class GerritService extends IntentService {
         }
 
         // Call the SyncProcessor to fetch the data if necessary
-        boolean needsSync = processor.isSyncRequired();
+        boolean needsSync = processor.isSyncRequired(this);
         if (needsSync) processor.fetchData(mRequestQueue);
     }
 

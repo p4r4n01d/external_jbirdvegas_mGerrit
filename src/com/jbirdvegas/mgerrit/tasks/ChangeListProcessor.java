@@ -48,8 +48,7 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
     }
 
     @Override
-    boolean isSyncRequired() {
-        Context context = getContext();
+    boolean isSyncRequired(Context context) {
         long syncInterval = context.getResources().getInteger(R.integer.changes_sync_interval);
         long lastSync = SyncTime.getValueForQuery(context, SyncTime.CHANGES_LIST_SYNC_TIME, getQuery());
         boolean sync = isInSyncInterval(syncInterval, lastSync);

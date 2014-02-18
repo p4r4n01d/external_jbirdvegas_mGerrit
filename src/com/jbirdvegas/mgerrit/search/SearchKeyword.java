@@ -214,7 +214,7 @@ public abstract class SearchKeyword {
      *  it is safe to return an empty string in that case. The default implementation
      *  returns an empty string.
      */
-    public String getGerritQuery() {
+    public String getGerritQuery(String serverVersion) {
         return "";
     }
 
