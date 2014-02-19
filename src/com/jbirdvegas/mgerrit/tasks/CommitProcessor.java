@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit.tasks;
  */
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.jbirdvegas.mgerrit.database.MessageInfo;
 import com.jbirdvegas.mgerrit.database.Reviewers;
@@ -43,7 +44,7 @@ class CommitProcessor extends SyncProcessor<JSONCommit> {
     }
 
     @Override
-    boolean isSyncRequired(Context context) {
+    boolean isSyncRequired(Context context, Intent intent) {
         return true;
     }
 

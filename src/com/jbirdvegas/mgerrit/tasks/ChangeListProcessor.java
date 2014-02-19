@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit.tasks;
  */
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Pair;
 
 import com.jbirdvegas.mgerrit.R;
@@ -50,9 +51,21 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
     }
 
     @Override
-    boolean isSyncRequired(Context context) {
-        // TODO: This is tempery
-        return true;
+    boolean isSyncRequired(Context context, Intent intent) {
+        String direction = intent.getStringExtra(GerritService.CHANGES_LIST_DIRECTION);
+        if (direction != null) {
+            if (GerritService.Direction.valueOf(direction) == GerritService.Direction.Older) {
+                return true;
+            }
+        }
+
+        long syncInterval = context.getResources().getInteger(R.integer.changes_sync_interval);
+        long lastSync = SyncTime.getValueForQuery(context, SyncTime.CHANGES_LIST_SYNC_TIME, getQuery());
+        boolean sync = isInSyncInterval(syncInterval, lastSync);
+        if (!sync) return true;
+
+        // Better just make sure that there are changes in the database
+        return DatabaseTable.isEmpty(context, Changes.CONTENT_URI);
     }
 
     @Override

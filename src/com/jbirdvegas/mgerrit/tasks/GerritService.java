@@ -36,6 +36,11 @@ public class GerritService extends IntentService {
     public static final String URL_KEY = "Url";
     public static final String DATA_TYPE_KEY = "Type";
 
+    /* These are for the change list - whether we are fetching newer or older changes than what
+      * we have already */
+    public enum Direction { Newer, Older }
+    public static final String CHANGES_LIST_DIRECTION = "direction";
+
     public static enum DataType { Project, Commit, CommitDetails, GetVersion, LegacyCommitDetails }
 
     private static RequestQueue mRequestQueue;
@@ -72,7 +77,7 @@ public class GerritService extends IntentService {
         }
 
         // Call the SyncProcessor to fetch the data if necessary
-        boolean needsSync = processor.isSyncRequired(this);
+        boolean needsSync = processor.isSyncRequired(this, intent);
         if (needsSync) processor.fetchData(mRequestQueue);
     }
 

@@ -1,6 +1,7 @@
 package com.jbirdvegas.mgerrit.tasks;
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -52,7 +53,7 @@ public class VersionProcessor extends SyncProcessor<String> {
     }
 
     @Override
-    boolean isSyncRequired(Context context) {
+    boolean isSyncRequired(Context context, Intent intent) {
         // Look up the database to see if we have previously saved the version
         return Config.getValue(context, Config.KEY_VERSION) == null;
     }

@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit.tasks;
  */
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.android.volley.RequestQueue;
 import com.jbirdvegas.mgerrit.Prefs;
@@ -49,7 +50,7 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
     }
 
     @Override
-    boolean isSyncRequired(Context context) {
+    boolean isSyncRequired(Context context, Intent intent) {
         long syncInterval = context.getResources().getInteger(R.integer.projects_sync_interval);
         long lastSync = SyncTime.getValueForQuery(context, SyncTime.PROJECTS_LIST_SYNC_TIME, mUrl);
         boolean sync = isInSyncInterval(syncInterval, lastSync);

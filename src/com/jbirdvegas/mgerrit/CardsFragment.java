@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -155,6 +156,7 @@ public abstract class CardsFragment extends Fragment
                 Intent it = new Intent(mParent, GerritService.class);
                 it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
                 it.putExtra(GerritService.URL_KEY, mUrl);
+                it.putExtra(GerritService.CHANGES_LIST_DIRECTION, GerritService.Direction.Older.toString());
                 mParent.startService(it);
             }
         };
@@ -220,6 +222,7 @@ public abstract class CardsFragment extends Fragment
         Intent it = new Intent(mParent, GerritService.class);
         it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
         it.putExtra(GerritService.URL_KEY, mUrl);
+        it.putExtra(GerritService.CHANGES_LIST_DIRECTION, GerritService.Direction.Newer);
         mParent.startService(it);
     }
 

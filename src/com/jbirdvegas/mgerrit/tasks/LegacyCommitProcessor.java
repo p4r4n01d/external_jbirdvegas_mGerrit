@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit.tasks;
  */
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
@@ -34,7 +35,7 @@ class LegacyCommitProcessor extends SyncProcessor<JSONCommit[]> {
     }
 
     @Override
-    boolean isSyncRequired(Context context) {
+    boolean isSyncRequired(Context context, Intent intent) {
         return true;
     }
 

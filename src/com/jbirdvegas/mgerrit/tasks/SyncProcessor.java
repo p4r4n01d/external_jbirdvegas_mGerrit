@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit.tasks;
  */
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -83,7 +84,7 @@ abstract class SyncProcessor<T> {
     /**
      * @return Whether it is necessary to contact the server
      */
-    abstract boolean isSyncRequired(Context context);
+    abstract boolean isSyncRequired(Context context, Intent intent);
 
     /**
      * @return T.class (the class of T). This is used for Volley Gson requests
