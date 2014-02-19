@@ -257,9 +257,9 @@ public class AgeSearch extends SearchKeyword {
         String operator = getOperator();
         if (serverVersion.startsWith("2.8.1") && mInstant != null) {
             if ("<=".equals(operator) || "<".equals(operator)) {
-                return "before:" + mInstant.toString() + '"';
+                return "before:\"" + mInstant.toString() + '"';
             } else if (">=".equals(operator) || ">".equals(operator)) {
-                return "after:" + mInstant.toString() + '"';
+                return "after:\"" + mInstant.toString() + '"';
             } else {
                 // TODO: Use a combination of before and after to get an interval if given in
                 //  relative time.

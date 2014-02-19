@@ -26,7 +26,6 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     private int mPendingResource = -1;
     private View mPendingView;
     private boolean mLoadingMoreData = false;
-    private boolean mIsMoreData = true;
 
     public EndlessAdapterWrapper(Context context, BaseAdapter wrapped) {
         this(context, wrapped, R.layout.loading_placeholder);
@@ -48,30 +47,27 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         mLoadingMoreData = true;
     }
 
-    public void finishedDataLoading(boolean moreData) {
-        mIsMoreData = moreData;
+    public void finishedDataLoading() {
         mPendingView = null;
         mLoadingMoreData = false;
     }
 
     @Override
     public boolean areAllItemsEnabled() {
-        return false;
+        return false; // The pending row is never enabled
     }
 
     @Override
     public boolean isEnabled(int position) {
-        if (position >= wrapped.getCount()) {
-            return(false);
-        }
-
-        return wrapped.isEnabled(position);
+        return position < wrapped.getCount() && wrapped.isEnabled(position);
     }
 
     @Override
     public int getCount() {
-        // Add an extra item for the pending row
-        return wrapped.getCount() + 1;
+        if (mLoadingMoreData) {
+            // Add an extra item for the pending row
+            return wrapped.getCount() + 1;
+        } else return wrapped.getCount();
     }
 
     @Override
@@ -95,12 +91,8 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     @Nullable
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        convertView.setVisibility(View.VISIBLE);
         if (position >= wrapped.getCount()) {
-            if (!mLoadingMoreData || !mIsMoreData) {
-                convertView.setVisibility(View.GONE);
-                return convertView;
-            } else if (mPendingView == null && mPendingResource != -1) {
+            if (mPendingView == null && mPendingResource != -1) {
                 LayoutInflater inflater = LayoutInflater.from(mContext);
                 return inflater.inflate(mPendingResource, null);
             } else {
@@ -131,27 +123,27 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     @Override
     public void notifyDataSetChanged() {
         wrapped.notifyDataSetChanged();
+        finishedDataLoading();
     }
 
     @Override
     public void notifyDataSetInvalidated() {
-        mPendingView = null;
-        mLoadingMoreData = false;
         wrapped.notifyDataSetInvalidated();
+        finishedDataLoading();
     }
 
     /**
      * Returns the ListAdapter that is wrapped by the endless
      * logic.
      */
-    protected BaseAdapter getWrappedAdapter() {
+    public BaseAdapter getWrappedAdapter() {
         return wrapped;
     }
 
     @Override
     public void onScrollStateChanged(AbsListView listView, int scrollState) {
         if (scrollState == SCROLL_STATE_IDLE) {
-            if (listView.getLastVisiblePosition() >= listView.getCount()) {
+            if (listView.getLastVisiblePosition() == wrapped.getCount() - 1) {
                 startDataLoading();
                 loadData();
             }

@@ -44,18 +44,15 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
     @Override
     void insert(JSONCommit[] commits) {
-        UserChanges.insertCommits(getContext(), Arrays.asList(commits));
+        if (commits.length > 0) {
+            UserChanges.insertCommits(getContext(), Arrays.asList(commits));
+        }
     }
 
     @Override
     boolean isSyncRequired(Context context) {
-        long syncInterval = context.getResources().getInteger(R.integer.changes_sync_interval);
-        long lastSync = SyncTime.getValueForQuery(context, SyncTime.CHANGES_LIST_SYNC_TIME, getQuery());
-        boolean sync = isInSyncInterval(syncInterval, lastSync);
-        if (!sync) return true;
-
-        // Better just make sure that there are changes in the database
-        return DatabaseTable.isEmpty(context, Changes.CONTENT_URI);
+        // TODO: This is tempery
+        return true;
     }
 
     @Override

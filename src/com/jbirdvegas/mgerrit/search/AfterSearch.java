@@ -30,7 +30,7 @@ public class AfterSearch extends AgeSearch {
         super(param, ">=");
     }
 
-    public AfterSearch(long timestamp, String operator) {
+    public AfterSearch(long timestamp) {
         super(timestamp, ">=");
     }
 

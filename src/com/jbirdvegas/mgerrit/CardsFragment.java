@@ -37,18 +37,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.haarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
 import com.jbirdvegas.mgerrit.adapters.ChangeListAdapter;
+import com.jbirdvegas.mgerrit.adapters.EndlessAdapterWrapper;
 import com.jbirdvegas.mgerrit.cards.CommitCardBinder;
+import com.jbirdvegas.mgerrit.database.Changes;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
+import com.jbirdvegas.mgerrit.search.BeforeSearch;
+import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.views.GerritSearchView;
 
@@ -89,6 +94,8 @@ public abstract class CardsFragment extends Fragment
     private ChangeListAdapter mAdapter;
     // Wrapper for mAdapter, enabling animations
     private SingleAnimationAdapter mAnimAdapter = null;
+    // Wrapper for above listview adapters to help provide infinite list functionality
+    private EndlessAdapterWrapper mEndlessAdapter;
     // Whether animations have been enabled
     private boolean mAnimationsEnabled;
     private GerritSearchView mSearchView;
@@ -135,12 +142,29 @@ public abstract class CardsFragment extends Fragment
             }
         });
 
-        /* If animations have been enabled, setup and use an animation adapter, otherwise use
-         *  the regular adapter. The data should always be bound to mAdapter */
-       mAnimationsEnabled = Tools.toggleAnimations(Prefs.getAnimationPreference(mParent),
-               mListView, mAnimAdapter, mAdapter);
+        BaseAdapter adapter = toggleAnimations();
 
+        // Wrap outer-most adapter in the endless adapter
+        mEndlessAdapter = new EndlessAdapterWrapper(mParent, adapter) {
+            @Override
+            public void loadData() {
+                String updated = Changes.getOldestUpdatedTime(mParent, getQuery());
+                GerritURL url = mUrl;
+                url.addSearchKeyword(new BeforeSearch(updated));
+
+                Intent it = new Intent(mParent, GerritService.class);
+                it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
+                it.putExtra(GerritService.URL_KEY, mUrl);
+                mParent.startService(it);
+            }
+        };
+        mListView.setAdapter(mEndlessAdapter);
+        mListView.setOnScrollListener(mEndlessAdapter);
+
+        String project = Prefs.getCurrentProject(mParent);
+        if (project != null && !project.isEmpty());
         mUrl = new GerritURL();
+        mUrl.addSearchKeyword(new ProjectSearch(project));
 
         // Need the account id of the owner here to maintain FK db constraint
         mUrl.setRequestDetailedAccounts(true);
@@ -165,7 +189,7 @@ public abstract class CardsFragment extends Fragment
 
         boolean animations = Prefs.getAnimationPreference(mParent);
         if (animations != mAnimationsEnabled) {
-            toggleAnimations(animations);
+            toggleAnimations();
         }
         EasyTracker.getInstance(getActivity()).activityStart(getActivity());
     }
@@ -288,8 +312,15 @@ public abstract class CardsFragment extends Fragment
      *  adapter, initialising a new adapter if necessary.
      * @param enable Whether to enable animations on the listview
      */
-    public void toggleAnimations(boolean enable) {
-        mAnimationsEnabled = Tools.toggleAnimations(enable, mListView, mAnimAdapter, mAdapter);
+    public BaseAdapter toggleAnimations() {
+        mAnimationsEnabled = Prefs.getAnimationPreference(mParent);
+        /* If animations have been enabled, setup and use an animation adapter, otherwise use
+         *  the regular adapter. The data should always be bound to mAdapter */
+        BaseAdapter adapter = Tools.toggleAnimations(mAnimationsEnabled, mListView, mAnimAdapter, mAdapter);
+
+        if (mAnimationsEnabled) mAnimAdapter = (SingleAnimationAdapter) adapter;
+
+        return adapter;
     }
 
     public void markDirty() { mIsDirty = true; }

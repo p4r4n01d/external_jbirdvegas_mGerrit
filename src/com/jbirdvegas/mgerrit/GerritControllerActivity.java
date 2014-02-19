@@ -56,6 +56,7 @@ import com.jbirdvegas.mgerrit.message.HandshakeError;
 import com.jbirdvegas.mgerrit.message.InitializingDataTransfer;
 import com.jbirdvegas.mgerrit.message.ProgressUpdate;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
+import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.tasks.GerritTask;
 import com.jbirdvegas.mgerrit.views.GerritSearchView;
 
@@ -161,10 +162,6 @@ public class GerritControllerActivity extends FragmentActivity {
         mChangeList = (ChangeListFragment) fm.findFragmentById(R.id.change_list_fragment);
 
         mGerritWebsite = Prefs.getCurrentGerrit(this);
-
-        /* Initially set the current Gerrit globally here.
-         *  We can rely on callbacks to know when they change */
-        GerritURL.setProject(Prefs.getCurrentProject(this));
 
         // Don't register listeners here. It is registered in onResume instead.
         mChangeListener = new BroadcastReceiver() {

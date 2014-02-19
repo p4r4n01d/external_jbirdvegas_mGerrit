@@ -161,9 +161,10 @@ abstract class SyncProcessor<T> {
 
         @Override
         public void run() {
-            insert(mData);
+            // Order is important here, as we need to insert the data first
+            if (mData != null) insert(mData);
             new Finished(mContext, null, mUrl).sendUpdateMessage();
-            doPostProcess(mData);
+            if (mData != null) doPostProcess(mData);
             // This thread has finished so the parent activity should no longer need it
             mResponseHandler = null;
         }
