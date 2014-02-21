@@ -141,17 +141,18 @@ public class Changes extends DatabaseTable {
         return pair;
     }
 
-    public static String getOldestUpdatedTime(Context context, String status) {
+    public static String getChangeUpdatedTime(Context context, String status, boolean newest) {
         Uri uri = DBParams.fetchOneRow(CONTENT_URI);
         String updated = null;
 
         status = JSONCommit.Status.getStatusString(status);
 
-        Cursor c = context.getContentResolver().query(uri,
-                new String[] { C_UPDATED },
-                C_STATUS + " = ?",
-                new String[] { status },
-                C_UPDATED + " ASC");
+        String sort;
+        if (newest) sort = SORT_BY;
+        else sort = C_UPDATED + " ASC";
+
+        Cursor c = context.getContentResolver().query(uri, new String[] { C_UPDATED },
+                C_STATUS + " = ?", new String[] { status }, sort);
         if (c.moveToFirst()) updated = c.getString(0);
         if (updated != null && !updated.isEmpty()) {
             /* From the SQLite documentation, a time string will have only one space, which can
@@ -161,6 +162,14 @@ public class Changes extends DatabaseTable {
 
         c.close();
         return updated;
+    }
+
+    public static String getNewestUpdatedTime(Context context, String status) {
+        return getChangeUpdatedTime(context, status, true);
+    }
+
+    public static String getOldestUpdatedTime(Context context, String status) {
+        return getChangeUpdatedTime(context, status, false);
     }
 
     public static Integer getChangeNumberForChange(Context context, String changeID) {

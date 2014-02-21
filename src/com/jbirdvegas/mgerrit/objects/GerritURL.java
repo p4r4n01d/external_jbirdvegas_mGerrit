@@ -10,6 +10,7 @@ import com.jbirdvegas.mgerrit.search.SearchKeyword;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +24,6 @@ public class GerritURL implements Parcelable
     private static Context sContext;
     private String mStatus = "";
     private boolean mRequestDetailedAccounts = false;
-    private String mSortkey = "";
     private int mChangeNo = 0;
 
     private Set<SearchKeyword> mSearchKeywords;
@@ -53,6 +53,13 @@ public class GerritURL implements Parcelable
     // Default constructor to facilitate instantiation
     public GerritURL() { }
 
+    public GerritURL(GerritURL url) {
+        mStatus = url.mStatus;
+        mRequestDetailedAccounts = url.mRequestDetailedAccounts;
+        mChangeNo = url.mChangeNo;
+        mRequestChangeDetail = url.mRequestChangeDetail;
+    }
+
     public static void setContext(Context context) {
         GerritURL.sContext = context;
     }
@@ -62,6 +69,10 @@ public class GerritURL implements Parcelable
             mSearchKeywords = new HashSet<>();
         }
         mSearchKeywords.add(keyword);
+    }
+
+    public void addSearchKeywords(Set<SearchKeyword> keywords) {
+        for (SearchKeyword keyword : keywords) addSearchKeyword(keyword);
     }
 
     public void setStatus(String status) {
@@ -91,15 +102,6 @@ public class GerritURL implements Parcelable
 
     public void setChangeNumber(int changeNumber) {
         mChangeNo = changeNumber;
-    }
-
-    /**
-     * Use the sortKey to resume a query from a given change. This is only valid
-     *  for requesting change lists.
-     * @param sortKey The sortkey of a given change.
-     */
-    public void setSortKey(String sortKey) {
-        mSortkey = sortKey;
     }
 
     @Override
@@ -180,9 +182,6 @@ public class GerritURL implements Parcelable
     }
 
     private void appendArgs(StringBuilder builder) {
-        if (mSortkey != null && !mSortkey.isEmpty()) {
-            builder.append("&P=").append(mSortkey);
-        }
         if (mRequestChangeDetail == ChangeDetailLevels.LEGACY) {
             builder.append(GerritURL.OLD_CHANGE_DETAIL_ARGS);
         }
@@ -215,17 +214,22 @@ public class GerritURL implements Parcelable
         dest.writeInt(mChangeNo);
         dest.writeString(mStatus);
         dest.writeInt(mRequestDetailedAccounts ? 1 : 0);
-        dest.writeString(mSortkey);
         dest.writeString(mRequestChangeDetail.name());
-        dest.writeString(SearchKeyword.getQuery(mSearchKeywords));
+
+        int size = mSearchKeywords.size();
+        dest.writeInt(size);
+        SearchKeyword[] keywords = new SearchKeyword[size];
+        dest.writeTypedArray(mSearchKeywords.toArray(keywords), flags);
     }
 
     public GerritURL(Parcel in) {
         mChangeNo = in.readInt();
         mStatus = in.readString();
         mRequestDetailedAccounts = in.readInt() == 1;
-        mSortkey = in.readString();
         mRequestChangeDetail = ChangeDetailLevels.valueOf(in.readString());
-        mSearchKeywords = SearchKeyword.constructTokens(in.readString());
+
+        SearchKeyword[] keywords = new SearchKeyword[in.readInt()];
+        in.readTypedArray(keywords, SearchKeyword.CREATOR);
+        mSearchKeywords = new HashSet<>(Arrays.asList(keywords));
     }
 }

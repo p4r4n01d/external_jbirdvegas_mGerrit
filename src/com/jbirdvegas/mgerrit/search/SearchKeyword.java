@@ -17,6 +17,8 @@ package com.jbirdvegas.mgerrit.search;
  *  limitations under the License.
  */
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import org.jetbrains.annotations.Contract;
@@ -31,7 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public abstract class SearchKeyword {
+public abstract class SearchKeyword implements Parcelable {
 
     public static final String TAG = "SearchKeyword";
 
@@ -85,6 +87,9 @@ public abstract class SearchKeyword {
         mOpParam = param;
     }
 
+    protected static SearchKeyword getInstance(Parcel in) {
+        return buildToken(in.readString());
+    }
 
     protected static void registerKeyword(String opName, Class<? extends SearchKeyword> clazz) {
         _KEYWORDS.put(opName, clazz);
@@ -135,7 +140,11 @@ public abstract class SearchKeyword {
     @Nullable
     private static SearchKeyword buildToken(@NotNull String tokenStr) {
         String[] s = tokenStr.split(":", 2);
-        if (s.length == 2) return buildToken(s[0], s[1]);
+        if (s.length == 2) {
+            // Remove the beginning and ending double quotes
+            s[1] = s[1].replaceAll("^\"|\"$", "");
+            return buildToken(s[0], s[1]);
+        }
         else return null;
     }
 
@@ -240,7 +249,7 @@ public abstract class SearchKeyword {
                                                    Class<? extends SearchKeyword> clazz) {
         Iterator<SearchKeyword> it = tokens.iterator();
         while (it.hasNext()) {
-            SearchKeyword token = it.next();
+            Object token = it.next();
             if (token.getClass().equals(clazz)) {
                 it.remove();
             }
@@ -250,7 +259,7 @@ public abstract class SearchKeyword {
 
     public static int findKeyword(Set<SearchKeyword> tokens, Class<? extends SearchKeyword> clazz) {
         int i = 0;
-        for (SearchKeyword token : tokens) {
+        for (Object token : tokens) {
             if (token.getClass().equals(clazz)) return i;
             else i++;
         }
@@ -278,4 +287,26 @@ public abstract class SearchKeyword {
             return index;
         }
     }
+
+    // --- Parcelable methods
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(toString());
+    }
+
+    public static final Parcelable.Creator<SearchKeyword> CREATOR
+            = new Parcelable.Creator<SearchKeyword>() {
+        public SearchKeyword createFromParcel(Parcel source) {
+            return getInstance(source);
+        }
+
+        public SearchKeyword[] newArray(int size) {
+            return new SearchKeyword[size];
+        }
+    };
 }

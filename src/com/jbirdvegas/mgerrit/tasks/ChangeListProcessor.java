@@ -19,28 +19,23 @@ package com.jbirdvegas.mgerrit.tasks;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Pair;
 
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.database.Changes;
-import com.jbirdvegas.mgerrit.database.CommitMarker;
 import com.jbirdvegas.mgerrit.database.DatabaseTable;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
-import com.jbirdvegas.mgerrit.objects.Reviewer;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
 class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
+    GerritService.Direction mDirection;
+
     ChangeListProcessor(Context context, GerritURL url) {
         super(context, url);
-        setResumableUrl();
     }
 
     @Override
@@ -54,9 +49,12 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
     boolean isSyncRequired(Context context, Intent intent) {
         String direction = intent.getStringExtra(GerritService.CHANGES_LIST_DIRECTION);
         if (direction != null) {
-            if (GerritService.Direction.valueOf(direction) == GerritService.Direction.Older) {
+            mDirection = GerritService.Direction.valueOf(direction);
+            if (mDirection == GerritService.Direction.Older) {
                 return true;
             }
+        } else {
+            mDirection = GerritService.Direction.Newer;
         }
 
         long syncInterval = context.getResources().getInteger(R.integer.changes_sync_interval);
@@ -75,46 +73,9 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
     @Override
     void doPostProcess(JSONCommit[] data) {
-        SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
-                System.currentTimeMillis(), getQuery());
-
-        // Save our spot using the sortkey of the most recent change
-        Pair<String, Integer> change = Changes.getMostRecentChange(mContext, getUrl().getStatus());
-        if (change != null) {
-            String changeID = change.first;
-            if (changeID != null && !changeID.isEmpty()) {
-                JSONCommit commit = findCommit(data, changeID);
-                if (commit != null) {
-                    CommitMarker.markCommit(mContext, commit);
-                }
-            }
+        if (mDirection != GerritService.Direction.Older) {
+            SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
+                    System.currentTimeMillis(), getQuery());
         }
-    }
-
-    /**
-     * Check if we have a sortkey already stored for the current query, if so
-     *  we can modify the url given to include that sortkey.
-     */
-    protected void setResumableUrl() {
-        GerritURL originalURL = getUrl();
-        String sortKey = CommitMarker.getSortKeyForQuery(mContext, getUrl().getStatus());
-        if (sortKey != null) {
-            originalURL.setSortKey(sortKey);
-            super.setUrl(originalURL);
-        }
-    }
-
-    private JSONCommit findCommit(JSONCommit[] commits,
-                                  @NotNull String changeID) {
-        for (JSONCommit commit : commits) {
-            if (changeID.equals(commit.getChangeId()))
-                return commit;
-        }
-        return null;
-    }
-
-    @Nullable
-    protected static Reviewer[] reviewersToArray(JSONCommit commit) {
-        return CommitProcessor.reviewersToArray(commit);
     }
 }

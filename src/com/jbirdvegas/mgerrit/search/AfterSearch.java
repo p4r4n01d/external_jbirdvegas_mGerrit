@@ -27,15 +27,15 @@ public class AfterSearch extends AgeSearch {
     }
 
     public AfterSearch(String param) {
-        super(param, ">=");
+        super(param, "<=");
     }
 
     public AfterSearch(long timestamp) {
-        super(timestamp, ">=");
+        super(timestamp, "<=");
     }
 
     @Override
     public String toString() {
-        return toString(OP_NAME);
+        return OP_NAME + ":" + getInstant().toString();
     }
 }

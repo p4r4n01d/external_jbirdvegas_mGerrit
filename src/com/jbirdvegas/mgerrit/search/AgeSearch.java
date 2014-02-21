@@ -162,7 +162,14 @@ public class AgeSearch extends SearchKeyword {
 
     private void parseDate(String param) {
         try {
-            mInstant = Instant.parse(param, ISODateTimeFormat.localDateOptionalTimeParser());
+            if (param.endsWith("Z")) {
+                /* The string representation of an instant includes a Z at the end, but this is not
+                 *  a valid format for the parser. */
+                String newParam = param.substring(0, param.length() - 1);
+                mInstant = Instant.parse(newParam, ISODateTimeFormat.localDateOptionalTimeParser());
+            } else {
+                mInstant = Instant.parse(param, ISODateTimeFormat.localDateOptionalTimeParser());
+            }
             mPeriod = null;
         } catch (IllegalArgumentException ignored) {
             mPeriod = toPeriod(param);

@@ -26,15 +26,15 @@ public class BeforeSearch extends AgeSearch {
     }
 
     public BeforeSearch(String param) {
-        super(param, "<=");
+        super(param, ">=");
     }
 
     public BeforeSearch(long timestamp) {
-        super(timestamp, "<=");
+        super(timestamp, ">=");
     }
 
     @Override
     public String toString() {
-        return toString(OP_NAME);
+        return OP_NAME + ":" + getInstant().toString();
     }
 }

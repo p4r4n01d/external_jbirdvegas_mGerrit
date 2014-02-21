@@ -59,6 +59,9 @@ public class GerritSearchView extends SearchView
 
     Set<SearchKeyword> mAdditionalKeywords;
 
+    // The list of keyword tokens for the last processed query
+    Set<SearchKeyword> mCurrentKeywords;
+
     private Bundle mProcessedQuery;
 
     public GerritSearchView(Context context, AttributeSet attrs) {
@@ -68,6 +71,7 @@ public class GerritSearchView extends SearchView
         setupCancelButton();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 
+        mCurrentKeywords = new HashSet<>();
         mProcessedQuery = new Bundle();
     }
 
@@ -109,6 +113,7 @@ public class GerritSearchView extends SearchView
                 Prefs.clearTrackingUser(mContext);
             }
         }
+
         // Pass this on to the current CardsFragment instance
         if (!processTokens(tokens)) {
             Log.w(TAG, "Could not process query: " + query);
@@ -143,6 +148,7 @@ public class GerritSearchView extends SearchView
     @Contract("null -> true")
     private boolean processTokens(final Set<SearchKeyword> tokens) {
         Set<SearchKeyword> newTokens = safeMerge(tokens, mAdditionalKeywords);
+        mCurrentKeywords = newTokens;
 
         Bundle bundle = new Bundle();
         bundle.putString(KEY_TO, getContext().getClass().getSimpleName());
@@ -250,6 +256,14 @@ public class GerritSearchView extends SearchView
 
     public Bundle getLastProcessedQuery() {
         return mProcessedQuery;
+    }
+
+    /**
+     * @return The list of search keywords that were included in the query plus any addional
+     *  keywords that were set via injectKeywords(Set<SearchKeyword>)
+     */
+    public Set<SearchKeyword> getLastQuery() {
+        return mCurrentKeywords;
     }
 
     @Override

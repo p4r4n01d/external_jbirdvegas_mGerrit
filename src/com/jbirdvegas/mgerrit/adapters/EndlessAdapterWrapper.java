@@ -2,6 +2,7 @@ package com.jbirdvegas.mgerrit.adapters;
 
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     private int mPendingResource = -1;
     private View mPendingView;
     private boolean mLoadingMoreData = false;
+    private BaseAdapter mChildAdapter;
 
     public EndlessAdapterWrapper(Context context, BaseAdapter wrapped) {
         this(context, wrapped, R.layout.loading_placeholder);
@@ -39,6 +41,19 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         this.wrapped = wrapped;
         this.mContext = context;
         this.mPendingResource = pendingResource;
+
+        // We need to intercept data change notifications from the underlying wrapper here
+        wrapped.registerDataSetObserver(new DataSetObserver() {
+            public void onChanged() {
+                finishedDataLoading();
+                mChildAdapter.notifyDataSetChanged();
+            }
+
+            public void onInvalidated() {
+                finishedDataLoading();
+                mChildAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     public abstract void loadData();
@@ -50,6 +65,10 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     public void finishedDataLoading() {
         mPendingView = null;
         mLoadingMoreData = false;
+    }
+
+    public void setChildAdapter(BaseAdapter child) {
+        mChildAdapter = child;
     }
 
     @Override
@@ -120,18 +139,6 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         return !mLoadingMoreData && wrapped.isEmpty();
     }
 
-    @Override
-    public void notifyDataSetChanged() {
-        wrapped.notifyDataSetChanged();
-        finishedDataLoading();
-    }
-
-    @Override
-    public void notifyDataSetInvalidated() {
-        wrapped.notifyDataSetInvalidated();
-        finishedDataLoading();
-    }
-
     /**
      * Returns the ListAdapter that is wrapped by the endless
      * logic.
@@ -145,6 +152,9 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         if (scrollState == SCROLL_STATE_IDLE) {
             if (listView.getLastVisiblePosition() == wrapped.getCount() - 1) {
                 startDataLoading();
+                /* We need to notify the listview's adapter that the data has changed (i.e.
+                 *  we have added a new row. */
+                if (mChildAdapter != null) mChildAdapter.notifyDataSetChanged();
                 loadData();
             }
         }
