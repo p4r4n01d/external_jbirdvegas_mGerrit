@@ -263,14 +263,22 @@ public class AgeSearch extends SearchKeyword {
     public String getGerritQuery(String serverVersion) {
         String operator = getOperator();
         if (serverVersion.startsWith("2.8.1") && mInstant != null) {
-            if ("<=".equals(operator) || "<".equals(operator)) {
+            if (">=".equals(operator) || ">".equals(operator)) {
                 return "before:\"" + mInstant.toString() + '"';
-            } else if (">=".equals(operator) || ">".equals(operator)) {
+            } else if ("<=".equals(operator) || "<".equals(operator)) {
                 return "after:\"" + mInstant.toString() + '"';
             } else {
-                // TODO: Use a combination of before and after to get an interval if given in
-                //  relative time.
-                return "";
+                // Use a combination of before and after to get an interval
+                if (mPeriod == null) {
+                    mPeriod = new Period(mInstant, Instant.now());
+                }
+                DateTime now = new DateTime();
+                DateTime earlier = now.minus(adjust(mPeriod, +1));
+                DateTime later = now.minus(mPeriod);
+
+                SearchKeyword newer = new AfterSearch(earlier.toString());
+                SearchKeyword older = new BeforeSearch(later.toString());
+                return newer.getGerritQuery(serverVersion) + "+" + older.getGerritQuery(serverVersion);
             }
         } else {
             if ("<=".equals(operator) || "<".equals(operator)) {

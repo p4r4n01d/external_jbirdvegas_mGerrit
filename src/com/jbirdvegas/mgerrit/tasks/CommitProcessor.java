@@ -53,6 +53,11 @@ class CommitProcessor extends SyncProcessor<JSONCommit> {
         return JSONCommit.class;
     }
 
+    @Override
+    int count(JSONCommit data) {
+        return data == null ? 0 : 1;
+    }
+
     @Nullable
     protected static Reviewer[] reviewersToArray(JSONCommit commit) {
         List<Reviewer> rs = commit.getReviewers();

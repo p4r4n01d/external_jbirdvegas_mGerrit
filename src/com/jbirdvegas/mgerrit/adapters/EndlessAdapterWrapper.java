@@ -21,13 +21,21 @@ import org.jetbrains.annotations.Nullable;
 public abstract class EndlessAdapterWrapper extends BaseAdapter
     implements AbsListView.OnScrollListener {
 
+    /**
+     * The child adapter that this wraps. Most of the work will be delegated to this adapter
+     *  and we need to observe when its data changes.
+     */
     private BaseAdapter wrapped;
     private Context mContext;
 
-    private int mPendingResource = -1;
     private View mPendingView;
     private boolean mLoadingMoreData = false;
-    private BaseAdapter mChildAdapter;
+
+    /**
+     * An adapter that wraps this adapter so we can notify it when either the child adapter's
+     *  data or this wraper's data changes.
+     */
+    private BaseAdapter mParentAdapter;
 
     public EndlessAdapterWrapper(Context context, BaseAdapter wrapped) {
         this(context, wrapped, R.layout.loading_placeholder);
@@ -40,35 +48,65 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     public EndlessAdapterWrapper(Context context, BaseAdapter wrapped, int pendingResource) {
         this.wrapped = wrapped;
         this.mContext = context;
-        this.mPendingResource = pendingResource;
 
         // We need to intercept data change notifications from the underlying wrapper here
         wrapped.registerDataSetObserver(new DataSetObserver() {
             public void onChanged() {
                 finishedDataLoading();
-                mChildAdapter.notifyDataSetChanged();
             }
 
             public void onInvalidated() {
                 finishedDataLoading();
-                mChildAdapter.notifyDataSetChanged();
             }
         });
+        setPendingResource(pendingResource);
     }
 
+    /**
+     * Override this method to perform the actual data loading. startDataLoading will be called
+     *  for you automatically, and finishedDataLoading will be called when the child adapter's
+     *  data changes.
+     *
+     *  When manually loading data, be sure to call startDataLoading. If after trying to load
+     *   more data, no additional data was found, manually call finishedDataLoading.
+     */
     public abstract void loadData();
 
+    /**
+     * Shows the pending view signalling more data is being loaded. Calling this when data
+     *  is already being loaded will have no effect.
+     *  When manually loading data, be sure to call this.
+     */
     public void startDataLoading() {
+        if (mLoadingMoreData) return; // No effect if we have already started loading
         mLoadingMoreData = true;
+        /* We need to notify the listview's adapter that the data has changed (i.e.
+         *  we have added the pending row. */
+        if (mParentAdapter != null) mParentAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Hides the pending view signalling no data is being loaded. Call this if a load finished
+     *  but there was no additional data to display.
+     */
     public void finishedDataLoading() {
-        mPendingView = null;
         mLoadingMoreData = false;
+        /* We need to notify the listview's adapter that the data has changed (i.e.
+         *  we have removed the pending row. */
+        if (mParentAdapter != null) mParentAdapter.notifyDataSetChanged();
     }
 
-    public void setChildAdapter(BaseAdapter child) {
-        mChildAdapter = child;
+    public void setParentAdatper(BaseAdapter child) {
+        mParentAdapter = child;
+    }
+
+    /**
+     * Sets the view to display when more data is being loaded.
+     * @param pendingResource Layout to be used for the pending row
+     */
+    public void setPendingResource(int pendingResource) {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        mPendingView = inflater.inflate(pendingResource, null);
     }
 
     @Override
@@ -94,7 +132,6 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         if (position >= wrapped.getCount()) {
             return null;
         }
-
         return wrapped.getItem(position);
     }
 
@@ -103,7 +140,6 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         if (position >= wrapped.getCount()) {
             return -1;
         }
-
         return wrapped.getItemId(position);
     }
 
@@ -111,12 +147,7 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (position >= wrapped.getCount()) {
-            if (mPendingView == null && mPendingResource != -1) {
-                LayoutInflater inflater = LayoutInflater.from(mContext);
-                return inflater.inflate(mPendingResource, null);
-            } else {
-                return mPendingView;
-            }
+            return mPendingView;
         } else {
             return wrapped.getView(position, convertView, parent);
         }
@@ -152,9 +183,6 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         if (scrollState == SCROLL_STATE_IDLE) {
             if (listView.getLastVisiblePosition() == wrapped.getCount() - 1) {
                 startDataLoading();
-                /* We need to notify the listview's adapter that the data has changed (i.e.
-                 *  we have added a new row. */
-                if (mChildAdapter != null) mChildAdapter.notifyDataSetChanged();
                 loadData();
             }
         }

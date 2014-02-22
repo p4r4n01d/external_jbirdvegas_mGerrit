@@ -72,6 +72,12 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
     }
 
     @Override
+    int count(Projects projects) {
+        if (projects != null) return projects.getProjectCount();
+        else return 0;
+    }
+
+    @Override
     protected void fetchData(RequestQueue queue) {
         super.fetchData(mUrl, queue);
     }

@@ -43,4 +43,10 @@ class LegacyCommitProcessor extends SyncProcessor<JSONCommit[]> {
     Class<JSONCommit[]> getType() {
         return JSONCommit[].class;
     }
+
+    @Override
+    int count(JSONCommit[] data) {
+        if (data != null) return data.length;
+        else return 0;
+    }
 }

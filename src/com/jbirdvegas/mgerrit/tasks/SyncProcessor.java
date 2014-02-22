@@ -100,6 +100,12 @@ abstract class SyncProcessor<T> {
     }
 
     /**
+     * @param data A collection of the deserialized data
+     * @return The number of items contained in data
+     */
+    abstract int count(T data);
+
+    /**
      * Sends a request to the Gerrit server for the url set in the constructor
      *  SyncProcessor(Context, GerritURL). The default simply calls
      *  fetchData(String).
@@ -162,9 +168,10 @@ abstract class SyncProcessor<T> {
 
         @Override
         public void run() {
+            int numItems = count(mData);
             // Order is important here, as we need to insert the data first
-            if (mData != null) insert(mData);
-            new Finished(mContext, null, mUrl).sendUpdateMessage();
+            if (mData != null && numItems > 0) insert(mData);
+            new Finished(mContext, null, mUrl, numItems).sendUpdateMessage();
             if (mData != null) doPostProcess(mData);
             // This thread has finished so the parent activity should no longer need it
             mResponseHandler = null;

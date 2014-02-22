@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -53,10 +52,10 @@ import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
+import com.jbirdvegas.mgerrit.message.Finished;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.search.AfterSearch;
 import com.jbirdvegas.mgerrit.search.BeforeSearch;
-import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.views.GerritSearchView;
 
@@ -89,6 +88,18 @@ public abstract class CardsFragment extends Fragment
             if (isAdded() && mParent.getClass().getSimpleName().equals(to)) {
                 getLoaderManager().restartLoader(0, null, CardsFragment.this);
             }
+        }
+    };
+
+    /* Broadcast receiver to tell the endless adapter we have finished loading when there was
+     * no data */
+    private final BroadcastReceiver finishedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+           if (intent.getIntExtra(Finished.ITEMS_FETCHED_KEY, 0) == 0 &&
+                   mEndlessAdapter != null) {
+               mEndlessAdapter.finishedDataLoading();
+           }
         }
     };
 
@@ -142,7 +153,7 @@ public abstract class CardsFragment extends Fragment
             public void loadData() {
                 String updated = Changes.getOldestUpdatedTime(mParent, getQuery());
                 GerritURL url = new GerritURL(mUrl);
-                url.addSearchKeyword(new AfterSearch(updated));
+                url.addSearchKeyword(new BeforeSearch(updated));
                 url.addSearchKeywords(mSearchView.getLastQuery());
 
                 Intent it = new Intent(mParent, GerritService.class);
@@ -192,6 +203,9 @@ public abstract class CardsFragment extends Fragment
             toggleAnimations();
         }
         EasyTracker.getInstance(getActivity()).activityStart(getActivity());
+
+        LocalBroadcastManager.getInstance(mParent).registerReceiver(finishedReceiver,
+                new IntentFilter(Finished.TYPE));
     }
 
     @Override
@@ -199,6 +213,8 @@ public abstract class CardsFragment extends Fragment
         super.onStop();
         LocalBroadcastManager.getInstance(mParent).unregisterReceiver(mSearchQueryListener);
         EasyTracker.getInstance(getActivity()).activityStop(getActivity());
+
+        LocalBroadcastManager.getInstance(mParent).unregisterReceiver(finishedReceiver);
     }
 
     /**
@@ -219,7 +235,7 @@ public abstract class CardsFragment extends Fragment
 
         String updated = Changes.getNewestUpdatedTime(mParent, getQuery());
         GerritURL url = new GerritURL(mUrl);
-        url.addSearchKeyword(new BeforeSearch(updated));
+        url.addSearchKeyword(new AfterSearch(updated));
 
         url.addSearchKeywords(mSearchView.getLastQuery());
 
@@ -327,7 +343,7 @@ public abstract class CardsFragment extends Fragment
 
         if (mAnimationsEnabled) {
             mAnimAdapter = (SingleAnimationAdapter) adapter;
-            mEndlessAdapter.setChildAdapter(mAnimAdapter);
+            mEndlessAdapter.setParentAdatper(mAnimAdapter);
         }
     }
 

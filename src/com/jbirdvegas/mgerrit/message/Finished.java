@@ -1,8 +1,11 @@
 package com.jbirdvegas.mgerrit.message;
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.jbirdvegas.mgerrit.objects.GerritMessage;
+
+import java.util.Map;
 
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)
@@ -25,11 +28,17 @@ public class Finished extends GerritMessage {
     /* Note: Must have the type declared static and public so receivers can subscribe
      * to this type of message */
     public static final String TYPE = "Finished";
+
+    // The number of items that were fetched
+    public static final String ITEMS_FETCHED_KEY = "num_items";
+
+    private final int mItems;
     String mMessage;
 
-    public Finished(Context context, String message, String url) {
+    public Finished(Context context, String message, String url, int items) {
         super(context, url);
         this.mMessage = message;
+        this.mItems = items;
     }
 
     @Override
@@ -40,5 +49,12 @@ public class Finished extends GerritMessage {
     @Override
     public String getMessage() {
         return mMessage;
+    }
+
+    @Override
+    protected Intent packMessage(Map<String, String> map) {
+        Intent intent = super.packMessage(map);
+        intent.putExtra(ITEMS_FETCHED_KEY, mItems);
+        return intent;
     }
 }

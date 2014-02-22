@@ -78,4 +78,10 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
                     System.currentTimeMillis(), getQuery());
         }
     }
+
+    @Override
+    int count(JSONCommit[] data) {
+        if (data != null) return data.length;
+        else return 0;
+    }
 }

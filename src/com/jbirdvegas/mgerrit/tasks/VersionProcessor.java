@@ -64,6 +64,12 @@ public class VersionProcessor extends SyncProcessor<String> {
     }
 
     @Override
+    int count(String version) {
+        if (version != null) return 1;
+        else return 0;
+    }
+
+    @Override
     protected void fetchData(RequestQueue queue) {
         Response.Listener<String> listener = getListener(mUrl);
 
