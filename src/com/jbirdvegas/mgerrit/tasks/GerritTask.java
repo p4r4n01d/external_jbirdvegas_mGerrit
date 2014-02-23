@@ -136,8 +136,7 @@ public abstract class GerritTask extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String s) {
-
-        new Finished(mContext, s, mCurrentUrl).sendUpdateMessage();
+        new Finished(mContext, s, mCurrentUrl, 1).sendUpdateMessage();
 
         // check if we are in production code or debugging mode
         boolean isDebuggable = 0 != (mContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE);

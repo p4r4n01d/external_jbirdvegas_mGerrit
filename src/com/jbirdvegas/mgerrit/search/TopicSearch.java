@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit.search;
  */
 
 import com.jbirdvegas.mgerrit.database.UserChanges;
+import com.jbirdvegas.mgerrit.objects.ServerVersion;
 
 public class TopicSearch extends SearchKeyword {
 
@@ -42,7 +43,7 @@ public class TopicSearch extends SearchKeyword {
     }
 
     @Override
-    public String getGerritQuery(String serverVersion) {
+    public String getGerritQuery(ServerVersion serverVersion) {
         return toString();
     }
 }

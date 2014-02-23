@@ -48,6 +48,7 @@ import com.jbirdvegas.mgerrit.adapters.ChangeListAdapter;
 import com.jbirdvegas.mgerrit.adapters.EndlessAdapterWrapper;
 import com.jbirdvegas.mgerrit.cards.CommitCardBinder;
 import com.jbirdvegas.mgerrit.database.Changes;
+import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.Tools;
@@ -56,6 +57,7 @@ import com.jbirdvegas.mgerrit.message.Finished;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.search.AfterSearch;
 import com.jbirdvegas.mgerrit.search.BeforeSearch;
+import com.jbirdvegas.mgerrit.search.SearchKeyword;
 import com.jbirdvegas.mgerrit.tasks.GerritService;
 import com.jbirdvegas.mgerrit.views.GerritSearchView;
 
@@ -79,6 +81,7 @@ public abstract class CardsFragment extends Fragment
     private boolean mIsDirty = false;
     // Indicates whether a request to force an update is pending
     private boolean mNeedsForceUpdate = false;
+    private String mServerVersion;
 
     // Broadcast receiver to receive processed search query changes
     private BroadcastReceiver mSearchQueryListener = new BroadcastReceiver() {
@@ -110,9 +113,12 @@ public abstract class CardsFragment extends Fragment
     private SingleAnimationAdapter mAnimAdapter = null;
     // Wrapper for above listview adapters to help provide infinite list functionality
     private EndlessAdapterWrapper mEndlessAdapter;
+
     // Whether animations have been enabled
     private boolean mAnimationsEnabled;
+
     private GerritSearchView mSearchView;
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState)
@@ -152,15 +158,7 @@ public abstract class CardsFragment extends Fragment
             @Override
             public void loadData() {
                 String updated = Changes.getOldestUpdatedTime(mParent, getQuery());
-                GerritURL url = new GerritURL(mUrl);
-                url.addSearchKeyword(new BeforeSearch(updated));
-                url.addSearchKeywords(mSearchView.getLastQuery());
-
-                Intent it = new Intent(mParent, GerritService.class);
-                it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
-                it.putExtra(GerritService.URL_KEY, url);
-                it.putExtra(GerritService.CHANGES_LIST_DIRECTION, GerritService.Direction.Older.toString());
-                mParent.startService(it);
+                sendRequest(GerritService.Direction.Older, new BeforeSearch(updated));
             }
         };
 
@@ -182,11 +180,13 @@ public abstract class CardsFragment extends Fragment
         mUrl.setStatus(getQuery());
 
         mSearchView = (GerritSearchView) mParent.findViewById(R.id.search);
+
+        mServerVersion = Config.getValue(mParent, Config.KEY_VERSION);
     }
 
     private void setup()
     {
-        sendRequest();
+        loadNewerChanges();
 
         // We cannot use the search query here as the SearchView may not have been initialised yet.
         getLoaderManager().initLoader(0, null, this);
@@ -224,25 +224,28 @@ public abstract class CardsFragment extends Fragment
      */
     abstract String getQuery();
 
+    private void loadNewerChanges() {
+        String updated = Changes.getNewestUpdatedTime(mParent, getQuery());
+        sendRequest(GerritService.Direction.Newer, new AfterSearch(updated));
+    }
+
     /**
      * Start the updater to check for an update if necessary
      */
-    private void sendRequest() {
+    private void sendRequest(GerritService.Direction direction, SearchKeyword keyword) {
         if (mNeedsForceUpdate) {
             mNeedsForceUpdate = false;
             SyncTime.clear(mParent);
         }
 
-        String updated = Changes.getNewestUpdatedTime(mParent, getQuery());
         GerritURL url = new GerritURL(mUrl);
-        url.addSearchKeyword(new AfterSearch(updated));
-
         url.addSearchKeywords(mSearchView.getLastQuery());
+        url.addSearchKeyword(keyword);
 
         Intent it = new Intent(mParent, GerritService.class);
         it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
         it.putExtra(GerritService.URL_KEY, url);
-        it.putExtra(GerritService.CHANGES_LIST_DIRECTION, GerritService.Direction.Newer);
+        it.putExtra(GerritService.CHANGES_LIST_DIRECTION, direction);
         mParent.startService(it);
     }
 
@@ -264,7 +267,7 @@ public abstract class CardsFragment extends Fragment
         }
 
         mNeedsForceUpdate = forceUpdate;
-        if (this.isAdded() && forceUpdate) sendRequest();
+        if (this.isAdded() && forceUpdate) loadNewerChanges();
     }
 
     @Override
@@ -276,7 +279,7 @@ public abstract class CardsFragment extends Fragment
         if (!mIsDirty) return;
         mIsDirty = false;
         getLoaderManager().restartLoader(0, null, this);
-        if (mNeedsForceUpdate) sendRequest();
+        if (mNeedsForceUpdate) loadNewerChanges();
     }
 
     private void setMenuItemTitle(MenuItem menuItem, String formatString, String parameters) {

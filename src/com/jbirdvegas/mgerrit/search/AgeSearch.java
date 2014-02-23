@@ -17,7 +17,9 @@ package com.jbirdvegas.mgerrit.search;
  *  limitations under the License.
  */
 
+import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.UserChanges;
+import com.jbirdvegas.mgerrit.objects.ServerVersion;
 
 import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;
@@ -260,9 +262,9 @@ public class AgeSearch extends SearchKeyword {
     }
 
     @Override
-    public String getGerritQuery(String serverVersion) {
+    public String getGerritQuery(ServerVersion serverVersion) {
         String operator = getOperator();
-        if (serverVersion.startsWith("2.8.1") && mInstant != null) {
+        if (serverVersion.isGreaterVersion("2.8.1") && mInstant != null) {
             if (">=".equals(operator) || ">".equals(operator)) {
                 return "before:\"" + mInstant.toString() + '"';
             } else if ("<=".equals(operator) || "<".equals(operator)) {

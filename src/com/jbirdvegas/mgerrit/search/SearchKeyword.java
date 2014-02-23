@@ -21,6 +21,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.jbirdvegas.mgerrit.objects.ServerVersion;
+
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -222,8 +224,9 @@ public abstract class SearchKeyword implements Parcelable {
      *  Some keywords do not have corresponding queries supported by Gerrit, so
      *  it is safe to return an empty string in that case. The default implementation
      *  returns an empty string.
+     * @param serverVersion The version of the Gerrit instance running on the server
      */
-    public String getGerritQuery(String serverVersion) {
+    public String getGerritQuery(ServerVersion serverVersion) {
         return "";
     }
 

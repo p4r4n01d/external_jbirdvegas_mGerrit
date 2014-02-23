@@ -158,7 +158,7 @@ public class GerritURL implements Parcelable
     }
 
     private boolean appendSearchKeywords(StringBuilder builder, boolean addSeperator) {
-        String version = Config.getValue(sContext, Config.KEY_VERSION);
+        ServerVersion version = Config.getServerVersion(sContext);
         if (mSearchKeywords != null && !mSearchKeywords.isEmpty()) {
             if (addSeperator) {
                 builder.append('+');

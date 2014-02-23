@@ -18,6 +18,7 @@ package com.jbirdvegas.mgerrit.search;
  */
 
 import com.jbirdvegas.mgerrit.database.UserChanges;
+import com.jbirdvegas.mgerrit.objects.ServerVersion;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -41,7 +42,7 @@ public class ProjectSearch extends SearchKeyword {
     }
 
     @Override
-    public String getGerritQuery(String serverVersion) {
+    public String getGerritQuery(ServerVersion serverVersion) {
         String param = getParam();
         // Keywords with empty parameters are ignored
         if (param == null || param.isEmpty()) return "";
