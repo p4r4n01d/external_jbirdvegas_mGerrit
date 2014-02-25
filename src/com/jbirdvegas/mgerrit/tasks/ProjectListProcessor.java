@@ -36,8 +36,8 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
 
     private final String mUrl;
 
-    ProjectListProcessor(Context context) {
-        super(context);
+    ProjectListProcessor(Context context, Intent intent) {
+        super(context, intent);
         String gerrit = Prefs.getCurrentGerrit(context);
         mUrl = gerrit + "projects/?d";
     }
@@ -50,7 +50,7 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
     }
 
     @Override
-    boolean isSyncRequired(Context context, Intent intent) {
+    boolean isSyncRequired(Context context) {
         long syncInterval = context.getResources().getInteger(R.integer.projects_sync_interval);
         long lastSync = SyncTime.getValueForQuery(context, SyncTime.PROJECTS_LIST_SYNC_TIME, mUrl);
         boolean sync = isInSyncInterval(syncInterval, lastSync);

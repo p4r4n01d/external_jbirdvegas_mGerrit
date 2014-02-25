@@ -34,8 +34,8 @@ public class VersionProcessor extends SyncProcessor<String> {
 
     private final String mUrl;
 
-    VersionProcessor(Context context) {
-        super(context);
+    VersionProcessor(Context context, Intent intent) {
+        super(context, intent);
         String url = Prefs.getCurrentGerrit(context);
         mUrl = url + "config/server/version";
     }
@@ -53,7 +53,7 @@ public class VersionProcessor extends SyncProcessor<String> {
     }
 
     @Override
-    boolean isSyncRequired(Context context, Intent intent) {
+    boolean isSyncRequired(Context context) {
         // Look up the database to see if we have previously saved the version
         return Config.getValue(context, Config.KEY_VERSION) == null;
     }

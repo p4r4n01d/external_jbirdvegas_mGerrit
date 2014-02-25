@@ -24,6 +24,7 @@ public class GerritURL implements Parcelable
     private static Context sContext;
     private String mStatus = "";
     private boolean mRequestDetailedAccounts = false;
+    private String mSortkey = "";
     private int mChangeNo = 0;
 
     private Set<SearchKeyword> mSearchKeywords;
@@ -72,6 +73,7 @@ public class GerritURL implements Parcelable
     }
 
     public void addSearchKeywords(Set<SearchKeyword> keywords) {
+        if (keywords == null) return;
         for (SearchKeyword keyword : keywords) addSearchKeyword(keyword);
     }
 
@@ -102,6 +104,15 @@ public class GerritURL implements Parcelable
 
     public void setChangeNumber(int changeNumber) {
         mChangeNo = changeNumber;
+    }
+
+    /**
+     * Use the sortKey to resume a query from a given change. This is only valid
+     *  for requesting change lists.
+     * @param sortKey The sortkey of a given change.
+     */
+    public void setSortKey(String sortKey) {
+        mSortkey = sortKey;
     }
 
     @Override
@@ -182,6 +193,9 @@ public class GerritURL implements Parcelable
     }
 
     private void appendArgs(StringBuilder builder) {
+        if (mSortkey != null && !mSortkey.isEmpty()) {
+            builder.append("&P=").append(mSortkey);
+        }
         if (mRequestChangeDetail == ChangeDetailLevels.LEGACY) {
             builder.append(GerritURL.OLD_CHANGE_DETAIL_ARGS);
         }
@@ -214,22 +228,32 @@ public class GerritURL implements Parcelable
         dest.writeInt(mChangeNo);
         dest.writeString(mStatus);
         dest.writeInt(mRequestDetailedAccounts ? 1 : 0);
+        dest.writeString(mSortkey);
         dest.writeString(mRequestChangeDetail.name());
 
-        int size = mSearchKeywords.size();
+        int size;
+        if (mSearchKeywords == null) size = 0;
+        else size = mSearchKeywords.size();
         dest.writeInt(size);
-        SearchKeyword[] keywords = new SearchKeyword[size];
-        dest.writeTypedArray(mSearchKeywords.toArray(keywords), flags);
+
+        if (size > 0) {
+            SearchKeyword[] keywords = new SearchKeyword[size];
+            dest.writeTypedArray(mSearchKeywords.toArray(keywords), flags);
+        }
     }
 
     public GerritURL(Parcel in) {
         mChangeNo = in.readInt();
         mStatus = in.readString();
         mRequestDetailedAccounts = in.readInt() == 1;
+        mSortkey = in.readString();
         mRequestChangeDetail = ChangeDetailLevels.valueOf(in.readString());
 
-        SearchKeyword[] keywords = new SearchKeyword[in.readInt()];
-        in.readTypedArray(keywords, SearchKeyword.CREATOR);
-        mSearchKeywords = new HashSet<>(Arrays.asList(keywords));
+        int size = in.readInt();
+        if (size > 0) {
+            SearchKeyword[] keywords = new SearchKeyword[size];
+            in.readTypedArray(keywords, SearchKeyword.CREATOR);
+            mSearchKeywords = new HashSet<>(Arrays.asList(keywords));
+        }
     }
 }

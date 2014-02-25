@@ -17,7 +17,6 @@ package com.jbirdvegas.mgerrit.search;
  *  limitations under the License.
  */
 
-import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.objects.ServerVersion;
 
@@ -261,14 +260,37 @@ public class AgeSearch extends SearchKeyword {
         return period.withFieldAdded(DurationFieldType.years(), adjustment);
     }
 
+    /**
+     * Calculates the number of days spanned in a period assuming 365 days per year, 30 days per
+     * month, 7 days per week, 24 hours per day, 60 minutes per hour and 60 seconds per minute.
+     * @param period A period to retrieve the number of standard days for
+     * @return The number of days spanned by the period.
+     */
+    private static int getDaysInPeriod(final Period period) {
+        int totalDays = 0;
+        Period temp = new Period(period);
+        if (period.getYears() > 0) {
+            int years = period.getYears();
+            totalDays += 365*years;
+            temp = temp.minusYears(years);
+        }
+        if (period.getMonths() > 0) {
+            int months = period.getMonths();
+            totalDays += 30*period.getMonths();
+            temp = temp.minusMonths(months);
+        }
+        return totalDays + temp.toStandardDays().getDays();
+    }
+
     @Override
     public String getGerritQuery(ServerVersion serverVersion) {
         String operator = getOperator();
-        if (serverVersion.isGreaterVersion("2.8.1") && mInstant != null) {
+        if (serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH)
+                && mInstant != null) {
             if (">=".equals(operator) || ">".equals(operator)) {
-                return "before:\"" + mInstant.toString() + '"';
+                return "before:" + mInstant.toString();
             } else if ("<=".equals(operator) || "<".equals(operator)) {
-                return "after:\"" + mInstant.toString() + '"';
+                return "after:" + mInstant.toString();
             } else {
                 // Use a combination of before and after to get an interval
                 if (mPeriod == null) {
@@ -289,12 +311,14 @@ public class AgeSearch extends SearchKeyword {
             }
 
             // Need to leave off the operator and make sure we are using relative format
-            String string = OP_NAME + ":\"";
             Period period = mPeriod;
             if (period == null) {
                 period = new Period(mInstant, Instant.now());
             }
-            return string + periodParser.print(period) + '"';
+            /* Gerrit only supports specifying one time unit, so we will normalize the period
+             *  into days.  */
+            int days = getDaysInPeriod(period);
+            return OP_NAME + ":" + String.valueOf(days) + "d";
         }
     }
 

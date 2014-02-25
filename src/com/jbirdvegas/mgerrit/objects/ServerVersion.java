@@ -23,6 +23,13 @@ import java.util.regex.Pattern;
 
 public class ServerVersion implements Comparator<ServerVersion> {
 
+    /*** Constants indicating the first release of significant features **/
+    // Release where support for getting change diffs was added
+    public static final String VERSION_DIFF = "2.8";
+    /* Release where support for before/after search operators (keywords) was added
+     *  Note: This has not officially been released. */
+    public static final String VERSION_BEFORE_SEARCH = "2.8.1";
+
     String mVersion;
 
     public ServerVersion(String mVersion) {
@@ -35,8 +42,8 @@ public class ServerVersion implements Comparator<ServerVersion> {
      * @return Whether the currentVersion supports the feature added in baseVersion. I.e.
      *  currentVersion >= baseVersion
      */
-    public boolean isGreaterVersion(String baseVersion) {
-        return this.compare(this, new ServerVersion(baseVersion)) >= 0;
+    public boolean isFeatureSupported(String baseVersion) {
+        return compare(this, new ServerVersion(baseVersion)) >= 0;
     }
 
     @Override
@@ -62,14 +69,18 @@ public class ServerVersion implements Comparator<ServerVersion> {
             throw new IllegalArgumentException("One of the version numbers was not valid");
         }
 
-        String[] aNums = versionA.split(".");
-        String[] bNums = versionB.split(".");
-
-        for (int i = 0; i < Math.min(aNums.length, bNums.length); i++) {
-            if (Integer.parseInt(aNums[i]) < Integer.parseInt(bNums[i]))
-                return -1;
-            else if (Integer.parseInt(aNums[i]) > Integer.parseInt(bNums[i]))
-                return 1;
+        int maxlen = Math.min(versionA.length(), versionB.length());
+        for (int i = 0; i < maxlen; i++) {
+            if (versionA.charAt(i) != versionB.charAt(i)) {
+                char a = versionA.charAt(i);
+                char b = versionB.charAt(i);
+                if (a >= '0' && a <= '9' && b >= '0' && b <= '9') {
+                    return a > b ? 1 : -1;
+                } else {
+                    // One char must be a '.' which has a lower ASCII code than digits
+                    return a > b ? -1 : 1;
+                }
+            }
         }
         return 0;
     }

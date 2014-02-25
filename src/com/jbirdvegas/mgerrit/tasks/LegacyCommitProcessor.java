@@ -25,8 +25,8 @@ import com.jbirdvegas.mgerrit.objects.JSONCommit;
 
 class LegacyCommitProcessor extends SyncProcessor<JSONCommit[]> {
 
-    LegacyCommitProcessor(Context context, GerritURL url) {
-        super(context, url);
+    LegacyCommitProcessor(Context context, Intent intent, GerritURL url) {
+        super(context, intent, url);
     }
 
     @Override
@@ -35,7 +35,7 @@ class LegacyCommitProcessor extends SyncProcessor<JSONCommit[]> {
     }
 
     @Override
-    boolean isSyncRequired(Context context, Intent intent) {
+    boolean isSyncRequired(Context context) {
         return true;
     }
 

@@ -62,22 +62,22 @@ public class GerritService extends IntentService {
         // Determine which SyncProcessor to use here
         DataType dataType = (DataType) intent.getSerializableExtra(DATA_TYPE_KEY);
         if (dataType == DataType.Project) {
-            processor = new ProjectListProcessor(this);
+            processor = new ProjectListProcessor(this, intent);
         } else if (dataType == DataType.Commit) {
-            processor = new ChangeListProcessor(this, mCurrentUrl);
+            processor = new ChangeListProcessor(this, intent, mCurrentUrl);
         } else if (dataType == DataType.CommitDetails) {
-            processor = new CommitProcessor(this, mCurrentUrl);
+            processor = new CommitProcessor(this, intent, mCurrentUrl);
         } else if (dataType == DataType.LegacyCommitDetails) {
-            processor = new LegacyCommitProcessor(this, mCurrentUrl);
+            processor = new LegacyCommitProcessor(this, intent, mCurrentUrl);
         } else if (dataType == DataType.GetVersion) {
-            processor = new VersionProcessor(this);
+            processor = new VersionProcessor(this, intent);
         } else {
             Log.w(TAG, "Don't know how to handle synchronization of type " + DATA_TYPE_KEY);
             return;
         }
 
         // Call the SyncProcessor to fetch the data if necessary
-        boolean needsSync = processor.isSyncRequired(this, intent);
+        boolean needsSync = processor.isSyncRequired(this);
         if (needsSync) processor.fetchData(mRequestQueue);
     }
 

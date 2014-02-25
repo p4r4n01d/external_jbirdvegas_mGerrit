@@ -34,8 +34,8 @@ import java.util.List;
 
 class CommitProcessor extends SyncProcessor<JSONCommit> {
 
-    CommitProcessor(Context context, GerritURL url) {
-        super(context, url);
+    CommitProcessor(Context context, Intent intent, GerritURL url) {
+        super(context, intent, url);
     }
 
     @Override
@@ -44,7 +44,7 @@ class CommitProcessor extends SyncProcessor<JSONCommit> {
     }
 
     @Override
-    boolean isSyncRequired(Context context, Intent intent) {
+    boolean isSyncRequired(Context context) {
         return true;
     }
 

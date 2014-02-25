@@ -9,9 +9,6 @@ import android.net.Uri;
 
 import com.jbirdvegas.mgerrit.objects.ServerVersion;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /*
  * Copyright (C) 2014 Android Open Kang Project (AOKP)
  *  Author: Evan Conway (P4R4N01D), 2014
@@ -98,6 +95,6 @@ public class Config extends DatabaseTable {
      *  This was introduced in Gerrit v2.8.
      */
     public static boolean isDiffSupported(Context context) {
-        return getServerVersion(context).isGreaterVersion("2.8");
+        return getServerVersion(context).isFeatureSupported(ServerVersion.VERSION_DIFF);
     }
 }

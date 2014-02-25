@@ -19,14 +19,21 @@ package com.jbirdvegas.mgerrit.tasks;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Pair;
 
 import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.database.Changes;
+import com.jbirdvegas.mgerrit.database.CommitMarker;
+import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.DatabaseTable;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.objects.JSONCommit;
+import com.jbirdvegas.mgerrit.objects.ServerVersion;
+import com.jbirdvegas.mgerrit.tasks.GerritService.Direction;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
@@ -34,8 +41,18 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
     GerritService.Direction mDirection;
 
-    ChangeListProcessor(Context context, GerritURL url) {
-        super(context, url);
+    ChangeListProcessor(Context context, Intent intent, GerritURL url) {
+        super(context, intent, url);
+
+        Direction direction = (Direction) getIntent().getSerializableExtra(GerritService.CHANGES_LIST_DIRECTION);
+        if (direction != null) mDirection = direction;
+        else mDirection = Direction.Newer;
+
+        // If we are loading newer changes using an old Gerrit instance, set the sortkey
+        if (mDirection == Direction.Newer) {
+            ServerVersion version = Config.getServerVersion(context);
+            if (!version.isFeatureSupported("2.8.1")) setResumableUrl();
+        }
     }
 
     @Override
@@ -46,15 +63,9 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
     }
 
     @Override
-    boolean isSyncRequired(Context context, Intent intent) {
-        String direction = intent.getStringExtra(GerritService.CHANGES_LIST_DIRECTION);
-        if (direction != null) {
-            mDirection = GerritService.Direction.valueOf(direction);
-            if (mDirection == GerritService.Direction.Older) {
-                return true;
-            }
-        } else {
-            mDirection = GerritService.Direction.Newer;
+    boolean isSyncRequired(Context context) {
+        if (mDirection == Direction.Older) {
+            return true;
         }
 
         long syncInterval = context.getResources().getInteger(R.integer.changes_sync_interval);
@@ -73,10 +84,44 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
     @Override
     void doPostProcess(JSONCommit[] data) {
-        if (mDirection != GerritService.Direction.Older) {
-            SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
-                    System.currentTimeMillis(), getQuery());
+        // Don't need to do anything for older changes
+        if (mDirection == Direction.Older) return;
+
+        SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
+                System.currentTimeMillis(), getQuery());
+
+        // Save our spot using the sortkey of the most recent change
+        Pair<String, Integer> change = Changes.getMostRecentChange(mContext, getUrl().getStatus());
+        if (change != null) {
+            String changeID = change.first;
+            if (changeID != null && !changeID.isEmpty()) {
+                JSONCommit commit = findCommit(data, changeID);
+                if (commit != null) {
+                    CommitMarker.markCommit(mContext, commit);
+                }
+            }
         }
+    }
+
+    /**
+     * Check if we have a sortkey already stored for the current query, if so
+     *  we can modify the url given to include that sortkey.
+     */
+    protected void setResumableUrl() {
+        GerritURL originalURL = getUrl();
+        String sortKey = CommitMarker.getSortKeyForQuery(mContext, getUrl().getStatus());
+        if (sortKey != null) {
+            originalURL.setSortKey(sortKey);
+            super.setUrl(originalURL);
+        }
+    }
+
+    private JSONCommit findCommit(JSONCommit[] commits, @NotNull String changeID) {
+        for (JSONCommit commit : commits) {
+            if (changeID.equals(commit.getChangeId()))
+                return commit;
+        }
+        return null;
     }
 
     @Override

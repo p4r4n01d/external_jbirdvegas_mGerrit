@@ -225,8 +225,14 @@ public abstract class CardsFragment extends Fragment
     abstract String getQuery();
 
     private void loadNewerChanges() {
+        SearchKeyword keyword = null;
+
         String updated = Changes.getNewestUpdatedTime(mParent, getQuery());
-        sendRequest(GerritService.Direction.Newer, new AfterSearch(updated));
+        if (updated != null && !updated.isEmpty()) {
+            keyword = new AfterSearch(updated);
+        }
+
+        sendRequest(GerritService.Direction.Newer, keyword);
     }
 
     /**
@@ -240,7 +246,7 @@ public abstract class CardsFragment extends Fragment
 
         GerritURL url = new GerritURL(mUrl);
         url.addSearchKeywords(mSearchView.getLastQuery());
-        url.addSearchKeyword(keyword);
+        if (keyword != null) url.addSearchKeyword(keyword);
 
         Intent it = new Intent(mParent, GerritService.class);
         it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);

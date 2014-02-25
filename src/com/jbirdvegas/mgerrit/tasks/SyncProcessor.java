@@ -41,6 +41,7 @@ abstract class SyncProcessor<T> {
     protected final Context mContext;
     private GerritURL mCurrentUrl;
     private ResponseHandler mResponseHandler;
+    private final Intent mIntent;
 
     private static Gson gson;
     static {
@@ -55,14 +56,17 @@ abstract class SyncProcessor<T> {
      *
      *  Note: subclasses using this constructor MUST override fetchData
      * @param context Contect for network access
+     * @param intent
      */
-    SyncProcessor(Context context) {
+    SyncProcessor(Context context, Intent intent) {
         this.mContext = context;
+        this.mIntent = intent;
     }
 
-    SyncProcessor(Context context, GerritURL url) {
+    SyncProcessor(Context context, Intent intent, GerritURL url) {
         this.mContext = context;
         this.mCurrentUrl = url;
+        this.mIntent = intent;
     }
 
     protected Context getContext() { return mContext; }
@@ -75,6 +79,8 @@ abstract class SyncProcessor<T> {
         return getUrl().getQuery();
     }
 
+    public Intent getIntent() { return mIntent; }
+
     /**
      * Inserts data into the database
      * @param data A collection of the deserialized data ready for insertion
@@ -84,7 +90,7 @@ abstract class SyncProcessor<T> {
     /**
      * @return Whether it is necessary to contact the server
      */
-    abstract boolean isSyncRequired(Context context, Intent intent);
+    abstract boolean isSyncRequired(Context context);
 
     /**
      * @return T.class (the class of T). This is used for Volley Gson requests
