@@ -72,6 +72,7 @@ public class Config extends DatabaseTable {
 
     public static ServerVersion getServerVersion(Context context) {
         String version = getValue(context, KEY_VERSION);
+        if (version == null || version.isEmpty()) return null;
         return new ServerVersion(version);
     }
 

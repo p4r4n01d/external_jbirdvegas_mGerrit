@@ -69,6 +69,7 @@ public abstract class DatabaseTable {
         FileChangesList, FileChangesID,
         FileInfoList, FileInfoID,
         MessageInfoList, MessageInfoID,
+        MoreChangesList, MoreChangesID,
         ProjectsList, ProjectsID,
         ReviewersList, ReviewersID,
         RevisionList, RevisionID,
@@ -90,6 +91,7 @@ public abstract class DatabaseTable {
         tables.add(FileChanges.class);
         tables.add(FileInfoTable.class);
         tables.add(MessageInfo.class);
+        tables.add(MoreChanges.class);
         tables.add(ProjectsTable.class);
         tables.add(Reviewers.class);
         tables.add(Revisions.class);

@@ -177,7 +177,10 @@ abstract class SyncProcessor<T> {
             int numItems = count(mData);
             // Order is important here, as we need to insert the data first
             if (mData != null && numItems > 0) insert(mData);
-            new Finished(mContext, null, mUrl, numItems).sendUpdateMessage();
+
+            Intent intent = mIntent;
+            intent.putExtra(GerritService.URL_KEY, mUrl);
+            new Finished(mContext, null, intent, numItems).sendUpdateMessage();
             if (mData != null) doPostProcess(mData);
             // This thread has finished so the parent activity should no longer need it
             mResponseHandler = null;

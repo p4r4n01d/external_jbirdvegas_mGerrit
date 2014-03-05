@@ -26,6 +26,7 @@ import com.jbirdvegas.mgerrit.database.Changes;
 import com.jbirdvegas.mgerrit.database.CommitMarker;
 import com.jbirdvegas.mgerrit.database.Config;
 import com.jbirdvegas.mgerrit.database.DatabaseTable;
+import com.jbirdvegas.mgerrit.database.MoreChanges;
 import com.jbirdvegas.mgerrit.database.SyncTime;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
@@ -51,7 +52,7 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
         // If we are loading newer changes using an old Gerrit instance, set the sortkey
         if (mDirection == Direction.Newer) {
             ServerVersion version = Config.getServerVersion(context);
-            if (!version.isFeatureSupported("2.8.1")) setResumableUrl();
+            if (version == null || !version.isFeatureSupported("2.8.1")) setResumableUrl();
         }
     }
 
@@ -84,23 +85,34 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
     @Override
     void doPostProcess(JSONCommit[] data) {
-        // Don't need to do anything for older changes
-        if (mDirection == Direction.Older) return;
+        String status = getUrl().getStatus();
+        boolean moreChanges = false;
 
-        SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
-                System.currentTimeMillis(), getQuery());
+        if (mDirection == Direction.Older) {
+            if (data.length > 0) {
+                moreChanges = data[data.length - 1].areMoreChanges();
+            }
+        } else {
+            if (data.length > 0) {
+                moreChanges = data[0].areMoreChanges();
+            }
 
-        // Save our spot using the sortkey of the most recent change
-        Pair<String, Integer> change = Changes.getMostRecentChange(mContext, getUrl().getStatus());
-        if (change != null) {
-            String changeID = change.first;
-            if (changeID != null && !changeID.isEmpty()) {
-                JSONCommit commit = findCommit(data, changeID);
-                if (commit != null) {
-                    CommitMarker.markCommit(mContext, commit);
+            SyncTime.setValue(mContext, SyncTime.CHANGES_LIST_SYNC_TIME,
+                    System.currentTimeMillis(), getQuery());
+
+            // Save our spot using the sortkey of the most recent change
+            Pair<String, Integer> change = Changes.getMostRecentChange(mContext, status);
+            if (change != null) {
+                String changeID = change.first;
+                if (changeID != null && !changeID.isEmpty()) {
+                    JSONCommit commit = findCommit(data, changeID);
+                    if (commit != null) {
+                        CommitMarker.markCommit(mContext, commit);
+                    }
                 }
             }
         }
+        MoreChanges.insert(mContext, status, mDirection, moreChanges);
     }
 
     /**

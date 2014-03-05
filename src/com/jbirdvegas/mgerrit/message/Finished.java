@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.jbirdvegas.mgerrit.objects.GerritMessage;
+import com.jbirdvegas.mgerrit.tasks.GerritService;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -32,13 +35,19 @@ public class Finished extends GerritMessage {
     // The number of items that were fetched
     public static final String ITEMS_FETCHED_KEY = "num_items";
 
+    // The original intent that has been processed
+    public static final String INTENT_KEY = "intent";
+
     private final int mItems;
+    private final Intent mIntent;
     String mMessage;
 
-    public Finished(Context context, String message, String url, int items) {
-        super(context, url);
+
+    public Finished(Context context, String message, @NotNull Intent intent, int items) {
+        super(context, intent.getStringExtra(GerritService.URL_KEY));
         this.mMessage = message;
         this.mItems = items;
+        this.mIntent = intent;
     }
 
     @Override
@@ -55,6 +64,7 @@ public class Finished extends GerritMessage {
     protected Intent packMessage(Map<String, String> map) {
         Intent intent = super.packMessage(map);
         intent.putExtra(ITEMS_FETCHED_KEY, mItems);
+        intent.putExtra(INTENT_KEY, mIntent);
         return intent;
     }
 }
