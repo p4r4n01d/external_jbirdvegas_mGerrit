@@ -82,6 +82,10 @@ public class ServerVersion implements Comparator<ServerVersion> {
                 }
             }
         }
-        return 0;
+
+        // Need to check the remaining characters
+        if (versionA.length() == versionB.length()) return 0;
+        else if (versionA.length() > versionB.length()) return 1;
+        else return -1;
     }
 }

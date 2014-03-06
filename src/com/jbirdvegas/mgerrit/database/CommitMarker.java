@@ -89,14 +89,16 @@ public class CommitMarker extends DatabaseTable {
     public static String getSortKeyForQuery(Context context, String status) {
         Uri uri = DBParams.fetchOneRow(CONTENT_URI);
         status = JSONCommit.Status.getStatusString(status);
+        String sortkey = null;
 
         Cursor c = context.getContentResolver().query(uri,
                 new String[] { C_SORTKEY },
                 C_STATUS + " = ?",
                 new String[] { status },
                 null);
-        if (c.moveToFirst()) return c.getString(0);
-        return null;
+        if (c.moveToFirst()) sortkey = c.getString(0);
+        c.close();
+        return sortkey;
     }
 
     /**

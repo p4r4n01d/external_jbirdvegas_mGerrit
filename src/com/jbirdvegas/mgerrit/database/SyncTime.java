@@ -70,14 +70,15 @@ public class SyncTime extends DatabaseTable {
     }
 
     public static long getValueForQuery(Context context, String key, String query) {
-
+        long value = 0;
         Cursor c = context.getContentResolver().query(CONTENT_URI,
                 new String[] { C_VALUE },
                 C_KEY + " = ?" + " AND " + C_QUERY + " LIKE ?",
                 new String[] { key, query + "%" },
                 null);
-        if (!c.moveToFirst()) return 0;
-        else return c.getLong(0);
+        if (c.moveToFirst()) value = c.getLong(0);
+        c.close();
+        return value;
     }
 
     public static void setValue(Context context, String key, long value, String query) {

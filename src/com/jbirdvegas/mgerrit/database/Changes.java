@@ -120,6 +120,7 @@ public class Changes extends DatabaseTable {
                 new String[] { changeID },
                 null);
         if (c.moveToFirst()) status = c.getString(0);
+        c.close();
         return status;
     }
 
@@ -182,6 +183,7 @@ public class Changes extends DatabaseTable {
                 new String[] { changeID },
                 null);
         if (c.moveToFirst()) changeNo = c.getInt(0);
+        c.close();
         return changeNo;
     }
 }

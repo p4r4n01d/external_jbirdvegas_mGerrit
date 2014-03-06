@@ -77,10 +77,11 @@ public class Config extends DatabaseTable {
     }
 
     public static String getValue(Context context, String key) {
+        String value = null;
         Cursor c = context.getContentResolver().query(CONTENT_URI,
                 new String[] { C_VALUE }, C_KEY + " = ?", new String[] { key }, null);
-        if (!c.moveToFirst()) return null;
-        else return c.getString(0);
+        if (c.moveToFirst()) value = c.getString(0);
+        return value;
     }
 
     public static void setValue(Context context, String key, String value) {

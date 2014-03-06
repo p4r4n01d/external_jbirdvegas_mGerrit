@@ -84,14 +84,16 @@ public class MoreChanges extends DatabaseTable {
     public static boolean areOlderChanges(Context context, String status) {
         Uri uri = DBParams.fetchOneRow(CONTENT_URI);
         status = JSONCommit.Status.getStatusString(status);
+        boolean olderChanges = true;
 
         Cursor c = context.getContentResolver().query(uri,
                 new String[] { C_MORE_CHANGES },
                 C_STATUS + " = ? AND " + C_DIRECTION + " = ?",
                 new String[] { status, Direction.Older.toString() },
                 null);
-        if (c.moveToFirst()) return c.getInt(0) != 1;
-        return true;
+        if (c.moveToFirst()) olderChanges = c.getInt(0) != 1;
+        c.close();
+        return olderChanges;
     }
 
     public static void insert(Context context, String status, Direction direction,

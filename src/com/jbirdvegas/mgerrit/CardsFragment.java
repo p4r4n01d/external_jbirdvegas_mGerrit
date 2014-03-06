@@ -356,7 +356,8 @@ public abstract class CardsFragment extends Fragment
      */
     public void toggleAnimations(BaseAdapter baseAdapter) {
         boolean anim = Prefs.getAnimationPreference(mParent);
-        if (anim == mAnimationsEnabled) return;
+        if (mAnimationsEnabled != null && anim == mAnimationsEnabled) return;
+        else mAnimationsEnabled = anim;
 
         /* If animations have been enabled, setup and use an animation adapter, otherwise use
          *  the regular adapter. The data should always be bound to mAdapter */
