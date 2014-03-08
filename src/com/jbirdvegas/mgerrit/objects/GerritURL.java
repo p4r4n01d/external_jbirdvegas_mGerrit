@@ -28,6 +28,7 @@ public class GerritURL implements Parcelable
     private int mChangeNo = 0;
 
     private Set<SearchKeyword> mSearchKeywords;
+    private int mLimit;
 
     private enum ChangeDetailLevels {
         DISABLED, // Do not fetch change details
@@ -113,6 +114,13 @@ public class GerritURL implements Parcelable
      */
     public void setSortKey(String sortKey) {
         mSortkey = sortKey;
+    }
+
+    /**
+     * @param limit The maximum number of changes to include in the response
+     */
+    public void setLimit(int limit) {
+        this.mLimit = limit;
     }
 
     @Override
@@ -201,6 +209,10 @@ public class GerritURL implements Parcelable
         }
         if (mRequestDetailedAccounts) {
             builder.append(GerritURL.DETAILED_ACCOUNTS_ARG);
+        }
+
+        if (mLimit > 0) {
+            builder.append("&n=").append(mLimit);
         }
     }
 

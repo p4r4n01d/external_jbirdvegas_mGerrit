@@ -29,6 +29,9 @@ import com.jbirdvegas.mgerrit.objects.GerritURL;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class GerritService extends IntentService {
 
     public static final String TAG = "GerritService";
@@ -44,11 +47,16 @@ public class GerritService extends IntentService {
     public static enum DataType { Project, Commit, CommitDetails, GetVersion, LegacyCommitDetails }
 
     private static RequestQueue mRequestQueue;
+    /** URLs of requests currently being processed. */
+    private static Set<GerritURL> mCurrentRequests;
 
     private GerritURL mCurrentUrl;
 
     // This is required for the service to be started
-    public GerritService() { super(TAG); }
+    public GerritService() {
+        super(TAG);
+        if (mCurrentRequests == null) mCurrentRequests = new HashSet<>();
+    }
 
     @Override
     protected void onHandleIntent(@NotNull Intent intent) {
@@ -58,6 +66,8 @@ public class GerritService extends IntentService {
 
         mCurrentUrl = intent.getParcelableExtra(URL_KEY);
         SyncProcessor processor;
+
+        if (!mCurrentRequests.add(mCurrentUrl)) return;
 
         // Determine which SyncProcessor to use here
         DataType dataType = (DataType) intent.getSerializableExtra(DATA_TYPE_KEY);
@@ -95,5 +105,9 @@ public class GerritService extends IntentService {
         Bundle b = new Bundle();
         b.putParcelable(GerritService.URL_KEY, url);
         GerritService.sendRequest(context, dataType, b);
+    }
+
+    protected static void finishedRequest(GerritURL url) {
+        mCurrentRequests.remove(url);
     }
 }

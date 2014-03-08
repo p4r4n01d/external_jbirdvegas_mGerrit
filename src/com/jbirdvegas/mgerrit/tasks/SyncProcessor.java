@@ -54,15 +54,23 @@ abstract class SyncProcessor<T> {
      * Alternate constructor where the url is not dynamic and can be determined from the
      *  current Gerrit instance.
      *
-     *  Note: subclasses using this constructor MUST override fetchData
-     * @param context Contect for network access
-     * @param intent
+     *  Note: subclasses using this constructor MUST override fetchData or setUrl
+     * @param context Context for network access
+     * @param intent The original intent to GerritService that started initiated
+     *               this SyncProcessor.
      */
     SyncProcessor(Context context, Intent intent) {
         this.mContext = context;
         this.mIntent = intent;
     }
 
+    /**
+     * Standard constructor to create a SyncProcessor
+     * @param context Context for network access
+     * @param intent The original intent to GerritService that started initiated
+     *               this SyncProcessor.
+     * @param url The Gerrit URL from which to retrieve the data from
+     */
     SyncProcessor(Context context, Intent intent, GerritURL url) {
         this.mContext = context;
         this.mCurrentUrl = url;
@@ -71,7 +79,6 @@ abstract class SyncProcessor<T> {
 
     protected Context getContext() { return mContext; }
     protected GerritURL getUrl() { return mCurrentUrl; }
-
     protected void setUrl(GerritURL url) { mCurrentUrl = url; }
 
     // Helper method to extract the relevant query portion of the URL
@@ -85,7 +92,7 @@ abstract class SyncProcessor<T> {
      * Inserts data into the database
      * @param data A collection of the deserialized data ready for insertion
      */
-    abstract void insert(T data);
+    abstract int insert(T data);
 
     /**
      * @return Whether it is necessary to contact the server
@@ -114,12 +121,18 @@ abstract class SyncProcessor<T> {
     /**
      * Sends a request to the Gerrit server for the url set in the constructor
      *  SyncProcessor(Context, GerritURL). The default simply calls
-     *  fetchData(String).
+     *  fetchData(String, RequestQueue).
      */
     protected void fetchData(RequestQueue queue) {
         fetchData(getUrl().toString(), queue);
     }
 
+    /**
+     * Send a request to the Gerrit server. Expects the response to be in
+     *  Json format.
+     * @param url The URL of the request
+     * @param queue An instance of the Volley request queue.
+     */
     protected void fetchData(final String url, RequestQueue queue) {
         GsonRequest request = new GsonRequest<>(url, gson, getType(), 5,
                 getListener(url), new Response.ErrorListener() {
@@ -155,7 +168,7 @@ abstract class SyncProcessor<T> {
         return new Response.Listener<T>() {
             @Override
             public void onResponse(T data) {
-            /* Offload all the work to a seperate thread so database activity is not
+            /* Offload all the work to a separate thread so database activity is not
              * done on the main thread. */
                 mResponseHandler = new ResponseHandler(data, url);
                 mResponseHandler.start();
@@ -174,14 +187,18 @@ abstract class SyncProcessor<T> {
 
         @Override
         public void run() {
-            int numItems = count(mData);
+            int numItems = 0;
             // Order is important here, as we need to insert the data first
-            if (mData != null && numItems > 0) insert(mData);
+            if (mData != null && count(mData) > 0) {
+                numItems = insert(mData);
+            }
 
             Intent intent = mIntent;
             intent.putExtra(GerritService.URL_KEY, mUrl);
             new Finished(mContext, null, intent, numItems).sendUpdateMessage();
             if (mData != null) doPostProcess(mData);
+
+            GerritService.finishedRequest(mCurrentUrl);
             // This thread has finished so the parent activity should no longer need it
             mResponseHandler = null;
         }

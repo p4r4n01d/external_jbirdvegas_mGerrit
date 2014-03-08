@@ -395,6 +395,7 @@ public class JSONCommit implements Parcelable {
         mReviewers = parcel.readParcelable(ReviewerList.class.getClassLoader());
         mPatchSetNumber = parcel.readInt();
         mMessagesList = parcel.readArrayList(CommitComment.class.getClassLoader());
+        mMoreChanges = parcel.readByte() == 1;
     }
 
     @Override
@@ -423,6 +424,7 @@ public class JSONCommit implements Parcelable {
         parcel.writeParcelable(mReviewers, 0);
         parcel.writeInt(mPatchSetNumber);
         parcel.writeTypedList(mMessagesList);
+        parcel.writeByte((byte) (mMoreChanges ? 1 : 0));
     }
 
     @Override
@@ -450,6 +452,7 @@ public class JSONCommit implements Parcelable {
                 ", mPatchSet=" + mPatchSet +
                 ", mPatchSetNumber=" + mPatchSetNumber +
                 ", mMessagesList=" + mMessagesList +
+                ", mMoreChanges=" + mMoreChanges +
                 '}';
     }
 }

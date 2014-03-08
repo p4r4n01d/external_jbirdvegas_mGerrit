@@ -43,10 +43,10 @@ class ProjectListProcessor extends SyncProcessor<Projects> {
     }
 
     @Override
-    void insert(Projects projects) {
+    int insert(Projects projects) {
         List<Project> projectList = projects.getAsList();
         Collections.sort(projectList);
-        ProjectsTable.insertProjects(getContext(), projectList);
+        return ProjectsTable.insertProjects(getContext(), projectList);
     }
 
     @Override

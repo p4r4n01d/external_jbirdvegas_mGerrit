@@ -285,8 +285,9 @@ public class AgeSearch extends SearchKeyword {
     @Override
     public String getGerritQuery(ServerVersion serverVersion) {
         String operator = getOperator();
-        if (serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH)
-                && mInstant != null) {
+        if (serverVersion != null &&
+                serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH) &&
+                mInstant != null) {
             if (">=".equals(operator) || ">".equals(operator)) {
                 return "before:" + mInstant.toString();
             } else if ("<=".equals(operator) || "<".equals(operator)) {

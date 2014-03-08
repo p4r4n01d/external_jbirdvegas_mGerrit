@@ -67,8 +67,11 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
      *  for you automatically, and finishedDataLoading will be called when the child adapter's
      *  data changes.
      *
-     *  When manually loading data, be sure to call startDataLoading. If after trying to load
-     *   more data, no additional data was found, manually call finishedDataLoading.
+     *  This method should not be called directly, instead call startDataLoading, which will
+     *   check if we are already sent a request to load more data and update the listview.
+     *
+     *  If after trying to load more data, no additional data was found, manually call
+     *  finishedDataLoading.
      */
     public abstract void loadData();
 
@@ -83,6 +86,7 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         /* We need to notify the listview's adapter that the data has changed (i.e.
          *  we have added the pending row. */
         if (mParentAdapter != null) mParentAdapter.notifyDataSetChanged();
+        loadData();
     }
 
     /**
@@ -183,7 +187,6 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         if (scrollState == SCROLL_STATE_IDLE) {
             if (listView.getLastVisiblePosition() == wrapped.getCount() - 1) {
                 startDataLoading();
-                loadData();
             }
         }
     }

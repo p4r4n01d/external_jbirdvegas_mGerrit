@@ -41,7 +41,7 @@ public class VersionProcessor extends SyncProcessor<String> {
     }
 
     @Override
-    void insert(String data) {
+    int insert(String data) {
         // Trim off the junk beginning and the quotes around the version number
         Pattern p = Pattern.compile("\"([^\"]+)\"");
         Matcher m = p.matcher(data);
@@ -50,6 +50,7 @@ public class VersionProcessor extends SyncProcessor<String> {
         } else {
             Config.setValue(getContext(), Config.KEY_VERSION, data);
         }
+        return 1;
     }
 
     @Override

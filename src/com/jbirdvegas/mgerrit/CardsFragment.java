@@ -128,8 +128,7 @@ public abstract class CardsFragment extends Fragment
 
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState)
-    {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         init(savedInstanceState);
@@ -184,6 +183,7 @@ public abstract class CardsFragment extends Fragment
         // Need the account id of the owner here to maintain FK db constraint
         mUrl.setRequestDetailedAccounts(true);
         mUrl.setStatus(getQuery());
+        mUrl.setLimit(mParent.getResources().getInteger(R.integer.changes_limit));
 
         mSearchView = (GerritSearchView) mParent.findViewById(R.id.search);
     }

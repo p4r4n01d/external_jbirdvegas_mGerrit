@@ -57,10 +57,11 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
     }
 
     @Override
-    void insert(JSONCommit[] commits) {
+    int insert(JSONCommit[] commits) {
         if (commits.length > 0) {
-            UserChanges.insertCommits(getContext(), Arrays.asList(commits));
+            return UserChanges.insertCommits(getContext(), Arrays.asList(commits));
         }
+        return 0;
     }
 
     @Override

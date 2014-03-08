@@ -68,7 +68,7 @@ public class MoreChanges extends DatabaseTable {
         db.execSQL("create table " + TABLE + " ("
                 + C_STATUS + " text NOT NULL, "
                 + C_DIRECTION + " text NOT NULL, "
-                + C_MORE_CHANGES + " INTEGER DEFAULT 0 NOT NULL, "
+                + C_MORE_CHANGES + " INTEGER DEFAULT 1 NOT NULL, "
                 + "PRIMARY KEY (" + C_STATUS + ", " + C_DIRECTION + ") ON CONFLICT REPLACE)");
     }
 
@@ -91,7 +91,7 @@ public class MoreChanges extends DatabaseTable {
                 C_STATUS + " = ? AND " + C_DIRECTION + " = ?",
                 new String[] { status, Direction.Older.toString() },
                 null);
-        if (c.moveToFirst()) olderChanges = c.getInt(0) != 1;
+        if (c.moveToFirst()) olderChanges = c.getInt(0) != 0;
         c.close();
         return olderChanges;
     }
@@ -105,10 +105,5 @@ public class MoreChanges extends DatabaseTable {
 
         Uri uri = DBParams.insertWithReplace(CONTENT_URI);
         context.getContentResolver().insert(uri, contentValues);
-    }
-
-    // Removes the extraneous 0s off the milliseconds in server timestamps
-    private static String trimDate(String date) {
-        return date.substring(0, date.length() - 6);
     }
 }
