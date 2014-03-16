@@ -28,13 +28,14 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AgeSearch extends SearchKeyword {
+public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
 
     public static final String OP_NAME = "age";
 
@@ -312,17 +313,34 @@ public class AgeSearch extends SearchKeyword {
             }
 
             // Need to leave off the operator and make sure we are using relative format
-            Period period = mPeriod;
-            if (period == null) {
-                period = new Period(mInstant, Instant.now());
-            }
             /* Gerrit only supports specifying one time unit, so we will normalize the period
              *  into days.  */
-            int days = getDaysInPeriod(period);
-            return OP_NAME + ":" + String.valueOf(days) + "d";
+            return OP_NAME + ":" + String.valueOf(toDays()) + "d";
         }
+    }
+
+    private int toDays() {
+        // Need to leave off the operator and make sure we are using relative format
+        Period period = mPeriod;
+        if (period == null) {
+            period = new Period(mInstant, Instant.now());
+        }
+            /* Gerrit only supports specifying one time unit, so we will normalize the period
+             *  into days.  */
+        return getDaysInPeriod(period);
     }
 
     protected Period getPeriod() { return mPeriod; }
     protected Instant getInstant() { return mInstant; }
+
+    @Override
+    public int compareTo(AgeSearch rhs) {
+        if (this.equals(rhs)) return 0;
+        else if (mInstant != null && rhs.mInstant != null) {
+            return mInstant.compareTo(rhs.mInstant);
+        } else {
+            // Compare the normalised period format (i.e. the period in days)
+            return Integer.compare(toDays(), rhs.toDays());
+        }
+    }
 }

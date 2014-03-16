@@ -28,9 +28,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -230,13 +233,32 @@ public abstract class SearchKeyword implements Parcelable {
         return "";
     }
 
-    public static String replaceKeyword(String query, SearchKeyword keyword) {
+    public static String replaceKeyword(final String query, final SearchKeyword keyword) {
         Set<SearchKeyword> tokens = SearchKeyword.constructTokens(query);
-        tokens = removeKeyword(tokens, keyword.getClass());
-        if (isParameterValid(keyword.getParam())) {
-            tokens.add(keyword);
-        }
+        tokens = replaceKeyword(tokens, keyword);
         return SearchKeyword.getQuery(tokens);
+    }
+
+    public static Set<SearchKeyword> replaceKeyword(final Set<SearchKeyword> tokens,
+                                                    SearchKeyword keyword) {
+        Set<SearchKeyword> retVal = removeKeyword(tokens, keyword.getClass());
+        if (isParameterValid(keyword.getParam())) {
+            retVal.add(keyword);
+        }
+        return retVal;
+    }
+
+    public static Set<SearchKeyword> replaceKeyword(final Set<SearchKeyword> tokens,
+                                                    AgeSearch keyword,
+                                                    int comparitor) {
+        List<SearchKeyword> list = new ArrayList<>(tokens);
+        int index = 0;
+        while ((index = findKeyword(tokens, keyword.getClass(), index)) >= 0) {
+            AgeSearch candidate = (AgeSearch) list.get(index);
+            if (keyword.compareTo(candidate) != comparitor) list.remove(index);
+            index++;
+        }
+        return new HashSet<>(list);
     }
 
     public static String addKeyword(String query, SearchKeyword keyword) {
@@ -261,9 +283,16 @@ public abstract class SearchKeyword implements Parcelable {
     }
 
     public static int findKeyword(Set<SearchKeyword> tokens, Class<? extends SearchKeyword> clazz) {
+        return findKeyword(tokens, clazz, 0);
+    }
+
+    public static int findKeyword(Set<SearchKeyword> tokens, Class<? extends SearchKeyword> clazz,
+                                  int start) {
+        if (start < 0) start = 0;
         int i = 0;
         for (Object token : tokens) {
-            if (token.getClass().equals(clazz)) return i;
+            if (i < start) i++;
+            else if (token.getClass().equals(clazz)) return i;
             else i++;
         }
         return -1;

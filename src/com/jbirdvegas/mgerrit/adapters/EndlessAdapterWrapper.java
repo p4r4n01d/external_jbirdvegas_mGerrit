@@ -31,6 +31,8 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     private View mPendingView;
     private boolean mLoadingMoreData = false;
 
+    private boolean mDisabled = false;
+
     /**
      * An adapter that wraps this adapter so we can notify it when either the child adapter's
      *  data or this wraper's data changes.

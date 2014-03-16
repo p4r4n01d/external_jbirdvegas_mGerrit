@@ -259,7 +259,7 @@ public class GerritSearchView extends SearchView
     }
 
     /**
-     * @return The list of search keywords that were included in the query plus any addional
+     * @return The list of search keywords that were included in the query plus any additional
      *  keywords that were set via injectKeywords(Set<SearchKeyword>)
      */
     public Set<SearchKeyword> getLastQuery() {

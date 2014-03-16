@@ -65,6 +65,7 @@ import com.jbirdvegas.mgerrit.views.GerritSearchView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public abstract class CardsFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -107,8 +108,8 @@ public abstract class CardsFragment extends Fragment
             if (intent.getIntExtra(Finished.ITEMS_FETCHED_KEY, 0) == 0) {
                 mEndlessAdapter.finishedDataLoading();
                 // Remove the endless adapter as we have no more changes to load
-                Tools.toggleAnimations(mAnimationsEnabled, mListView, mAnimAdapter, mAdapter);
-                mEndlessAdapter = null;
+                //Tools.toggleAnimations(mAnimationsEnabled, mListView, mAnimAdapter, mAdapter);
+                //mEndlessAdapter = null;
             }
         }
     };
@@ -162,15 +163,15 @@ public abstract class CardsFragment extends Fragment
                 getQuery());
         mAdapter.setViewBinder(new CommitCardBinder(mParent, mRequestQueue));
 
-        if (MoreChanges.areOlderChanges(mParent, getQuery())) {
-            mEndlessAdapter = new EndlessAdapterWrapper(mParent, mAdapter) {
-                @Override
-                public void loadData() {
-                    String updated = Changes.getOldestUpdatedTime(mParent, getQuery());
-                    sendRequest(Direction.Older, new BeforeSearch(updated));
-                }
-            };
-        }
+        mEndlessAdapter = new EndlessAdapterWrapper(mParent, mAdapter) {
+            @Override
+            public void loadData() {
+                String updated = Changes.getOldestUpdatedTime(mParent, getQuery());
+                Set<SearchKeyword> keywords = mSearchView.getLastQuery();
+
+                sendRequest(Direction.Older, new BeforeSearch(updated));
+            }
+        };
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -205,10 +206,7 @@ public abstract class CardsFragment extends Fragment
         if (mEndlessAdapter != null) {
             toggleAnimations(mEndlessAdapter);
             mListView.setOnScrollListener(mEndlessAdapter);
-        } else {
-            toggleAnimations(mAdapter);
-            mEndlessAdapter = null;
-        }
+        } else toggleAnimations(mAdapter);
 
         EasyTracker.getInstance(getActivity()).activityStart(getActivity());
 
@@ -233,28 +231,32 @@ public abstract class CardsFragment extends Fragment
     abstract String getQuery();
 
     private void loadNewerChanges() {
-        SearchKeyword keyword = null;
+        Set<SearchKeyword> keywords = null;
 
         String updated = Changes.getNewestUpdatedTime(mParent, getQuery());
         if (updated != null && !updated.isEmpty()) {
-            keyword = new AfterSearch(updated);
+            keywords = mSearchView.getLastQuery();
+            SearchKeyword.replaceKeyword(keywords, new AfterSearch(updated));
         }
 
-        sendRequest(Direction.Newer, keyword);
+        sendRequest(Direction.Newer, keywords);
     }
 
     /**
      * Start the updater to check for an update if necessary
      */
-    private void sendRequest(Direction direction, SearchKeyword keyword) {
+    private void sendRequest(Direction direction, Set<SearchKeyword> keywords) {
         if (mNeedsForceUpdate) {
             mNeedsForceUpdate = false;
             SyncTime.clear(mParent);
         }
 
         GerritURL url = new GerritURL(mUrl);
-        url.addSearchKeywords(mSearchView.getLastQuery());
-        if (keyword != null) url.addSearchKeyword(keyword);
+
+        if (keywords == null || keywords.isEmpty()) {
+            keywords = mSearchView.getLastQuery();
+        }
+        url.addSearchKeywords(keywords);
 
         Intent it = new Intent(mParent, GerritService.class);
         it.putExtra(GerritService.DATA_TYPE_KEY, GerritService.DataType.Commit);
@@ -352,7 +354,7 @@ public abstract class CardsFragment extends Fragment
     /**
      * Enables or disables listview animations. This simply toggles the
      *  adapter, initialising a new adapter if necessary.
-     * @param enable Whether to enable animations on the listview
+     * @param baseAdapter The current adapter for the listview
      */
     public void toggleAnimations(BaseAdapter baseAdapter) {
         boolean anim = Prefs.getAnimationPreference(mParent);
@@ -412,5 +414,9 @@ public abstract class CardsFragment extends Fragment
         mAdapter.swapCursor(cursor);
         // Broadcast that we have finished loading changes
         new ChangeLoadingFinished(mParent, getQuery()).sendUpdateMessage();
+
+        if (cursor.getCount() < 1 && mEndlessAdapter != null) {
+            mEndlessAdapter.startDataLoading();
+        }
     }
 }
