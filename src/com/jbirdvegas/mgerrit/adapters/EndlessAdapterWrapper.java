@@ -31,7 +31,7 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     private View mPendingView;
     private boolean mLoadingMoreData = false;
 
-    private boolean mDisabled = false;
+    private boolean mEnabled = true;
 
     /**
      * An adapter that wraps this adapter so we can notify it when either the child adapter's
@@ -55,6 +55,7 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
         wrapped.registerDataSetObserver(new DataSetObserver() {
             public void onChanged() {
                 finishedDataLoading();
+                mEnabled = true;
             }
 
             public void onInvalidated() {
@@ -83,7 +84,8 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
      *  When manually loading data, be sure to call this.
      */
     public void startDataLoading() {
-        if (mLoadingMoreData) return; // No effect if we have already started loading
+        // No effect if we have already started loading or this is disabled
+        if (mLoadingMoreData || !mEnabled) return;
         mLoadingMoreData = true;
         /* We need to notify the listview's adapter that the data has changed (i.e.
          *  we have added the pending row. */
@@ -113,6 +115,12 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
     public void setPendingResource(int pendingResource) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mPendingView = inflater.inflate(pendingResource, null);
+    }
+
+    /** Sets whether this adapter is enabled or not */
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+        if (!enabled) mLoadingMoreData = false;
     }
 
     @Override
@@ -186,7 +194,7 @@ public abstract class EndlessAdapterWrapper extends BaseAdapter
 
     @Override
     public void onScrollStateChanged(AbsListView listView, int scrollState) {
-        if (scrollState == SCROLL_STATE_IDLE) {
+        if (mEnabled && scrollState == SCROLL_STATE_IDLE) {
             if (listView.getLastVisiblePosition() == wrapped.getCount() - 1) {
                 startDataLoading();
             }

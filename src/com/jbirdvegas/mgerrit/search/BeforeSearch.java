@@ -1,5 +1,9 @@
 package com.jbirdvegas.mgerrit.search;
 
+import com.jbirdvegas.mgerrit.objects.ServerVersion;
+
+import org.joda.time.Instant;
+
 /*
  * Copyright (C) 2014 Android Open Kang Project (AOKP)
  *  Author: Evan Conway (P4R4N01D), 2014
@@ -33,8 +37,23 @@ public class BeforeSearch extends AgeSearch {
         super(timestamp, ">=");
     }
 
+    public BeforeSearch(Instant instant) {
+        this((instant == null) ? instant.getMillis() : 0);
+    }
+
     @Override
     public String toString() {
         return OP_NAME + ":" + getInstant().toString();
+    }
+
+    @Override
+    public String getGerritQuery(ServerVersion serverVersion) {
+        Instant instant = getInstant();
+        if (serverVersion != null &&
+                serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH) &&
+                instant != null) {
+            return "before:{" + sInstantFormatter.print(instant) +'}';
+        }
+        return "";
     }
 }

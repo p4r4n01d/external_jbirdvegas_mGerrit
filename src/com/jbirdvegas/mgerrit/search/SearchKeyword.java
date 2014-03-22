@@ -248,17 +248,29 @@ public abstract class SearchKeyword implements Parcelable {
         return retVal;
     }
 
-    public static Set<SearchKeyword> replaceKeyword(final Set<SearchKeyword> tokens,
-                                                    AgeSearch keyword,
-                                                    int comparitor) {
-        List<SearchKeyword> list = new ArrayList<>(tokens);
-        int index = 0;
-        while ((index = findKeyword(tokens, keyword.getClass(), index)) >= 0) {
-            AgeSearch candidate = (AgeSearch) list.get(index);
-            if (keyword.compareTo(candidate) != comparitor) list.remove(index);
-            index++;
+    /**
+     * @param tokens A list of search keywords
+     * @param keyword An additional age search keyword to be added to the list
+     * @return A new set of search keywords, retaining only the oldest AgeSearch keyword
+     */
+    public static Set<SearchKeyword> retainOldest(final Set<SearchKeyword> tokens,
+                                                  @NotNull AgeSearch keyword) {
+        List<AgeSearch> ageSearches = new ArrayList<>();
+        List<SearchKeyword> otherSearches = new ArrayList<>();
+
+        ageSearches.add(keyword);
+
+        if (tokens.size() > 0) {
+            for (SearchKeyword o : tokens) {
+                if (o instanceof AgeSearch) ageSearches.add((AgeSearch) o);
+                else otherSearches.add(o);
+            }
+
+            Collections.sort(ageSearches, Collections.reverseOrder());
+            otherSearches.add(ageSearches.get(0));
         }
-        return new HashSet<>(list);
+
+        return new HashSet<>(otherSearches);
     }
 
     public static String addKeyword(String query, SearchKeyword keyword) {

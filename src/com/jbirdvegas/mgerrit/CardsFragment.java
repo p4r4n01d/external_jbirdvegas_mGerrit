@@ -108,6 +108,7 @@ public abstract class CardsFragment extends Fragment
             if (intent.getIntExtra(Finished.ITEMS_FETCHED_KEY, 0) == 0) {
                 mEndlessAdapter.finishedDataLoading();
                 // Remove the endless adapter as we have no more changes to load
+                mEndlessAdapter.setEnabled(false);
                 //Tools.toggleAnimations(mAnimationsEnabled, mListView, mAnimAdapter, mAdapter);
                 //mEndlessAdapter = null;
             }
@@ -166,12 +167,16 @@ public abstract class CardsFragment extends Fragment
         mEndlessAdapter = new EndlessAdapterWrapper(mParent, mAdapter) {
             @Override
             public void loadData() {
-                String updated = Changes.getOldestUpdatedTime(mParent, getQuery());
                 Set<SearchKeyword> keywords = mSearchView.getLastQuery();
-
-                sendRequest(Direction.Older, new BeforeSearch(updated));
+                String updated = Changes.getOldestUpdatedTime(mParent, getQuery());
+                if (updated != null) {
+                    keywords = SearchKeyword.retainOldest(keywords, new BeforeSearch(updated));
+                }
+                sendRequest(Direction.Older, keywords);
             }
         };
+
+        mEndlessAdapter.setEnabled(MoreChanges.areOlderChanges(mParent, getQuery()));
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

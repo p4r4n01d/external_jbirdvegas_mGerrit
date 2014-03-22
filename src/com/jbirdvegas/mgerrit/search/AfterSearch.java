@@ -17,6 +17,10 @@ package com.jbirdvegas.mgerrit.search;
  *  limitations under the License.
  */
 
+import com.jbirdvegas.mgerrit.objects.ServerVersion;
+
+import org.joda.time.Instant;
+
 public class AfterSearch extends AgeSearch {
 
     public static final String OP_NAME = "after";
@@ -34,8 +38,26 @@ public class AfterSearch extends AgeSearch {
         super(timestamp, "<=");
     }
 
+    public AfterSearch(Instant instant) {
+        this((instant == null) ? instant.getMillis() : 0);
+    }
+
     @Override
     public String toString() {
         return OP_NAME + ":" + getInstant().toString();
+    }
+
+    @Override
+    public String getGerritQuery(ServerVersion serverVersion) {
+        Instant instant = getInstant();
+        if (serverVersion != null &&
+                serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH) &&
+                instant != null) {
+            return "after:{" + sInstantFormatter.print(instant) +'}';
+        }
+        // Need to leave off the operator and make sure we are using relative format
+        /* Gerrit only supports specifying one time unit, so we will normalize the period
+         *  into days.  */
+        return OP_NAME + ":" + String.valueOf(toDays()) + "d";
     }
 }

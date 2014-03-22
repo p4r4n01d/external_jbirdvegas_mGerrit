@@ -10,6 +10,8 @@ import com.jbirdvegas.mgerrit.search.SearchKeyword;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -142,7 +144,11 @@ public class GerritURL implements Parcelable
         } else {
             builder.append("?q=");
             addSeperator = appendStatus(builder, false);
-            appendSearchKeywords(builder, addSeperator);
+            try {
+                appendSearchKeywords(builder, addSeperator);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
 
         appendArgs(builder);
@@ -176,7 +182,8 @@ public class GerritURL implements Parcelable
         return false;
     }
 
-    private boolean appendSearchKeywords(StringBuilder builder, boolean addSeperator) {
+    private boolean appendSearchKeywords(StringBuilder builder, boolean addSeperator)
+            throws UnsupportedEncodingException {
         ServerVersion version = Config.getServerVersion(sContext);
         if (mSearchKeywords != null && !mSearchKeywords.isEmpty()) {
             if (addSeperator) {
@@ -190,7 +197,7 @@ public class GerritURL implements Parcelable
                     addSeperator = false;
                 }
 
-                String operator = keyword.getGerritQuery(version);
+                String operator =  URLEncoder.encode(keyword.getGerritQuery(version),"UTF-8");
                 if (operator != null && !operator.isEmpty()) {
                     builder.append(operator);
                     addSeperator = true;

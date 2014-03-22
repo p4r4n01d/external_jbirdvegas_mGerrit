@@ -24,13 +24,15 @@ import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Instant;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -105,8 +107,12 @@ public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
             .toFormatter();
 
 
+    protected static final DateTimeFormatter sInstantFormatter;
+
     static {
         registerKeyword(OP_NAME, AgeSearch.class);
+
+        sInstantFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.US);
     }
 
     public AgeSearch(String param, String operator) {
@@ -267,7 +273,7 @@ public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
      * @param period A period to retrieve the number of standard days for
      * @return The number of days spanned by the period.
      */
-    private static int getDaysInPeriod(final Period period) {
+    protected static int getDaysInPeriod(final Period period) {
         int totalDays = 0;
         Period temp = new Period(period);
         if (period.getYears() > 0) {
@@ -286,32 +292,28 @@ public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
     @Override
     public String getGerritQuery(ServerVersion serverVersion) {
         String operator = getOperator();
+
+        if ("<=".equals(operator) || "<".equals(operator)) {
+            new BeforeSearch(mInstant).getGerritQuery(serverVersion);
+        } else if (">=".equals(operator) || ">".equals(operator)) {
+            new AfterSearch(mInstant).getGerritQuery(serverVersion);
+        }
+
         if (serverVersion != null &&
                 serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH) &&
                 mInstant != null) {
-            if (">=".equals(operator) || ">".equals(operator)) {
-                return "before:" + mInstant.toString();
-            } else if ("<=".equals(operator) || "<".equals(operator)) {
-                return "after:" + mInstant.toString();
-            } else {
-                // Use a combination of before and after to get an interval
-                if (mPeriod == null) {
-                    mPeriod = new Period(mInstant, Instant.now());
-                }
-                DateTime now = new DateTime();
-                DateTime earlier = now.minus(adjust(mPeriod, +1));
-                DateTime later = now.minus(mPeriod);
-
-                SearchKeyword newer = new AfterSearch(earlier.toString());
-                SearchKeyword older = new BeforeSearch(later.toString());
-                return newer.getGerritQuery(serverVersion) + "+" + older.getGerritQuery(serverVersion);
+            // Use a combination of before and after to get an interval
+            if (mPeriod == null) {
+                mPeriod = new Period(mInstant, Instant.now());
             }
+            DateTime now = new DateTime();
+            DateTime earlier = now.minus(adjust(mPeriod, +1));
+            DateTime later = now.minus(mPeriod);
+
+            SearchKeyword newer = new AfterSearch(earlier.toString());
+            SearchKeyword older = new BeforeSearch(later.toString());
+            return newer.getGerritQuery(serverVersion) + "+" + older.getGerritQuery(serverVersion);
         } else {
-            if ("<=".equals(operator) || "<".equals(operator)) {
-                // These queries don't match any Gerrit queries
-                return "";
-            }
-
             // Need to leave off the operator and make sure we are using relative format
             /* Gerrit only supports specifying one time unit, so we will normalize the period
              *  into days.  */
@@ -319,7 +321,7 @@ public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
         }
     }
 
-    private int toDays() {
+    protected int toDays() {
         // Need to leave off the operator and make sure we are using relative format
         Period period = mPeriod;
         if (period == null) {
@@ -340,7 +342,7 @@ public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
             return mInstant.compareTo(rhs.mInstant);
         } else {
             // Compare the normalised period format (i.e. the period in days)
-            return Integer.compare(toDays(), rhs.toDays());
+            return toDays() - rhs.toDays();
         }
     }
 }
