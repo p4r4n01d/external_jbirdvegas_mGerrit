@@ -71,11 +71,10 @@ public abstract class CardsFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String SEARCH_QUERY = "SEARCH";
+    private static int sChangesLimit = 0;
     protected String TAG = "CardsFragment";
 
     private GerritURL mUrl;
-
-    private RequestQueue mRequestQueue;
 
     private FragmentActivity mParent;
 
@@ -105,12 +104,10 @@ public abstract class CardsFragment extends Fragment
 
             if (mEndlessAdapter == null || direction == Direction.Newer) return;
 
-            if (intent.getIntExtra(Finished.ITEMS_FETCHED_KEY, 0) == 0) {
-                mEndlessAdapter.finishedDataLoading();
+            int itemsFetched = intent.getIntExtra(Finished.ITEMS_FETCHED_KEY, 0);
+            if (itemsFetched < sChangesLimit) {
                 // Remove the endless adapter as we have no more changes to load
-                mEndlessAdapter.setEnabled(false);
-                //Tools.toggleAnimations(mAnimationsEnabled, mListView, mAnimAdapter, mAdapter);
-                //mEndlessAdapter = null;
+                mEndlessAdapter.finishedDataLoading();
             }
         }
     };
@@ -147,7 +144,7 @@ public abstract class CardsFragment extends Fragment
     {
         mParent = this.getActivity();
         View mCurrentFragment = this.getView();
-        mRequestQueue = Volley.newRequestQueue(mParent);
+        RequestQueue mRequestQueue = Volley.newRequestQueue(mParent);
 
         // Setup the list
         int[] to = new int[] { R.id.commit_card_title, R.id.commit_card_commit_owner,
@@ -185,11 +182,12 @@ public abstract class CardsFragment extends Fragment
             }
         });
 
+        sChangesLimit = mParent.getResources().getInteger(R.integer.changes_limit);
+
         mUrl = new GerritURL();
         // Need the account id of the owner here to maintain FK db constraint
         mUrl.setRequestDetailedAccounts(true);
         mUrl.setStatus(getQuery());
-        mUrl.setLimit(mParent.getResources().getInteger(R.integer.changes_limit));
 
         mSearchView = (GerritSearchView) mParent.findViewById(R.id.search);
     }
@@ -257,6 +255,7 @@ public abstract class CardsFragment extends Fragment
         }
 
         GerritURL url = new GerritURL(mUrl);
+        if (sChangesLimit > 0) url.setLimit(sChangesLimit);
 
         if (keywords == null || keywords.isEmpty()) {
             keywords = mSearchView.getLastQuery();
