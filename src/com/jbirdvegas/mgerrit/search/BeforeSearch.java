@@ -37,10 +37,6 @@ public class BeforeSearch extends AgeSearch {
         super(timestamp, ">=");
     }
 
-    public BeforeSearch(Instant instant) {
-        this((instant == null) ? instant.getMillis() : 0);
-    }
-
     @Override
     public String toString() {
         return OP_NAME + ":" + getInstant().toString();
@@ -48,7 +44,11 @@ public class BeforeSearch extends AgeSearch {
 
     @Override
     public String getGerritQuery(ServerVersion serverVersion) {
-        Instant instant = getInstant();
+        return _getGerritQuery(this, serverVersion);
+    }
+
+    public static String _getGerritQuery(AgeSearch ageSearch, ServerVersion serverVersion) {
+        Instant instant = ageSearch.getInstant();
         if (serverVersion != null &&
                 serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH) &&
                 instant != null) {

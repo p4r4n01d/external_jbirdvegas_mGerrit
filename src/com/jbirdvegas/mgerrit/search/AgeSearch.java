@@ -294,9 +294,9 @@ public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
         String operator = getOperator();
 
         if ("<=".equals(operator) || "<".equals(operator)) {
-            new BeforeSearch(mInstant).getGerritQuery(serverVersion);
+            return BeforeSearch._getGerritQuery(this, serverVersion);
         } else if (">=".equals(operator) || ">".equals(operator)) {
-            new AfterSearch(mInstant).getGerritQuery(serverVersion);
+            return AfterSearch._getGerritQuery(this, serverVersion);
         }
 
         if (serverVersion != null &&
