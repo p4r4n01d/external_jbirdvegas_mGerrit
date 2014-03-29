@@ -50,8 +50,11 @@ public class BeforeSearch extends AgeSearch {
     public static String _getGerritQuery(AgeSearch ageSearch, ServerVersion serverVersion) {
         Instant instant = ageSearch.getInstant();
         if (serverVersion != null &&
-                serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH) &&
-                instant != null) {
+                serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH)) {
+            if (instant == null) {
+                instant = AgeSearch.getInstantFromPeriod(ageSearch.getPeriod());
+            }
+
             return "before:{" + sInstantFormatter.print(instant) +'}';
         }
         return "";

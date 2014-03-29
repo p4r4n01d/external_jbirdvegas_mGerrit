@@ -249,6 +249,7 @@ public class GerritURL implements Parcelable
         dest.writeInt(mRequestDetailedAccounts ? 1 : 0);
         dest.writeString(mSortkey);
         dest.writeString(mRequestChangeDetail.name());
+        dest.writeInt(mLimit);
 
         int size;
         if (mSearchKeywords == null) size = 0;
@@ -267,6 +268,7 @@ public class GerritURL implements Parcelable
         mRequestDetailedAccounts = in.readInt() == 1;
         mSortkey = in.readString();
         mRequestChangeDetail = ChangeDetailLevels.valueOf(in.readString());
+        mLimit = in.readInt();
 
         int size = in.readInt();
         if (size > 0) {

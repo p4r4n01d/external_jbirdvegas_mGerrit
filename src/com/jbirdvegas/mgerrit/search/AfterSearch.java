@@ -51,13 +51,17 @@ public class AfterSearch extends AgeSearch {
     protected static String _getGerritQuery(AgeSearch ageSearch, ServerVersion serverVersion) {
         Instant instant = ageSearch.getInstant();
         if (serverVersion != null &&
-                serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH) &&
-                instant != null) {
+                serverVersion.isFeatureSupported(ServerVersion.VERSION_BEFORE_SEARCH)) {
+            if (instant == null) {
+                instant = AgeSearch.getInstantFromPeriod(ageSearch.getPeriod());
+            }
+
             return "after:{" + sInstantFormatter.print(instant) +'}';
         }
         // Need to leave off the operator and make sure we are using relative format
         /* Gerrit only supports specifying one time unit, so we will normalize the period
-         *  into days.  */
-        return OP_NAME + ":" + String.valueOf(ageSearch.toDays()) + "d";
+         *  into days.
+         * After search on the server only supports the parameter in timestamps */
+        return AgeSearch.OP_NAME + ":" + String.valueOf(ageSearch.toDays()) + "d";
     }
 }

@@ -21,6 +21,7 @@ import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.objects.ServerVersion;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Instant;
 import org.joda.time.Period;
@@ -334,6 +335,12 @@ public class AgeSearch extends SearchKeyword implements Comparable<AgeSearch> {
 
     protected Period getPeriod() { return mPeriod; }
     protected Instant getInstant() { return mInstant; }
+
+    protected static Instant getInstantFromPeriod(Period period) {
+        Instant now = new Instant();
+        Duration duration = period.toDurationTo(now);
+        return now.minus(duration);
+    }
 
     @Override
     public int compareTo(AgeSearch rhs) {

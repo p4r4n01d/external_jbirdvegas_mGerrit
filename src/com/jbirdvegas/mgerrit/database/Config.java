@@ -81,6 +81,7 @@ public class Config extends DatabaseTable {
         Cursor c = context.getContentResolver().query(CONTENT_URI,
                 new String[] { C_VALUE }, C_KEY + " = ?", new String[] { key }, null);
         if (c.moveToFirst()) value = c.getString(0);
+        c.close();
         return value;
     }
 
