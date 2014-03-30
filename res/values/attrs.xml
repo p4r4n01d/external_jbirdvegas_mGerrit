@@ -73,7 +73,7 @@
     <attr name="refreshStyle" format="reference"/>
     <declare-styleable name="ThemeableSwipeRefreshLayout">
         <attr name="refreshColors" format="reference"/>
-        <attr name="color1" format="reference"/>
+        <attr name="refreshColor1" format="reference"/>
         <attr name="color2" format="reference"/>
         <attr name="color3" format="reference"/>
         <attr name="color4" format="reference"/>

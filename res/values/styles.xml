@@ -159,14 +159,14 @@
     </style>
 
     <style name="RefreshView">
-        <item name="color1">@color/card_background</item>
+        <item name="refreshColor1">@color/card_background</item>
         <item name="color2">@color/text_orange</item>
         <item name="color3">@color/text_green</item>
         <item name="color4">@color/text_red</item>
     </style>
 
     <style name="RefreshView.Dark">
-        <item name="color1">@color/card_background_dark</item>
+        <item name="refreshColor1">@color/card_background_dark</item>
         <item name="color3">@color/text_green_light</item>
         <item name="color4">@color/text_light_red</item>
     </style>
