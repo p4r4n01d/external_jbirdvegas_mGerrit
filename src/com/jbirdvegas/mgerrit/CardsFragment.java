@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.support.v4.widget.SwipeRefreshLayout;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -54,6 +55,7 @@ import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.message.Finished;
+import com.jbirdvegas.mgerrit.message.StartingRequest;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 import com.jbirdvegas.mgerrit.search.AfterSearch;
 import com.jbirdvegas.mgerrit.search.BeforeSearch;
@@ -68,7 +70,8 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public abstract class CardsFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor> {
+        implements LoaderManager.LoaderCallbacks<Cursor>,
+        SwipeRefreshLayout.OnRefreshListener {
 
     public static final String SEARCH_QUERY = "SEARCH";
     private static int sChangesLimit = 0;
@@ -99,6 +102,8 @@ public abstract class CardsFragment extends Fragment
     private final BroadcastReceiver finishedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (mSwipeLayout != null) mSwipeLayout.setRefreshing(false);
+
             Intent processed = intent.getParcelableExtra(Finished.INTENT_KEY);
             Direction direction = (Direction) processed.getSerializableExtra(GerritService.CHANGES_LIST_DIRECTION);
 
@@ -109,6 +114,13 @@ public abstract class CardsFragment extends Fragment
                 // Remove the endless adapter as we have no more changes to load
                 mEndlessAdapter.finishedDataLoading();
             }
+        }
+    };
+
+    private final BroadcastReceiver startReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mSwipeLayout.setRefreshing(true);
         }
     };
 
@@ -124,6 +136,7 @@ public abstract class CardsFragment extends Fragment
     private Boolean mAnimationsEnabled = null;
 
     private GerritSearchView mSearchView;
+    private SwipeRefreshLayout mSwipeLayout;
 
 
     @Override
@@ -190,6 +203,9 @@ public abstract class CardsFragment extends Fragment
         mUrl.setStatus(getQuery());
 
         mSearchView = (GerritSearchView) mParent.findViewById(R.id.search);
+
+        mSwipeLayout = (SwipeRefreshLayout) mParent.findViewById(R.id.swipe_container);
+        mSwipeLayout.setOnRefreshListener(this);
     }
 
     private void setup()
@@ -213,6 +229,9 @@ public abstract class CardsFragment extends Fragment
 
         EasyTracker.getInstance(getActivity()).activityStart(getActivity());
 
+        LocalBroadcastManager.getInstance(mParent).registerReceiver(startReceiver,
+            new IntentFilter(StartingRequest.TYPE));
+
         LocalBroadcastManager.getInstance(mParent).registerReceiver(finishedReceiver,
                 new IntentFilter(Finished.TYPE));
     }
@@ -223,6 +242,7 @@ public abstract class CardsFragment extends Fragment
         LocalBroadcastManager.getInstance(mParent).unregisterReceiver(mSearchQueryListener);
         EasyTracker.getInstance(getActivity()).activityStop(getActivity());
 
+        LocalBroadcastManager.getInstance(mParent).unregisterReceiver(startReceiver);
         LocalBroadcastManager.getInstance(mParent).unregisterReceiver(finishedReceiver);
     }
 
@@ -422,5 +442,9 @@ public abstract class CardsFragment extends Fragment
         if (cursor.getCount() < 1 && mEndlessAdapter != null) {
             mEndlessAdapter.startDataLoading();
         }
+    }
+
+    @Override public void onRefresh() {
+        refresh(true);
     }
 }

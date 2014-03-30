@@ -86,4 +86,18 @@
         <item>@string/diff_option_internal</item>
         <item>@string/diff_option_external</item>
     </string-array>
+
+    <integer-array name="refresh_colors" translatable="false">
+        <item>@color/card_background_dark</item>
+        <item>@color/text_orange</item>
+        <item>@color/text_green</item>
+        <item>@color/text_red</item>
+    </integer-array>
+
+    <integer-array name="refresh_colors_dark" translatable="false">
+        <item>@color/card_background</item>
+        <item>@color/text_orange</item>
+        <item>@color/text_green</item>
+        <item>@color/text_red</item>
+    </integer-array>
 </resources>
