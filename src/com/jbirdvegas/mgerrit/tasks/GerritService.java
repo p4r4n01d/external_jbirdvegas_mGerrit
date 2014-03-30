@@ -50,11 +50,12 @@ public class GerritService extends IntentService {
     private GerritURL mCurrentUrl;
 
     // A list of the currently running sync processors
-    private static HashMap<GerritURL, SyncProcessor> runningTasks;
+    private static HashMap<GerritURL, SyncProcessor> sRunningTasks;
 
     // This is required for the service to be started
     public GerritService() {
         super(TAG);
+        sRunningTasks = new HashMap<>();
     }
 
     @Override
@@ -66,7 +67,7 @@ public class GerritService extends IntentService {
         mCurrentUrl = intent.getParcelableExtra(URL_KEY);
         SyncProcessor processor;
 
-        if (runningTasks.containsKey(mCurrentUrl)) return;
+        if (sRunningTasks.containsKey(mCurrentUrl)) return;
 
         // Determine which SyncProcessor to use here
         DataType dataType = (DataType) intent.getSerializableExtra(DATA_TYPE_KEY);
@@ -88,7 +89,7 @@ public class GerritService extends IntentService {
         // Call the SyncProcessor to fetch the data if necessary
         boolean needsSync = processor.isSyncRequired(this);
         if (needsSync) {
-            runningTasks.put(mCurrentUrl, processor);
+            sRunningTasks.put(mCurrentUrl, processor);
             processor.fetchData(mRequestQueue);
         }
     }
@@ -109,15 +110,19 @@ public class GerritService extends IntentService {
         GerritService.sendRequest(context, dataType, b);
     }
 
-    private boolean isProcessorRunning(SyncProcessor processor) {
+    private static boolean isProcessorRunning(SyncProcessor processor) {
         Class<? extends SyncProcessor> clazz = processor.getClass();
-        for (SyncProcessor next : runningTasks.values()) {
+        for (SyncProcessor next : sRunningTasks.values()) {
             if (next.getClass().equals(clazz)) return true;
         }
         return false;
     }
 
+    protected static HashMap<GerritURL, SyncProcessor> getRunningProcessors() {
+        return sRunningTasks;
+    }
+
     protected static void finishedRequest(GerritURL url) {
-        runningTasks.remove(url);
+        sRunningTasks.remove(url);
     }
 }

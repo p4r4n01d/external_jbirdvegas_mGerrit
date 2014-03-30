@@ -37,6 +37,8 @@ import com.jbirdvegas.mgerrit.tasks.GerritService.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
@@ -66,9 +68,10 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
 
     @Override
     boolean isSyncRequired(Context context) {
-        if (mDirection == Direction.Older) {
-            return true;
-        }
+        // Are we already fetching changes for this status?
+        if (areFetchingChangesForStatus(getQuery())) return false;
+
+        else if (mDirection == Direction.Older) return true;
 
         long syncInterval = context.getResources().getInteger(R.integer.changes_sync_interval);
         long lastSync = SyncTime.getValueForQuery(context, SyncTime.CHANGES_LIST_SYNC_TIME, getQuery());
@@ -135,6 +138,17 @@ class ChangeListProcessor extends SyncProcessor<JSONCommit[]> {
                 return commit;
         }
         return null;
+    }
+
+    private boolean areFetchingChangesForStatus(@NotNull String status) {
+        Class<? extends SyncProcessor> clazz = ChangeListProcessor.class;
+        HashMap<GerritURL, SyncProcessor> processors = GerritService.getRunningProcessors();
+
+        for (Map.Entry<GerritURL, SyncProcessor> entry : processors.entrySet()) {
+            if (entry.getValue().getClass().equals(clazz) && status.equals(entry.getKey().getQuery()))
+                return true;
+        }
+        return false;
     }
 
     @Override
