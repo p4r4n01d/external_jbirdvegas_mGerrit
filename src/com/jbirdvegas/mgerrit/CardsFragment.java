@@ -206,6 +206,9 @@ public abstract class CardsFragment extends Fragment
 
         mSwipeLayout = (SwipeRefreshLayout) mParent.findViewById(R.id.swipe_container);
         mSwipeLayout.setOnRefreshListener(this);
+
+        mSwipeLayout.setColorScheme(R.color.text_orange, R.color.text_green, R.color.text_red,
+                android.R.color.transparent);
     }
 
     private void setup()

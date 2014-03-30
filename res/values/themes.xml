@@ -45,7 +45,6 @@
         <item name="backgroundTop">@drawable/border_top</item>
         <item name="acceptIcon">@drawable/ic_action_accept</item>
         <item name="cancelIcon">@drawable/ic_action_cancel</item>
-        <item name="refreshStyle">@style/RefreshView</item>
     </style>
 
     <style name="Theme.Dark" parent="android:style/Theme.Holo">
@@ -76,6 +75,5 @@
         <item name="backgroundTop">@drawable/border_top_dark</item>
         <item name="acceptIcon">@drawable/ic_action_accept_dark</item>
         <item name="cancelIcon">@drawable/ic_action_cancel_dark</item>
-        <item name="refreshStyle">@style/RefreshView.Dark</item>
     </style>
 </resources>
