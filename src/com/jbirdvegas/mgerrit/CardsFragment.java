@@ -205,7 +205,6 @@ public abstract class CardsFragment extends Fragment
         mSearchView = (GerritSearchView) mParent.findViewById(R.id.search);
 
         mSwipeLayout = (SwipeRefreshLayout) mParent.findViewById(R.id.swipe_container);
-        mSwipeLayout.setOnRefreshListener(this);
 
         mSwipeLayout.setColorScheme(R.color.text_orange, R.color.text_green, R.color.text_red,
                 android.R.color.transparent);
@@ -237,6 +236,8 @@ public abstract class CardsFragment extends Fragment
 
         LocalBroadcastManager.getInstance(mParent).registerReceiver(finishedReceiver,
                 new IntentFilter(Finished.TYPE));
+
+        mSwipeLayout.setOnRefreshListener(this);
     }
 
     @Override
@@ -247,6 +248,8 @@ public abstract class CardsFragment extends Fragment
 
         LocalBroadcastManager.getInstance(mParent).unregisterReceiver(startReceiver);
         LocalBroadcastManager.getInstance(mParent).unregisterReceiver(finishedReceiver);
+
+        mSwipeLayout.setOnRefreshListener(null);
     }
 
     /**
@@ -311,8 +314,6 @@ public abstract class CardsFragment extends Fragment
 
         mNeedsForceUpdate = forceUpdate;
         if (this.isAdded() && forceUpdate) loadNewerChanges();
-
-
     }
 
     @Override
