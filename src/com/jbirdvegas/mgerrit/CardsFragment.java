@@ -84,6 +84,8 @@ public abstract class CardsFragment extends Fragment
     private boolean mIsDirty = false;
     // Indicates whether a request to force an update is pending
     private boolean mNeedsForceUpdate = false;
+    // Indicates whether the current fragment is refreshing
+    private boolean mIsRefreshing = false;
 
     // Broadcast receiver to receive processed search query changes
     private BroadcastReceiver mSearchQueryListener = new BroadcastReceiver() {
@@ -330,6 +332,10 @@ public abstract class CardsFragment extends Fragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
+        if (mSwipeLayout != null) {
+            mSwipeLayout.setRefreshing(mIsRefreshing);
+        }
+
         /* Refresh if necessary. As the fragment has just been attached,
          *  we can assume it is added here */
         if (!mIsDirty) return;
@@ -460,11 +466,19 @@ public abstract class CardsFragment extends Fragment
 
     @Override
     public void onStartRefresh() {
-        mSwipeLayout.setRefreshing(true);
+        if (isAdded() && mSwipeLayout != null) {
+            mSwipeLayout.setRefreshing(true);
+        } else {
+            mIsRefreshing = true;
+        }
     }
 
     @Override
     public void onStopRefresh() {
-        mSwipeLayout.setRefreshing(false);
+        if (isAdded() && mSwipeLayout != null) {
+            mSwipeLayout.setRefreshing(false);
+        } else {
+            mIsRefreshing = false;
+        }
     }
 }

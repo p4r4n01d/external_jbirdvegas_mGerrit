@@ -18,8 +18,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.jbirdvegas.mgerrit"
-          android:versionCode="210000"
-          android:versionName="2.10.000-DEVELOP">
+          android:versionCode="210005"
+          android:versionName="2.10.005-DEVELOP">
 
     <uses-sdk android:minSdkVersion="14"
         android:targetSdkVersion="19"/>

@@ -368,11 +368,17 @@ public class GerritControllerActivity extends FragmentActivity
 
     @Override
     public void onStartRefresh() {
-        mChangeList.getCurrentFragment().onStartRefresh();
+        CardsFragment currentFragment = mChangeList.getCurrentFragment();
+        if (currentFragment != null) {
+            currentFragment.onStartRefresh();
+        }
     }
 
     @Override
     public void onStopRefresh() {
-        mChangeList.getCurrentFragment().onStopRefresh();
+        CardsFragment currentFragment = mChangeList.getCurrentFragment();
+        if (currentFragment != null) {
+            currentFragment.onStopRefresh();
+        }
     }
 }
