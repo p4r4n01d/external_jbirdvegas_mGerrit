@@ -34,7 +34,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -56,7 +55,8 @@ import com.jbirdvegas.mgerrit.views.GerritSearchView;
 
 import org.jetbrains.annotations.Nullable;
 
-public class GerritControllerActivity extends FragmentActivity {
+public class GerritControllerActivity extends FragmentActivity
+    implements Refreshable {
 
     private static final String GERRIT_INSTANCE = "gerrit";
     private String mGerritWebsite;
@@ -130,7 +130,6 @@ public class GerritControllerActivity extends FragmentActivity {
         AnalyticsHelper.sendAnalyticsEvent(this, AnalyticsHelper.GA_APP_OPEN,
                 AnalyticsHelper.GA_THEME_SET_ON_OPEN, Prefs.getCurrentTheme(this), null);
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -365,5 +364,15 @@ public class GerritControllerActivity extends FragmentActivity {
         });
         builder.create();
         builder.show();
+    }
+
+    @Override
+    public void onStartRefresh() {
+        mChangeList.getCurrentFragment().onStartRefresh();
+    }
+
+    @Override
+    public void onStopRefresh() {
+        mChangeList.getCurrentFragment().onStopRefresh();
     }
 }
