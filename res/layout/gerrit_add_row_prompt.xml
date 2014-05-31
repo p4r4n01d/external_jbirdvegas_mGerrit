@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:focusable="false"
-        android:text="Add your own Gerrit here..."/>
+        android:text="@string/add_custom_gerrit"/>
 
     <TextView
         android:id="@+id/txtGerritURL"
