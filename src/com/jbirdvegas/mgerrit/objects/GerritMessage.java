@@ -25,15 +25,21 @@ public abstract class GerritMessage {
 
     public final String mUrl;
     private final Intent mIntent;
+    private final String mStatus;
 
-    public GerritMessage(@NotNull Intent intent, String url) {
+    public GerritMessage(@NotNull Intent intent, String url, String status) {
         this.mIntent = intent;
         this.mUrl = url;
+        this.mStatus = status;
     }
 
     public String getUrl() { return mUrl; }
 
     public Intent getIntent() {
         return mIntent;
+    }
+
+    public String getStatus() {
+        return mStatus;
     }
 }

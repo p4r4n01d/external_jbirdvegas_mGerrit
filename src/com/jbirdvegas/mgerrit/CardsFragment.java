@@ -451,6 +451,10 @@ public abstract class CardsFragment extends Fragment
 
     /* Tell the endless adapter we have finished loading when there was no data */
     public void onEventMainThread(Finished ev) {
+        if (!getQuery().equals(ev.getStatus())) {
+            return;
+        }
+
         mSwipeLayout.setRefreshing(false);
 
         Intent processed = ev.getIntent();
@@ -465,11 +469,14 @@ public abstract class CardsFragment extends Fragment
     }
 
     public void onEventMainThread(StartingRequest ev) {
-        // TODO ----------------------------------------------------- Check status and set refreshing if true
-        mSwipeLayout.setRefreshing(true);
+        if (getQuery().equals(ev.getStatus())) {
+            mSwipeLayout.setRefreshing(true);
+        }
     }
 
     public void onEventMainThread(ErrorDuringConnection ev) {
-        mSwipeLayout.setRefreshing(false);
+        if (getQuery().equals(ev.getStatus())) {
+            mSwipeLayout.setRefreshing(false);
+        }
     }
 }

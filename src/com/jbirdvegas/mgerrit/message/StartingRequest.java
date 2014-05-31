@@ -21,9 +21,15 @@ import android.content.Intent;
 
 import com.jbirdvegas.mgerrit.objects.GerritMessage;
 
+import org.jetbrains.annotations.NotNull;
+
 public class StartingRequest extends GerritMessage {
 
     public StartingRequest(Intent intent, String url) {
-        super(intent, url);
+        super(intent, url, null);
+    }
+
+    public StartingRequest(@NotNull Intent intent, String url, String status) {
+        super(intent, url, status);
     }
 }

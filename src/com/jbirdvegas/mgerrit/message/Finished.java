@@ -3,7 +3,6 @@ package com.jbirdvegas.mgerrit.message;
 import android.content.Intent;
 
 import com.jbirdvegas.mgerrit.objects.GerritMessage;
-import com.jbirdvegas.mgerrit.tasks.GerritService;
 
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)
@@ -25,8 +24,8 @@ public class Finished extends GerritMessage {
 
     private final int mItems;
 
-    public Finished(Intent intent, int items) {
-        super(intent, intent.getStringExtra(GerritService.URL_KEY));
+    public Finished(Intent intent, String url, String status, int items) {
+        super(intent, url, status);
         this.mItems = items;
     }
 

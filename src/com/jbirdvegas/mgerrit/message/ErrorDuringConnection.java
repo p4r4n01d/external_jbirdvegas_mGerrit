@@ -24,8 +24,8 @@ public class ErrorDuringConnection extends GerritMessage {
 
     private final Exception exception;
 
-    public ErrorDuringConnection(Intent intent, Exception mGerritException, String url) {
-        super(intent, url);
+    public ErrorDuringConnection(Intent intent, String url, String status, Exception mGerritException) {
+        super(intent, url, status);
         this.exception = mGerritException;
     }
 

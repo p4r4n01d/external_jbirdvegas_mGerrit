@@ -89,6 +89,12 @@ abstract class SyncProcessor<T> {
         return getUrl().getQuery();
     }
 
+    // Helper method to return the change status
+    private String getStatus() {
+        if (mCurrentUrl == null) return null;
+        else return mCurrentUrl.getStatus();
+    }
+
     public Intent getIntent() { return mIntent; }
 
     /**
@@ -127,7 +133,7 @@ abstract class SyncProcessor<T> {
      *  fetchData(String, RequestQueue).
      */
     protected void fetchData(RequestQueue queue) {
-        fetchData(getUrl().toString(), queue);
+        fetchData(mCurrentUrl.toString(), queue);
     }
 
     /**
@@ -141,7 +147,7 @@ abstract class SyncProcessor<T> {
                 getListener(url), new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mEventBus.post(new ErrorDuringConnection(mIntent, volleyError, url));
+                mEventBus.post(new ErrorDuringConnection(mIntent, url, getStatus(), volleyError));
             }
         });
 
@@ -151,7 +157,7 @@ abstract class SyncProcessor<T> {
     protected void fetchData(final String url, Request<T> request, RequestQueue queue) {
         if (queue == null) queue = Volley.newRequestQueue(getContext());
 
-        mEventBus.post(new StartingRequest(mIntent, url));
+        mEventBus.post(new StartingRequest(mIntent, url, getStatus()));
         queue.add(request);
     }
 
@@ -196,9 +202,7 @@ abstract class SyncProcessor<T> {
                 numItems = insert(mData);
             }
 
-            Intent intent = mIntent;
-            intent.putExtra(GerritService.URL_KEY, mUrl);
-            EventBus.getDefault().post(new Finished(intent, numItems));
+            EventBus.getDefault().post(new Finished(mIntent, mUrl, getStatus(), numItems));
             if (mData != null) doPostProcess(mData);
 
             GerritService.finishedRequest(mCurrentUrl);

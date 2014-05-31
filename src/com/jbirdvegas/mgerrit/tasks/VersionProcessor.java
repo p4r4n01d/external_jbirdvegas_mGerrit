@@ -83,13 +83,13 @@ public class VersionProcessor extends SyncProcessor<String> {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 if (volleyError == null || volleyError.networkResponse == null) {
-                    mEventBus.post(new ErrorDuringConnection(getIntent(), volleyError, mUrl));
+                    mEventBus.post(new ErrorDuringConnection(getIntent(), mUrl, null, volleyError));
 
                 } else if (volleyError.networkResponse.statusCode == 404) {
                     // Pretend we got a response
                     getListener(mUrl).onResponse(Config.VERSION_DEFAULT);
                 } else {
-                    mEventBus.post(new ErrorDuringConnection(getIntent(), volleyError, mUrl));
+                    mEventBus.post(new ErrorDuringConnection(getIntent(), mUrl, null, volleyError));
                 }
             }
         });
