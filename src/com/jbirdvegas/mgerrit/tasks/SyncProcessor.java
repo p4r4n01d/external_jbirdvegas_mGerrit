@@ -32,6 +32,8 @@ import com.jbirdvegas.mgerrit.message.Finished;
 import com.jbirdvegas.mgerrit.message.StartingRequest;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * Base class that the GerritService expects as a contract to synchronise data from the
  *  server into the database. Comes with a decent dose of Generics
@@ -39,6 +41,7 @@ import com.jbirdvegas.mgerrit.objects.GerritURL;
  */
 abstract class SyncProcessor<T> {
     protected final Context mContext;
+    private final EventBus mEventBus;
     private GerritURL mCurrentUrl;
     private ResponseHandler mResponseHandler;
     private final Intent mIntent;
@@ -60,8 +63,7 @@ abstract class SyncProcessor<T> {
      *               this SyncProcessor.
      */
     SyncProcessor(Context context, Intent intent) {
-        this.mContext = context;
-        this.mIntent = intent;
+        this(context, intent, null);
     }
 
     /**
@@ -75,6 +77,7 @@ abstract class SyncProcessor<T> {
         this.mContext = context;
         this.mCurrentUrl = url;
         this.mIntent = intent;
+        this.mEventBus = EventBus.getDefault();
     }
 
     protected Context getContext() { return mContext; }
@@ -138,7 +141,7 @@ abstract class SyncProcessor<T> {
                 getListener(url), new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                new ErrorDuringConnection(mContext, volleyError, url);
+                mEventBus.post(new ErrorDuringConnection(mIntent, volleyError, url));
             }
         });
 
@@ -148,7 +151,7 @@ abstract class SyncProcessor<T> {
     protected void fetchData(final String url, Request<T> request, RequestQueue queue) {
         if (queue == null) queue = Volley.newRequestQueue(getContext());
 
-        new StartingRequest(mContext, url).sendUpdateMessage();
+        mEventBus.post(new StartingRequest(mIntent, url));
         queue.add(request);
     }
 
@@ -195,7 +198,7 @@ abstract class SyncProcessor<T> {
 
             Intent intent = mIntent;
             intent.putExtra(GerritService.URL_KEY, mUrl);
-            new Finished(mContext, null, intent, numItems).sendUpdateMessage();
+            EventBus.getDefault().post(new Finished(intent, numItems));
             if (mData != null) doPostProcess(mData);
 
             GerritService.finishedRequest(mCurrentUrl);

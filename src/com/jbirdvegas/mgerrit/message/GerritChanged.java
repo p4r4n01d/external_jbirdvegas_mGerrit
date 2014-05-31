@@ -1,8 +1,8 @@
-package com.jbirdvegas.mgerrit.objects;
+package com.jbirdvegas.mgerrit.message;
 
 /*
- * Copyright (C) 2013 Android Open Kang Project (AOKP)
- *  Author: Evan Conway (P4R4N01D), 2013
+ * Copyright (C) 2014 Android Open Kang Project (AOKP)
+ *  Author: Evan Conway (P4R4N01D), 2014
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,24 +16,15 @@ package com.jbirdvegas.mgerrit.objects;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+public class GerritChanged {
 
-import android.content.Intent;
+    private final String mNewGerrit;
 
-import org.jetbrains.annotations.NotNull;
-
-public abstract class GerritMessage {
-
-    public final String mUrl;
-    private final Intent mIntent;
-
-    public GerritMessage(@NotNull Intent intent, String url) {
-        this.mIntent = intent;
-        this.mUrl = url;
+    public GerritChanged(String newGerrit) {
+        this.mNewGerrit = newGerrit;
     }
 
-    public String getUrl() { return mUrl; }
-
-    public Intent getIntent() {
-        return mIntent;
+    public String getNewGerrit() {
+        return mNewGerrit;
     }
 }

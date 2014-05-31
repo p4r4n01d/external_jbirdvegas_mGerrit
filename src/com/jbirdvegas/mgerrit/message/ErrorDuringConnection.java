@@ -1,12 +1,8 @@
 package com.jbirdvegas.mgerrit.message;
 
-import android.content.Context;
 import android.content.Intent;
 
-import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.objects.GerritMessage;
-
-import java.util.Map;
 
 /*
  * Copyright (C) 2013 Android Open Kang Project (AOKP)
@@ -26,35 +22,12 @@ import java.util.Map;
  */
 public class ErrorDuringConnection extends GerritMessage {
 
-    /* Note: Must have the type declared static and public so receivers can subscribe
-     * to this type of message */
-    public static final String TYPE = "ErrorDuringConnection";
     private final Exception exception;
 
-    public ErrorDuringConnection(Context context, Exception mGerritException, String url) {
-        super(context, url);
+    public ErrorDuringConnection(Intent intent, Exception mGerritException, String url) {
+        super(intent, url);
         this.exception = mGerritException;
     }
 
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public String getMessage() {
-        return getContext().getString(R.string.communications_error);
-    }
-
-    @Override
-    protected Intent packMessage(Map<String, String> map) {
-        Intent intent = new Intent(getType());
-
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            intent.putExtra(entry.getKey(), entry.getValue());
-            intent.putExtra(URL, mUrl);
-            intent.putExtra(GerritMessage.EXCEPTION, exception);
-        }
-        return intent;
-    }
+    public Exception getException() { return exception; }
 }

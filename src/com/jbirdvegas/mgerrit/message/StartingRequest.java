@@ -17,31 +17,13 @@ package com.jbirdvegas.mgerrit.message;
  *  limitations under the License.
  */
 
-import android.content.Context;
 import android.content.Intent;
 
-import com.jbirdvegas.mgerrit.R;
 import com.jbirdvegas.mgerrit.objects.GerritMessage;
-
-import java.util.Map;
 
 public class StartingRequest extends GerritMessage {
 
-    /* Note: Must have the type declared static and public so receivers can subscribe
-     * to this type of message */
-    public static final String TYPE = "Establishing Connection";
-
-    public StartingRequest(Context context, String url) {
-        super(context, url);
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public String getMessage() {
-        return getContext().getString(R.string.connection_starting);
+    public StartingRequest(Intent intent, String url) {
+        super(intent, url);
     }
 }

@@ -60,6 +60,7 @@
         <item>@string/theme_dark_value</item>
     </string-array>
     <string-array name="library_titles" translatable="false">
+        <item>@string/event_bus</item>
         <item>@string/jodatime</item>
         <item>@string/listview_animations</item>
         <item>@string/nine_old_androids</item>
@@ -68,6 +69,7 @@
     </string-array>
 
     <string-array name="library_websites" translatable="false">
+        <item>@string/event_bus_website</item>
         <item>@string/jodatime_website</item>
         <item>@string/listview_animations_website</item>
         <item>@string/nine_old_androids_website</item>
