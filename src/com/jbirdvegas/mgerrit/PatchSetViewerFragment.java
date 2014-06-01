@@ -459,12 +459,12 @@ public class PatchSetViewerFragment extends Fragment
         onLoadFinished(cursorLoader, null);
     }
 
-    public void onMainEvent(StatusSelected ev) {
+    public void onEventMainThread(StatusSelected ev) {
         setStatus(ev.getStatus());
         loadChange(false);
     }
 
-    public void onMainEvent(ChangeLoadingFinished ev) {
+    public void onEventMainThread(ChangeLoadingFinished ev) {
         String status = ev.getStatus();
 
         /* We may have got a broadcast saying that data from another tab
