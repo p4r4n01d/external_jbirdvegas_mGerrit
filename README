@@ -5,8 +5,11 @@ Gerrit instance viewer supporting the most popular Android ROMs.
 Supports tracking the Gerrit Instances for:
 - AOKP
 - AOSP
+- CarbonROM
 - CM
 - Gerrit Review
+- Omni
+- PAC-man
 - PA
 - Add your own...
 
@@ -28,11 +31,17 @@ Change List Searching
 -------------------
 Searching the change lists, either the 'Review', 'Merged' or 'Abandoned' tabs is designed to mimic the functionality in the Gerrit
  web interface. As each change contains alot of different data, Gerrit uses what are known as operators. To avoid confusing these
- with what they call boolean operators we will call these "keywords". 
+ with what they call boolean operators we will call these "keywords".
 
 Keywords: Act as restrictions on the search. As more keywords are added to the same query string, they further restrict the returned
  results.
 
+As an example, searching for "subject:warnings" will return a list of chnages where the commit subject contains the string "warnings"
+ in the locally stored changes for the current tab.
+
+Note: these search queries operate on the data stored locally in the database and do not query the Gerrit server. It is recomended
+ to refresh the data before quering to make sure the most recent changes will be available to be searched.
+Currently, it is required to re-submit the search query when changing tabs as each one operates independently.
 
 Supported keywords
 ~~~~~~~~~~~~~~~~~~
@@ -42,7 +51,9 @@ change:'ID'; changeid:'ID'
 The change-Id that was scraped out of the commit message. Performs a partial match, so only the first few characters need to be specified.
 
 message:'MESSAGE'; subject:'MESSAGE'; intitle:'MESSAGE'
-Changes that match MESSAGE arbitrary string in the first line of the commit message.
+Changes that match MESSAGE arbitrary string in the first line of the commit message. The string MESSAGE can be quoted (") which will
+ only show changes that contain exactly the string MESSAGE. If the string is unquoted and contains spaces, only the first word will
+ be used.
 
 owner:'USER'
 Changes originally submitted by USER. Identifier that uniquely identifies one account. The user can be:
@@ -63,7 +74,7 @@ Changes for BRANCH. This is the short name shown in the web interface without th
 age:'OP''AGE'
     Amount of time that has expired since the change was last updated with a review comment or new patch set. Unlike the Gerrit web interface, this supports both specifing absolute and relative times.
 Absolute:
- 'AGE' must be of a form specified by the ISO standard, where the date is mandatory and the time is optional. YYYY-MM-DDTHH:mm:ss fits this format
+ 'AGE' must be of a form specified by the ISO standard, where the date is mandatory and the time is optional. YYYY-MM-DDTHH:mm:ss fits this format. Should be in server time as no datetime conversion is performed.
 Relative:
 'AGE' can be provided as a period of time since the current time, for example to view changes 2 days ago use:
 	age:"2 days"
@@ -88,10 +99,10 @@ The supported operators are:
     - '=': Default. Search for changes equal to the given time give or take one unit from the shortest time interval. For example the search:
 	age:"=5 weeks 2 days"	is equivilant to	age:">5 weeks 1 days" age:"<5 weeks 3 days"
 Note: Specifying the same unit multiple times in a single keyword stacks, with the value accumulating. For example:
-	age:"5 weeks 2w"		is equivilant to	age:"5 weeks"
+	age:"5 weeks 2w"		is equivilant to	age:"7 weeks"
 
 
-Licence
+License
 -------
 mGerrit is licensed as Apache v2
 /*
@@ -115,6 +126,9 @@ Building
 mGerrit building instructions (from base of repository):
  ANT: ant clean debug
  gradle: gradle clean build
+ 
+ gradle 
+ requires Build Tools revision 19.1.0
 
 
 AOKP
