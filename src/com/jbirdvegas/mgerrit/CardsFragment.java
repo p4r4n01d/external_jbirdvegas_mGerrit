@@ -221,7 +221,7 @@ public abstract class CardsFragment extends Fragment
         super.onStop();
         EasyTracker.getInstance(getActivity()).activityStop(getActivity());
 
-        EventBus.getDefault().unregister(this);
+        mEventBus.unregister(this);
     }
 
     /**

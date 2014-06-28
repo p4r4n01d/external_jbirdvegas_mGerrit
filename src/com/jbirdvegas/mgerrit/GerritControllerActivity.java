@@ -286,7 +286,7 @@ public class GerritControllerActivity extends FragmentActivity {
         }
 
         if (mTwoPane) {
-            mChangeDetail.setSelectedChange(changeId);
+            mChangeDetail.loadChange(changeId);
         } else if (ev.isExpanded()) {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.

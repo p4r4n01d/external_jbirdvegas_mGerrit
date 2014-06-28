@@ -102,7 +102,7 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
 
     public void itemClickListener(View view) {
         TagHolder vh = (TagHolder) view.getTag();
-        EventBus.getDefault().post(new NewChangeSelected(vh.changeid, vh.changeNumber, vh.changeStatus, true));
+        EventBus.getDefault().postSticky(new NewChangeSelected(vh.changeid, vh.changeNumber, vh.changeStatus, true));
 
         // Set this view as selected
         setSelectedChangeId((CommitCard) view, vh.changeid);
