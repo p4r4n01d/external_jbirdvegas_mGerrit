@@ -25,7 +25,6 @@ import android.util.Pair;
 
 import com.jbirdvegas.mgerrit.PatchSetViewerActivity;
 import com.jbirdvegas.mgerrit.PatchSetViewerFragment;
-import com.jbirdvegas.mgerrit.R;
 
 public class PatchSetAdapter extends FragmentStatePagerAdapter {
     private final PatchSetViewerActivity mParent;
@@ -46,18 +45,11 @@ public class PatchSetAdapter extends FragmentStatePagerAdapter {
         mBundle.putString(PatchSetViewerFragment.CHANGE_ID, change.first);
         mBundle.putInt(PatchSetViewerFragment.CHANGE_NO, change.second);
         fragment.setArguments(mBundle);
-
-        setTitle(change.second);
         return fragment;
     }
 
     @Override
     public int getCount() {
         return mParent.getNumberOfChanges();
-    }
-
-    private void setTitle(int commitNumber) {
-        String s = mParent.getResources().getString(R.string.change_detail_heading);
-        mParent.setTitle(String.format(s, commitNumber));
     }
 }

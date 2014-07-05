@@ -66,6 +66,7 @@ public class PatchSetViewerActivity extends FragmentActivity
     private String mStatus;
     private String mChangeId;
     private Integer mChangeNumber;
+    private Integer mCurrentTab;
 
     private Cursor mCursor;
     private static Integer sChangeIdIndex;
@@ -89,7 +90,7 @@ public class PatchSetViewerActivity extends FragmentActivity
         setSelectedStatus(mStatus);
 
         // Don't pass args here as it does not have search query information
-        getSupportLoaderManager().initLoader(0, null, this);
+        getSupportLoaderManager().initLoader(20, null, this);
 
         mAdapter = new PatchSetAdapter(this, getSupportFragmentManager(), args);
 
@@ -98,35 +99,18 @@ public class PatchSetViewerActivity extends FragmentActivity
         mViewPager = (ViewPager) findViewById(R.id.tabs);
         mViewPager.setAdapter(mAdapter);
 
+        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                onNewChangeSelected(position);
+            }
+        });
+    }
 
-        mViewPager
-                .setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                    @Override
-                    public void onPageSelected(int position) {
-                        Pair<String, Integer> change = getChangeAtPosition(position);
-                        SelectedChange.setSelectedChange(PatchSetViewerActivity.this, change.first, change.second, mStatus);
-                    }
-                });
-
-
-        /* If there was a fragment state save from previous configurations of
-         * this activity, then it doesn't need to be added again.*/
-        //if (savedInstanceState == null) {
-            /* Create the detail fragment and add it to the activity
-             * using a fragment transaction.
-             * Copy all the intent arguments over to the fragment */
-            /*PatchSetViewerFragment fragment = new PatchSetViewerFragment();
-            Bundle args = new Bundle();
-            args.putAll(getIntent().getExtras());
-            fragment.setArguments(args);
-
-            // Display the fragment
-            getSupportFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, fragment)
-                    .commit();
-        } else {
-            setContentView(R.layout.commit_list);
-        }*/
+    private void onNewChangeSelected(int position) {
+        Pair<String, Integer> change = getChangeAtPosition(position);
+        SelectedChange.setSelectedChange(this, change.first, change.second, mStatus);
+        setTitleWithCommit(change.second);
     }
 
     @Override
@@ -230,20 +214,34 @@ public class PatchSetViewerActivity extends FragmentActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        /* Weird behaviour: This method gets called multiple times. Once after
+         *  initialising this activity and starting the loader, then again later without
+         *  manually resetting the loaders. If the current tab is set we have been here,
+         *  so we don't need to find the page again.
+         *
+         *  Note: We could respond to the database being updated here (this is the only
+         *   logical reason explaining the above), but this is called too frequently,
+         *  so we will only update this when the user opens the activity
+         */
+
+        int pos = 0;
         mCursor = cursor;
         sChangeIdIndex = cursor.getColumnIndex(UserChanges.C_CHANGE_ID);
         sChangeNumberIndex = cursor.getColumnIndex(UserChanges.C_COMMIT_NUMBER);
 
-        int pos = -1;
         while (cursor.moveToNext()) {
             if (cursor.getString(sChangeIdIndex).equals(mChangeId)) {
                 pos = cursor.getPosition();
                 break;
             }
         }
-
         mAdapter.notifyDataSetChanged();
-        if (pos >= 0) mViewPager.setCurrentItem(pos);
+
+        if (mCurrentTab == null) {
+            mCurrentTab = pos;
+            if (mCurrentTab >= 0) mViewPager.setCurrentItem(mCurrentTab);
+            onNewChangeSelected(mCurrentTab);
+        }
     }
 
     @DebugLog
@@ -255,6 +253,11 @@ public class PatchSetViewerActivity extends FragmentActivity
     public int getNumberOfChanges() {
         if (mCursor == null || mCursor.isClosed()) return 0;
         return mCursor.getCount();
+    }
+
+    private void setTitleWithCommit(int commitNumber) {
+        String s = getResources().getString(R.string.change_detail_heading);
+        setTitle(String.format(s, commitNumber));
     }
 
     // Listen for processed search query changes
