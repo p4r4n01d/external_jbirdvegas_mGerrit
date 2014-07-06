@@ -52,6 +52,7 @@ import com.jbirdvegas.mgerrit.helpers.Tools;
 import com.jbirdvegas.mgerrit.message.ChangeLoadingFinished;
 import com.jbirdvegas.mgerrit.message.ErrorDuringConnection;
 import com.jbirdvegas.mgerrit.message.Finished;
+import com.jbirdvegas.mgerrit.message.NewChangeSelected;
 import com.jbirdvegas.mgerrit.message.SearchQueryChanged;
 import com.jbirdvegas.mgerrit.message.StartingRequest;
 import com.jbirdvegas.mgerrit.objects.GerritURL;
@@ -214,6 +215,11 @@ public abstract class CardsFragment extends Fragment
         EasyTracker.getInstance(getActivity()).activityStart(getActivity());
 
         mEventBus.registerSticky(this);
+
+        NewChangeSelected ev = mEventBus.getStickyEvent(NewChangeSelected.class);
+        if (ev != null && ev.compareStatuses(getQuery())) {
+            mAdapter.setSelectedChangeId(ev.getChangeId());
+        }
     }
 
     @Override

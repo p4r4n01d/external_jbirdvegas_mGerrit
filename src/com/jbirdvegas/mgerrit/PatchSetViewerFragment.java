@@ -269,7 +269,7 @@ public class PatchSetViewerFragment extends Fragment
 
         if (direct) loadChange(changeID);
         else {
-            mEventBus.post(new NewChangeSelected(changeID, changeNumber, mStatus));
+            mEventBus.post(new NewChangeSelected(changeID, changeNumber, mStatus, this));
         }
     }
 

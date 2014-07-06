@@ -48,7 +48,6 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
     private String selectedChangeId;
     private CommitCard selectedChangeView;
 
-
     public ChangeListAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags,
                              String status) {
         super(context, layout, c, from, to, flags);
@@ -110,8 +109,9 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
 
     /**
      * Notify the adapter that a new changeid has been selected.
-     *  This will refresh the adapter, forcing each view to refresh
-     *  and ensuring that only the view specified has its change selected state set
+     * This will refresh the adapter, forcing each view to refresh
+     * and ensuring that only the view specified has its change selected state set
+     *
      * @param change The id of the change that was selected
      */
     public void setSelectedChangeId(String change) {
@@ -167,7 +167,7 @@ public class ChangeListAdapter extends SimpleCursorAdapter {
     @Override
     public Cursor swapCursor(Cursor c) {
         CommitCardBinder binder = (CommitCardBinder) getViewBinder();
-        if (binder != null ) {
+        if (binder != null) {
             binder.onCursorChanged();
         }
 

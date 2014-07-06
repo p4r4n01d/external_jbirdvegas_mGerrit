@@ -36,6 +36,7 @@ import com.jbirdvegas.mgerrit.adapters.PatchSetAdapter;
 import com.jbirdvegas.mgerrit.database.SelectedChange;
 import com.jbirdvegas.mgerrit.database.UserChanges;
 import com.jbirdvegas.mgerrit.helpers.Tools;
+import com.jbirdvegas.mgerrit.message.NewChangeSelected;
 import com.jbirdvegas.mgerrit.message.SearchQueryChanged;
 
 import org.jetbrains.annotations.Nullable;
@@ -111,6 +112,7 @@ public class PatchSetViewerActivity extends FragmentActivity
         Pair<String, Integer> change = getChangeAtPosition(position);
         SelectedChange.setSelectedChange(this, change.first, change.second, mStatus);
         setTitleWithCommit(change.second);
+        mEventBus.postSticky(new NewChangeSelected(change.first, change.second, mStatus, false));
     }
 
     @Override
