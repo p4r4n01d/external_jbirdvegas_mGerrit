@@ -74,6 +74,7 @@ public class NewChangeSelected {
             Bundle arguments = new Bundle();
             arguments.putString(PatchSetViewerFragment.CHANGE_ID, mChangeId);
             arguments.putString(PatchSetViewerFragment.STATUS, mStatus);
+            arguments.putInt(PatchSetViewerFragment.CHANGE_NO, mChangeNumber);
             Intent detailIntent = new Intent(context, PatchSetViewerActivity.class);
             detailIntent.putExtras(arguments);
             context.startActivity(detailIntent);

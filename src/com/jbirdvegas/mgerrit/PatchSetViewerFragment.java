@@ -194,8 +194,8 @@ public class PatchSetViewerFragment extends Fragment
 
         if (getArguments() == null) {
             /** This should be the default value of {@link ChangeListFragment.mSelectedStatus } */
-            //setStatus(JSONCommit.Status.NEW.toString());
-            //loadChange(true);
+            setStatus(JSONCommit.Status.NEW.toString());
+            loadChange(true);
         } else {
             Bundle args = getArguments();
             setStatus(args.getString(STATUS));
@@ -265,11 +265,11 @@ public class PatchSetViewerFragment extends Fragment
         }
 
         changeID = change.first;
-        changeNumber = change.second;
+        mChangeNumber = change.second;
 
         if (direct) loadChange(changeID);
         else {
-            mEventBus.post(new NewChangeSelected(changeID, changeNumber, mStatus, this));
+            mEventBus.post(new NewChangeSelected(changeID, mChangeNumber, mStatus, this));
         }
     }
 
