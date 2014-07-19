@@ -105,6 +105,7 @@ public class TeamListAdapter extends ArrayAdapter<GerritDetails> {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
+        String gerritUrl;
         GerritDetails rowData;
 
         // Row specific handling

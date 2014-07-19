@@ -88,12 +88,4 @@ public class GooFileArrayAdapter extends BaseAdapter {
             fileUpdate = (TextView) view.findViewById(R.id.goo_file_date);
         }
     }
-
-    public List<GooFileObject> getGooFilesList() {
-        return mGooFilesList;
-    }
-
-    public GooFileObject getObjectAtPostition(int position) {
-        return (GooFileObject) getItem(position);
-    }
 }

@@ -5,12 +5,10 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:0.12.+'
         classpath 'com.jakewharton.hugo:hugo-plugin:1.1.0'
-        classpath 'org.robolectric:robolectric-gradle-plugin:0.11.+'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'hugo'
-apply plugin: 'robolectric'
 
 repositories {
     mavenCentral()
@@ -28,15 +26,11 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.mcxiaoke.volley:library:1.0.+'
     compile 'de.greenrobot:eventbus:2.2.+'
-
-    androidTestCompile 'junit:junit:4.10'
-    androidTestCompile 'org.robolectric:robolectric:2.3+'
-    androidTestCompile 'com.squareup:fest-android:1.0.+'
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '20.0.0'
+    buildToolsVersion '19.1.0'
     // compile Using Java 7
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -53,7 +47,7 @@ android {
             assets.srcDirs = ['assets']
         }
 
-        instrumentTest.setRoot('src/test')
+        instrumentTest.setRoot('tests')
     }
     signingConfigs {
         release {}
@@ -63,6 +57,9 @@ android {
             runProguard false
             proguardFile 'proguard-project.txt'
             signingConfig signingConfigs.release
+            lintOptions {
+                abortOnError false
+            }
         }
     }
     defaultConfig {}
@@ -86,13 +83,4 @@ if (props.containsKey('storeFile') &&
     android.signingConfigs.release.keyPassword = props['keyPassword']
 } else {
     android.buildTypes.release.signingConfig = null
-}
-
-robolectric {
-    // configure the set of classes for JUnit tests
-    include '**/*Test.class'
-    exclude '**/espresso/**/*.class'
-
-    // configure max heap size of the test JVM
-    maxHeapSize = "2048m"
 }

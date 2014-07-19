@@ -33,6 +33,7 @@ import com.jbirdvegas.mgerrit.message.SearchQueryChanged;
 import com.jbirdvegas.mgerrit.search.OwnerSearch;
 import com.jbirdvegas.mgerrit.search.ProjectSearch;
 import com.jbirdvegas.mgerrit.search.SearchKeyword;
+import org.jetbrains.annotations.Nullable;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;

@@ -25,7 +25,6 @@ import android.net.NetworkInfo;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
 import com.android.volley.toolbox.HttpHeaderParser;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2013 Android Open Kang Project (AOKP)
-  ~  Author: Jon Stanford (JBirdVegas), 2013
+  ~  Author: Jon Stanford (JBirdVegas), 2014
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
   ~  limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+<resources>
     <string name="app_name">mGerrit</string>
     <string name="reviewable">Review</string>
     <string name="merged">Merged</string>
@@ -58,16 +58,20 @@
     <string name="transferring_json_data">Transferring JSON encoded data…</string>
 
     <string name="open_source_libs">Open Source Libraries</string>
-    <string name="nine_old_androids">NineOldAndroids</string>
+    <string name="nine_old_androids" translatable="false">NineOldAndroids</string>
     <string name="nine_old_androids_website" translatable="false">http://nineoldandroids.com/</string>
-    <string name="listview_animations">ListViewAnimations</string>
+    <string name="listview_animations" translatable="false">ListViewAnimations</string>
     <string name="listview_animations_website" translatable="false">https://github.com/nhaarman/ListViewAnimations</string>
-    <string name="support_library">Support Library v4</string>
+    <string name="support_library" translatable="false">Support Library v4</string>
     <string name="support_library_website" translatable="false">http://developer.android.com/tools/support-library/index.html</string>
-    <string name="jodatime">Joda-Time</string>
+    <string name="gson_library" translatable="false">Gson</string>
+    <string name="gson_library_website" translatable="false">http://code.google.com/p/google-gson/</string>
+    <string name="jodatime" translatable="false">Joda-Time</string>
     <string name="jodatime_website" translatable="false">http://www.joda.org/joda-time</string>
-    <string name="event_bus">EventBus</string>
+    <string name="event_bus" translatable="false">EventBus</string>
     <string name="event_bus_website" translatable="false">http://greenrobot.github.io/EventBus/</string>
+    <string name="aosp_volley_website" translatable="false">https://android.googlesource.com/platform/frameworks/volley/</string>
+    <string name="aosp_volley_title" translatable="false">AOSP\'s Volley</string>
 
     <string name="explain_status_title">Explain statuses</string>
     <string name="explain_status_summary">Brief explanation of the Status tabs meanings</string>
@@ -81,8 +85,6 @@
     </string>
     <string name="comments_card_title">Comments:</string>
     <string name="unknown">Unknown</string>
-    <string name="aosp_volley_website" translatable="false">https://android.googlesource.com/platform/frameworks/volley/</string>
-    <string name="aosp_volley_title">AOSP\'s Volley</string>
     <string name="developers_role">Choose developer\'s role to view</string>
     <string name="commit_reviewer">Commit Reviewer</string>
 
@@ -101,7 +103,6 @@
     <string name="moar_info">More detailed information on this change</string>
     <string name="commit_shared_from_mgerrit" formatted="false">Commit %s shared from mGerrit!</string>
     <string name="found_cards_toast" formatted="false"><![CDATA[Found %d commits in %d seconds]]></string>
-    <string name="cancel">Cancel</string>
     <string name="menu_projects">View by project</string>
     <string name="aokp_changelog">AOKP Changelog</string>
     <string name="download_update">Download</string>
@@ -118,7 +119,6 @@
     <string name="please_enter_gerrit_url">Please enter the Gerrit url</string>
     <string name="add_team_url">New Gerrit team URL</string>
     <string name="add_gerrit_name">New Gerrit team name</string>
-    <string name="save">Save</string>
     <string name="handshake_fail_message">Failed handshake try installing provider\'s certificate on your device.
     </string>
     <string name="caused_by">Caused by:</string>
@@ -180,5 +180,4 @@
     <string name="diff_text_loading">Loading diff text</string>
     <string name="diff_image_loading">Loading image</string>
     <string name="loading_changes">Loading More Changes&#8230;</string>
-    <string name="add_custom_gerrit">Add your own Gerrit here...</string>
 </resources>

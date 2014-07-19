@@ -36,7 +36,8 @@ public class GerritURL implements Parcelable
         DISABLED, // Do not fetch change details
         LEGACY,   // Fetch change details and use legacy URL (Gerrit 2.7 or lower)
         ENABLED   // Fetch change details and use new change details endpoint (Gerrit 2.8+)
-    } private ChangeDetailLevels mRequestChangeDetail = ChangeDetailLevels.DISABLED;
+    }
+    private ChangeDetailLevels mRequestChangeDetail = ChangeDetailLevels.DISABLED;
 
     public static final String DETAILED_ACCOUNTS_ARG = "&o=DETAILED_ACCOUNTS";
     // used to query commit message

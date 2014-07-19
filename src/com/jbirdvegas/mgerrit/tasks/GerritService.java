@@ -60,7 +60,7 @@ public class GerritService extends IntentService {
 
     @Override
     protected void onHandleIntent(@NotNull Intent intent) {
-        if (mRequestQueue != null) {
+        if (mRequestQueue == null) {
             mRequestQueue = Volley.newRequestQueue(this);
         }
 

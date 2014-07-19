@@ -51,6 +51,8 @@
     <declare-styleable name="ImageView">
         <attr name="shareIcon" format="reference"/>
         <attr name="saveIcon" format="reference"/>
+        <attr name="backIcon" format="reference"/>
+        <attr name="nextIcon" format="reference"/>
     </declare-styleable>
 
     <attr name="diffStyle" format="reference" />
@@ -63,10 +65,10 @@
         <attr name="pathInfo" format="color" />
     </declare-styleable>
 
-    <declare-styleable name="ImageButton">
+<!--    <declare-styleable name="ImageButton">
         <attr name="backIcon" format="reference"/>
         <attr name="nextIcon" format="reference"/>
-    </declare-styleable>
+    </declare-styleable>-->
     <declare-styleable name="StripedImageView">
         <attr name="addedStripeColor" format="color"/>
         <attr name="deletedStripeColor" format="color"/>

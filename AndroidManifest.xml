@@ -18,15 +18,13 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.jbirdvegas.mgerrit"
-          android:versionCode="210005"
-          android:versionName="2.10.005-DEVELOP">
+          android:versionCode="210010"
+          android:versionName="2.10.010-DEVELOP">
 
     <uses-sdk android:minSdkVersion="14"
         android:targetSdkVersion="19"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <application
         android:name=".TheApplication"
         android:label="@string/app_name"

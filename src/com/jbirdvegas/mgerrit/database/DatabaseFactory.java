@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.jbirdvegas.mgerrit.Prefs;
 import com.jbirdvegas.mgerrit.helpers.DBParams;
+import org.jetbrains.annotations.NotNull;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

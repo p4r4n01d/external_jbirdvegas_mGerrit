@@ -71,7 +71,7 @@ public class FileInfo {
             }
 
             return MODIFIED;
-        }
+        };
     }
 
     public FileInfo(String draft) {

@@ -74,6 +74,7 @@ public class TheApplication extends Application
         if (key.equals(Prefs.GERRIT_KEY)) onGerritChanged(Prefs.getCurrentGerrit(this));
         if (key.equals(Prefs.APP_THEME)) {
             this.setTheme(Prefs.getCurrentThemeID(this));
+            return;
         }
     }
 
