@@ -22,21 +22,14 @@ Outstanding
     - Example, I could be following CM's Gerrit and view mGerrit changes on AOKP's Gerrit
     - May want to put this in a new slide-out menu
         - List all tracked projects under the the one heading (that is collapsable)
-- Seperate debug/release versioning (not sure if gradle fully supports this)
+- Seperate debug/release versioning
 - Layout optimisations using Android Hierarchy Viewer (debug version)
-- Check in DefaultGerritReceivers whether the broadcast response matches the query
-	- When initializing the DefaultGerritReceivers specify the query being performed (GerritURL)
-	- Check query before incrementing/decrementing the number of running queries
 - Check BroadcastReceivers across activities
 	- E.g. If a broadcast response is broadcast delivered while the ProjectsList activity is open for a change query, the broadcast should be
 		(re-)delivered to the activity that was listening to broadcasts matching the actual query
-- Change detail viewpager
-	- Viewpager to swipe through changes in the change detail screen (phone layout only)
 - Option to disable quick scroll
-- ProgressBar infinite spinning: Spinner keeps spinning when no internet connection
-- Why don't images load on properties card in change list?
 - Fetching changes updates projects list
-- Change detail ViewPager: Add ViewPager to swipe through changes in the change detail screen (phone layout only)
+- Commit message text highlighting
 
 
 Searching (Requires database), action bar
@@ -73,9 +66,9 @@ Tablet (master-detail layout)
 Future Direction
 ----------------
 - Authentication/Authorisation
-	- Not sure if Gerrit API(s) supports this
-	- Show system prompt such as "mgerrit is requesting access to...", such as when an Oauth2 token is requested (something similar to what happens when you use the Google Play Services APIs anyway).
-	- This will make way for mGerrit to become a full-blown Gerrit client/portal.
+	- Not sure if Gerrit API(s) supports this:
+	    - Show system prompt such as "mgerrit is requesting access to...", such as when an Oauth2 token is requested (something similar to what happens when you use the Google Play Services APIs anyway).
+	    - This will make way for mGerrit to become a full-blown Gerrit client/portal.
 
 
 More on Auth (privileged actions)
