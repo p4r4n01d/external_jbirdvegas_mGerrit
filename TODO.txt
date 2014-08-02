@@ -1,5 +1,9 @@
 mGerrit TODO List
 
+Issues
+======
+- Loading the details of the first change in the list actually shows the second (phones only)
+
 Outstanding
 ===========
 - Reset project if current project not listed in current Gerrit
@@ -53,7 +57,6 @@ Change List
 -----------
 	- Restore projects and owner cards
 		- Investigate card swiping
-	- Infinate list - load more changes when scrolled to the bottom of the list
 	- Titles only - Easiest to do with a setting in the preferences
 
 
