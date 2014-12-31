@@ -18,11 +18,11 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.jbirdvegas.mgerrit"
-          android:versionCode="210010"
-          android:versionName="2.10.010-DEVELOP">
+          android:versionCode="210013"
+          android:versionName="2.10.013-DEVELOP">
 
     <uses-sdk android:minSdkVersion="14"
-        android:targetSdkVersion="19"/>
+        android:targetSdkVersion="21"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
