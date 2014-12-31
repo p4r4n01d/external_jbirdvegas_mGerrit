@@ -17,15 +17,17 @@ repositories {
 dependencies {
     compile files('libs/android-support-v4.jar')
     compile files('libs/libGoogleAnalyticsServices.jar')
-    compile files('libs/joda-time-2.3.jar')
     compile files('libs/annotations.jar')
     compile 'com.nineoldandroids:library:2.4.0'
-    compile('com.nhaarman.listviewanimations:library:2.5.+') {
-        exclude module: 'support-v4'
-    }
-    compile 'com.google.code.gson:gson:2.2.4'
+
+    compile 'com.google.code.gson:gson:2.3'
     compile 'com.mcxiaoke.volley:library:1.0.+'
-    compile 'de.greenrobot:eventbus:2.2.+'
+    compile 'de.greenrobot:eventbus:2.4.0'
+    compile 'joda-time:joda-time:2.6'
+
+    compile 'com.nhaarman.listviewanimations:lib-core:3.1.0@aar'
+    compile 'com.nhaarman.listviewanimations:lib-manipulation:3.1.0@aar'
+    compile 'com.nhaarman.listviewanimations:lib-core-slh:3.1.0@aar'
 }
 
 android {
