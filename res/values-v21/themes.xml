@@ -23,10 +23,10 @@
         <item name="android:actionBarStyle">@style/ActionBar.Light</item>
         <item name="android:actionModeBackground">@drawable/ab_transparent</item>
         <item name="android:textColorPrimary">@color/actionbar_text</item>
+        <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
         <item name="gerritIcon">@drawable/ic_menu_source</item>
         <item name="projectsIcon">@drawable/ic_menu_project</item>
         <item name="refreshIcon">@drawable/ic_action_refresh</item>
-        <item name="overflowIcon">@drawable/ic_action_overflow</item>
         <item name="shareIcon">@drawable/ic_action_share</item>
         <item name="mainBackgroundColor">@color/main_background</item>
         <item name="cardTextStyle">@style/CardText.Light</item>
@@ -54,10 +54,10 @@
 
         <item name="android:actionBarStyle">@style/ActionBar.Dark</item>
         <item name="android:textColorPrimary">@color/actionbar_text_dark</item>
+        <item name="android:actionOverflowButtonStyle">@style/OverFlow.Dark</item>
         <item name="gerritIcon">@drawable/ic_menu_source_dark</item>
         <item name="projectsIcon">@drawable/ic_menu_project_dark</item>
         <item name="refreshIcon">@drawable/ic_action_refresh_dark</item>
-        <item name="overflowIcon">@drawable/ic_action_overflow_dark</item>
         <item name="shareIcon">@android:drawable/ic_menu_share</item>
         <item name="mainBackgroundColor">@color/main_background_dark</item>
         <item name="cardTextStyle">@style/CardText.Dark</item>

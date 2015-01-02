@@ -93,6 +93,6 @@
             android:layout_centerHorizontal="true"
             android:layout_toLeftOf="@id/diff_next"
             android:layout_toRightOf="@id/diff_previous"
-            android:dropDownVerticalOffset="25sp"/>
+            android:dropDownVerticalOffset="25dp"/>
     </RelativeLayout>
 </LinearLayout>

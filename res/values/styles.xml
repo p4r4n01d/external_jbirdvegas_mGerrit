@@ -28,6 +28,14 @@
         <item name="android:background">@drawable/ab_transparent_dark</item>
     </style>
 
+    <style name="OverFlow" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_action_overflow</item>
+    </style>
+
+    <style name="OverFlow.Dark" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_action_overflow_dark</item>
+    </style>
+
     <!-- Resize the action bar activity indicator to match the other action items -->
     <style name="IndeterminateProgress" parent="@android:style/Widget.Holo.ProgressBar.Small">
         <item name="android:minWidth">32dp</item>
