@@ -112,7 +112,7 @@ public abstract class CardsFragment extends Fragment
         }
     };
     private EventBus mEventBus;
-    private StickyListHeadersAdapter mHeaderAdapterWrapper;
+    private HeaderAdapterDecorator mHeaderAdapterWrapper;
     private HeaderAdapterWrapper mHeaderAdapter;
 
 
@@ -191,6 +191,7 @@ public abstract class CardsFragment extends Fragment
         mHeaderAdapterWrapper = new HeaderAdapterDecorator(mEndlessAdapter, mHeaderAdapter);
         mListView.setAdapter(mHeaderAdapterWrapper);
         mListView.setDrawingListUnderStickyHeader(false);
+        mListView.getWrappedList().setDividerHeight(16);
 
         sChangesLimit = mParent.getResources().getInteger(R.integer.changes_limit);
 
@@ -480,9 +481,11 @@ public abstract class CardsFragment extends Fragment
 
         if (mEndlessAdapter == null || direction == Direction.Newer) return;
 
+        mEndlessAdapter.finishedDataLoading();
+
         if (ev.getItems() < sChangesLimit) {
             // Remove the endless adapter as we have no more changes to load
-            mEndlessAdapter.finishedDataLoading();
+            mListView.setOnScrollListener(null);
         }
     }
 
