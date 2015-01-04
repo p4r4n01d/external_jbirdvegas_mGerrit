@@ -240,6 +240,8 @@ public class PatchSetViewerActivity extends FragmentActivity
 
         mAdapter.notifyDataSetChanged();
 
+        if (mChangeNumber != null) setTitleWithCommit(mChangeNumber);
+
         if (pos == mViewPager.getCurrentItem()) mCurrentTab = pos;
         else if (mCurrentTab == null) {
             mCurrentTab = pos;

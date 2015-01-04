@@ -386,12 +386,12 @@ public abstract class CardsFragment extends Fragment
         /* If animations have been enabled, setup and use an animation adapter, otherwise use
          *  the regular adapter. The data should always be bound to mAdapter */
         BaseAdapter adapter = Tools.toggleAnimations(mAnimationsEnabled, mListView.getWrappedList(), mAnimAdapter, baseAdapter);
+        if (mEndlessAdapter != null) {
+            mEndlessAdapter.setParentAdatper(adapter);
+        }
 
         if (mAnimationsEnabled) {
             mAnimAdapter = (SingleAnimationAdapter) adapter;
-            if (baseAdapter == mEndlessAdapter) {
-                mEndlessAdapter.setParentAdatper(mAnimAdapter);
-            }
         }
     }
 
@@ -479,13 +479,19 @@ public abstract class CardsFragment extends Fragment
         Intent processed = ev.getIntent();
         Direction direction = (Direction) processed.getSerializableExtra(GerritService.CHANGES_LIST_DIRECTION);
 
-        if (mEndlessAdapter == null || direction == Direction.Newer) return;
+        if (mEndlessAdapter != null) {
+            if (direction == Direction.Newer) {
+                // We loaded more changes so the data may have changed. finishedDataLoading is only for older changes
+                mEndlessAdapter.notifyDataSetChanged();
+            } else {
+                mEndlessAdapter.finishedDataLoading();
 
-        mEndlessAdapter.finishedDataLoading();
-
-        if (ev.getItems() < sChangesLimit) {
-            // Remove the endless adapter as we have no more changes to load
-            mListView.setOnScrollListener(null);
+                if (ev.getItems() < sChangesLimit) {
+                    // Remove the endless adapter as we have no more older changes to load
+                    // The scroll listener is only used for loading older changes
+                    mListView.setOnScrollListener(null);
+                }
+            }
         }
     }
 

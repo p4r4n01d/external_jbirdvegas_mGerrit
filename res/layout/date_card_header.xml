@@ -22,7 +22,8 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:weightSum="1">
+              android:weightSum="1"
+              android:elevation="@dimen/z_offset_low">
 
     <TextView
         android:layout_width="match_parent"
