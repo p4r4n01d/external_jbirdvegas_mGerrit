@@ -16,28 +16,21 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:background="?attr/cardBackgroundColor"
+    android:elevation="@dimen/z_offset_low">
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:text="January 01, 2015"
-        android:id="@+id/header"
-        style="?attr/cardTitleStyle"
-        android:enabled="false"
-        android:paddingLeft="@dimen/standard_padding"
-        android:paddingRight="@dimen/standard_padding"/>
-
-    <View android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/listDivider"
-        android:paddingLeft="@dimen/standard_padding"
-        android:paddingRight="@dimen/standard_padding"/>
-
+        android:layout_height="match_parent"
+        android:id="@+id/message_card_message"
+        android:layout_gravity="center"
+        android:paddingLeft="8dip"
+        android:paddingRight="8dip"
+        android:textSize="@dimen/text_size_medium"
+        android:autoLink="web" />
 </LinearLayout>

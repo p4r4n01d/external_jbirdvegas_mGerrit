@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-  ~ Copyright (C) 2015 Android Open Kang Project (AOKP)
+  ~ Copyright (C) 2014 Android Open Kang Project (AOKP)
   ~  Author: Evan Conway (P4R4N01D), 2015
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,12 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="1">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:weightSum="1"
+              android:elevation="@dimen/z_offset_low">
 
     <TextView
         android:layout_width="match_parent"
@@ -31,13 +32,14 @@
         android:id="@+id/header"
         style="?attr/cardTitleStyle"
         android:enabled="false"
-        android:paddingLeft="@dimen/standard_padding"
-        android:paddingRight="@dimen/standard_padding"/>
+        android:paddingStart="@dimen/standard_padding"
+        android:textSize="@dimen/text_size_medium"
+        android:paddingEnd="@dimen/standard_padding"/>
 
     <View android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/listDivider"
-        android:paddingLeft="@dimen/standard_padding"
-        android:paddingRight="@dimen/standard_padding"/>
+        android:paddingStart="@dimen/standard_padding"
+        android:paddingEnd="@dimen/standard_padding"/>
 
 </LinearLayout>

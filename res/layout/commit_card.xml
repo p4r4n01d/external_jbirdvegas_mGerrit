@@ -23,7 +23,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="?attr/clickableCardBackground"
-    android:elevation="@dimen/z_offset_low">
+    android:elevation="@dimen/z_offset_medium">
 
     <View
         android:id="@+id/commit_card_commit_status"

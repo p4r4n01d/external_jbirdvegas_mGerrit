@@ -51,7 +51,7 @@
     <dimen name="card_subitem_indent">@dimen/standard_padding</dimen>
 
     <!-- Material -->
-    <dimen name="z_offset_low">4dp</dimen>
-    <dimen name="z_offset_medium">6dp</dimen>
-    <dimen name="z_offset_high">8dp</dimen>
+    <dimen name="z_offset_low">2dp</dimen>
+    <dimen name="z_offset_medium">4dp</dimen>
+    <dimen name="z_offset_high">6dp</dimen>
 </resources>

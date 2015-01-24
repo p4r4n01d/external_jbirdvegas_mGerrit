@@ -111,6 +111,8 @@ public class PatchSetViewerActivity extends FragmentActivity
     private void onNewChangeSelected(int position) {
         Pair<String, Integer> change = getChangeAtPosition(position);
         SelectedChange.setSelectedChange(this, change.first, change.second, mStatus);
+        mChangeNumber = change.second;
+        mChangeId = change.first;
         setTitleWithCommit(change.second);
         mEventBus.postSticky(new NewChangeSelected(change.first, change.second, mStatus, false));
     }

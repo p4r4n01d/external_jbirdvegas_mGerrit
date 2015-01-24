@@ -412,6 +412,7 @@ public abstract class CardsFragment extends Fragment
             }
         }
 
+        onStartRefresh();
         if (args != null) {
             String databaseQuery = args.getString(SearchQueryChanged.KEY_WHERE);
             if (databaseQuery != null && !databaseQuery.isEmpty()) {
@@ -424,6 +425,7 @@ public abstract class CardsFragment extends Fragment
                 }
             }
         }
+
         return UserChanges.findCommits(mParent, getQuery(), null, null);
     }
 
@@ -440,6 +442,12 @@ public abstract class CardsFragment extends Fragment
         if (sIsTabletMode) {
             // Broadcast that we have finished loading changes
             mEventBus.post(new ChangeLoadingFinished(getQuery()));
+        }
+
+        if (mEndlessAdapter != null) {
+            mEndlessAdapter.notifyDataSetChanged();
+        } else {
+            mAdapter.notifyDataSetChanged();
         }
     }
 

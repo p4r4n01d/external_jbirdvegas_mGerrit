@@ -34,5 +34,6 @@
         android:paddingBottom="@dimen/cards_list_padding_vert"
         android:paddingLeft="@dimen/cards_list_padding_horiz"
         android:paddingRight="@dimen/cards_list_padding_horiz"
-        android:paddingTop="@dimen/cards_list_padding_vert"/>
+        android:paddingTop="@dimen/cards_list_padding_vert"
+        android:drawSelectorOnTop="true"/>
 </android.support.v4.widget.SwipeRefreshLayout>
