@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_last_updated"
-            tools:text="January 01, 1970, 12:00:00 am"
+            tools:text="12:00 am"
             style="@style/CardText" />
     </LinearLayout>
 

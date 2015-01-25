@@ -45,7 +45,7 @@
 
     <!-- Cards list sizes -->
     <dimen name="cards_list_padding_vert">8dp</dimen>
-    <dimen name="cards_list_padding_horiz">12dp</dimen>
+    <dimen name="cards_list_padding_horiz">8dp</dimen>
     <dimen name="cards_list_divider_height">8.0dp</dimen>
     <dimen name="changelog_padding_vert">8dp</dimen>
     <dimen name="card_subitem_indent">@dimen/standard_padding</dimen>

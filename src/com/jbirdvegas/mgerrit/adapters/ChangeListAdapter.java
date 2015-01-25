@@ -199,7 +199,7 @@ public class ChangeListAdapter extends SimpleCursorAdapter implements Categoriza
         Integer index = getDateColumnIndex(c);
         // Convert to date
         DateTime date = Tools.parseDate(c.getString(index), mServerTimeZone, mLocalTimeZone);
-        return DateTimeFormat.forPattern("MMMM dd, yyyy").withLocale(mLocale).print(date);
+        return DateTimeFormat.forPattern(mContext.getString(R.string.header_date_format)).withLocale(mLocale).print(date);
     }
 
     @Override

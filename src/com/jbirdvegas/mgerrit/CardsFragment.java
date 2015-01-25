@@ -412,7 +412,6 @@ public abstract class CardsFragment extends Fragment
             }
         }
 
-        onStartRefresh();
         if (args != null) {
             String databaseQuery = args.getString(SearchQueryChanged.KEY_WHERE);
             if (databaseQuery != null && !databaseQuery.isEmpty()) {

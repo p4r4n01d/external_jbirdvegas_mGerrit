@@ -55,6 +55,7 @@ public class Tools {
     private static final String GERRIT_DATETIME_FORMAT = "yyyy-MM-dd hh:mm:ss.SSS";
     private static final String HUMAN_READABLE_DATETIME_FORMAT = "MMMM dd, yyyy '%s' hh:mm:ss aa";
     private static final String HUMAN_READABLE_DATE_FORMAT = "MMMM dd, yyyy";
+    private static final String HUMAN_READABLE_TIME_FORMAT = "hh:mm aa";
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS").withLocale(Locale.US);
 
     public static String stackTraceToString(Throwable e) {
@@ -119,8 +120,8 @@ public class Tools {
      *         example: Jun 09, 2013 07:47 40ms PM
      */
     @SuppressWarnings("SimpleDateFormatWithoutLocale")
-    public static String prettyPrintDate(Context context, String date,
-                                   TimeZone serverTimeZone, TimeZone localTimeZone) {
+    public static String prettyPrintDateTime(Context context, String date,
+                                             TimeZone serverTimeZone, TimeZone localTimeZone) {
         try {
             SimpleDateFormat currentDateFormat
                     = new SimpleDateFormat(GERRIT_DATETIME_FORMAT, Locale.US);
@@ -139,9 +140,22 @@ public class Tools {
         }
     }
 
-    public static String prettyPrintDate(Date date) {
-        DateFormat humanDateFormat = new SimpleDateFormat(HUMAN_READABLE_DATE_FORMAT, Locale.getDefault());
-        return humanDateFormat.format(date);
+    @SuppressWarnings("SimpleDateFormatWithoutLocale")
+    public static String prettyPrintTime(Context context, String date,
+                                         TimeZone serverTimeZone, TimeZone localTimeZone) {
+        try {
+            SimpleDateFormat currentDateFormat
+                    = new SimpleDateFormat(GERRIT_DATETIME_FORMAT, Locale.US);
+            DateFormat humanDateFormat = new SimpleDateFormat(HUMAN_READABLE_TIME_FORMAT, Locale.getDefault());
+            // location of server
+            currentDateFormat.setTimeZone(serverTimeZone);
+            // local location
+            humanDateFormat.setTimeZone(localTimeZone);
+            return humanDateFormat.format(currentDateFormat.parse(date));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return date;
+        }
     }
 
     public static void colorPath(Resources r, TextView view,
