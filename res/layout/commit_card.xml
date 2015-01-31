@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/commit_card_title"
             tools:text="Tweak commit card layout"
-            android:paddingBottom="8dip"/>
+            android:paddingBottom="8dip" />
 
         <TextView
             style="@style/CardText.Committer"
